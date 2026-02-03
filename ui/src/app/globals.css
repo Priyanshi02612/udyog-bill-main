@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* Brand */
+  --color-primary: #1392ec; /* Main blue */
+  --color-primary-soft: #e6f4fe; /* Light blue background */
+  --color-primary-muted: #7bbff3; /* Muted blue */
+
+  /* Base */
+  --color-background: #ffffff; /* White */
+  --color-foreground: #0f172a; /* Near-black text */
+
+  /* UI */
+  --color-border: #e5e7eb;
+  --color-card: #ffffff;
+  --color-muted: #64748b;
+}
+
+body button {
+  cursor: pointer;
+}
+
+.textile-pattern {
+  background-color: transparent;
+  background-image:
+    linear-gradient(#1173d405 1px, transparent 1px),
+    linear-gradient(90deg, #1173d405 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.hero-gradient {
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(17, 115, 212, 0.08),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(17, 115, 212, 0.05),
+      transparent 40%
+    );
+}

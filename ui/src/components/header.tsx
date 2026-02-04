@@ -3,10 +3,11 @@
 import Image from "next/image";
 import logo from "../assets/logo.png";
 import { Button } from "./ui/button";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export const Header = () => {
   const router = useRouter();
+  const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
@@ -18,16 +19,33 @@ export const Header = () => {
           </h2>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button
-            size="sm"
-            variant="link"
-            onClick={() => router.push("/login")}
-          >
-            Login
-          </Button>
-          <Button size="sm">Get Started</Button>
-        </div>
+        {pathname === "/sign-up" ? (
+          <div className="flex items-center justify-center gap-2 text-sm">
+            <span className="hidden md:block text-slate-500">
+              Already have an account?
+            </span>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => router.push("/login")}
+            >
+              Login
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <Button
+              size="sm"
+              variant="link"
+              onClick={() => router.push("/login")}
+            >
+              Login
+            </Button>
+            <Button size="sm" onClick={() => router.push("/sign-up")}>
+              Get Started
+            </Button>
+          </div>
+        )}
       </div>
     </header>
   );

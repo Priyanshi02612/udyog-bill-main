@@ -12,6 +12,7 @@
   /* Base */
   --color-background: #ffffff; /* White */
   --color-foreground: #0f172a; /* Near-black text */
+  --color-background-light: #f6f7f8;
 
   /* UI */
   --color-border: #e5e7eb;
@@ -43,4 +44,15 @@ body button {
       rgba(139, 90, 43, 0.06),
       transparent 40%
     );
+}
+
+.role-card:hover {
+  border-color: #8b5a2b;
+  transform: translateX(4px);
+  transition: all 0.2s ease;
+}
+.role-card.active {
+  border-color: #8b5a2b;
+  background-color: rgba(19, 146, 236, 0.05);
+  box-shadow: 0 0 0 1px #8b5a2b;
 }

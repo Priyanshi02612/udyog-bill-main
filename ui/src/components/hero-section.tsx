@@ -1,8 +1,13 @@
+"use client";
+
 import { MdVerified, MdOutlineArrowForward } from "react-icons/md";
 import { Button } from "./ui/button";
 import { DashboardMockup } from "./dashboard-mockup";
+import { useRouter } from "next/navigation";
 
 export const HeroSection = () => {
+  const router = useRouter();
+
   return (
     <div className="relative py-16 textile-pattern hero-gradient">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
@@ -27,6 +32,7 @@ export const HeroSection = () => {
             <Button
               trailingIcon={<MdOutlineArrowForward className="w-5 h-5" />}
               className="w-max"
+              onClick={() => router.push("/sign-up")}
             >
               Get Started Now
             </Button>

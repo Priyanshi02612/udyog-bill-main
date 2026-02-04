@@ -1,8 +1,12 @@
-import React from "react";
+"use client";
+
+import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import { MdOutlineArrowForward } from "react-icons/md";
 
 export const CTASection = () => {
+  const router = useRouter();
+
   return (
     <div className="pb-16 relative overflow-hidden">
       <div className="absolute inset-0 bg-primary textile-pattern opacity-10"></div>
@@ -13,13 +17,14 @@ export const CTASection = () => {
           </h2>
           <p className="text-white/80 text-lg mb-10 max-w-2xl mx-auto">
             Join thousands of textile professionals streamlining their
-            operations with TexSaaS. Get started in minutes, not months.
+            operations with UdyogBill. Get started in minutes, not months.
           </p>
 
           <Button
             variant="secondary"
             trailingIcon={<MdOutlineArrowForward className="w-5 h-5" />}
             className="w-max"
+            onClick={() => router.push("/sign-up")}
           >
             Get Started Now
           </Button>

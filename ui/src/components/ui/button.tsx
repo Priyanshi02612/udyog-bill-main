@@ -8,7 +8,8 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
     | "outline-primary"
     | "outline-secondary"
     | "icon"
-    | "link";
+    | "link"
+    | "link-secondary";
   size?: "sm" | "md" | "lg";
   leadingIcon?: React.ReactNode;
   trailingIcon?: React.ReactNode;
@@ -39,13 +40,14 @@ export const Button: React.FC<ButtonProps> = ({
     primary:
       "bg-primary text-white rounded-xl hover:bg-primary/90 shadow-md shadow-primary/30",
     secondary:
-      "bg-white text-primary rounded-xl hover:bg-slate-100 shadow-md shadow-primary/20",
+      "bg-primary/10 text-primary rounded-xl hover:bg-primary/20",
     "outline-primary":
       "border-2 border-primary text-primary rounded-xl hover:bg-primary/10",
     "outline-secondary":
       "border-2 border-slate-200 text-slate-900 rounded-xl hover:bg-slate-100",
     icon: "bg-primary text-white rounded-full hover:bg-primary/90 w-10 h-10",
     link: "text-primary px-0 py-0 font-semibold hover:text-primary/80",
+    "link-secondary": "text-slate-600 hover:text-slate-500",
   };
 
   return (

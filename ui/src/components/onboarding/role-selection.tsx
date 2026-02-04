@@ -1,5 +1,6 @@
 "use client";
 
+import { useContext } from "react";
 import {
   MdChevronRight,
   MdFactory,
@@ -7,10 +8,16 @@ import {
   MdStorefront,
 } from "react-icons/md";
 import OnboardingPageWrapper from "./page-wrapper";
+import { OnboardingContext } from "../../context/onboarding.context";
+import { OnBoardingContextType, Role } from "../../utils/types";
 
-const roleOptions = [
+const roleOptions: {
+  title: string;
+  description: string;
+  role: Role;
+  icon: React.ReactNode;
+}[] = [
   {
-    id: 1,
     title: "Manufacturer",
     description:
       "Manage production lines, looms, dye-house workflow, and bulk raw material inventory tracking",
@@ -18,7 +25,6 @@ const roleOptions = [
     icon: <MdFactory className="w-6 h-6 text-primary" />,
   },
   {
-    id: 2,
     title: "Wholesaler",
     description:
       "Connect manufacturers with retailers, manage regional distribution hubs and large B2B orders",
@@ -26,7 +32,6 @@ const roleOptions = [
     icon: <MdInventory className="w-6 h-6 text-primary" />,
   },
   {
-    id: 3,
     title: "Retailer",
     description:
       "Source fabrics, manage storefront inventory, and handle end-customer sales and returns.",
@@ -36,34 +41,65 @@ const roleOptions = [
 ];
 
 const RoleSelection = () => {
+  const { data, updateData } = useContext(
+    OnboardingContext,
+  ) as OnBoardingContextType;
+
+  const handleSelectRole = (role: Role) => {
+    updateData({ role });
+  };
+
   return (
     <OnboardingPageWrapper
       title="How will you use UdyogBill?"
       subtitle="Select the role that best describes your business."
     >
-      {roleOptions.map((role, index) => {
-        return (
-          <div
-            key={index}
-            className="role-card group cursor-pointer flex items-center gap-6 p-3 bg-white border-2 border-slate-200 rounded-xl hover:shadow-md transition-all"
-          >
-            <div className="shrink-0 w-8 h-8 md:w-14 md:h-14 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-              {role.icon}
+      <div className="flex flex-col gap-4">
+        {roleOptions.map((role) => {
+          const isSelected = data.role === role.role;
+
+          return (
+            <div
+              key={role.role}
+              onClick={() => handleSelectRole(role.role)}
+              className={`group cursor-pointer flex items-center gap-6 p-3 rounded-xl border-2 transition-all
+                ${
+                  isSelected
+                    ? "border-primary bg-primary/5 shadow-md"
+                    : "border-slate-200 bg-white hover:shadow-md"
+                }`}
+            >
+              <div
+                className={`shrink-0 w-14 h-14 rounded-lg flex items-center justify-center transition-colors
+                  ${
+                    isSelected
+                      ? "bg-primary/20"
+                      : "bg-primary/10 group-hover:bg-primary/20"
+                  }`}
+              >
+                {role.icon}
+              </div>
+
+              <div className="flex-1 text-left">
+                <h3 className="text-slate-900 text-lg font-bold mb-1">
+                  {role.title}
+                </h3>
+                <p className="text-slate-500 text-sm leading-relaxed">
+                  {role.description}
+                </p>
+              </div>
+
+              <MdChevronRight
+                className={`w-6 h-6 transition-opacity ${
+                  isSelected
+                    ? "opacity-100 text-primary"
+                    : "opacity-0 group-hover:opacity-100 text-primary"
+                }`}
+              />
             </div>
-            <div className="flex-1 text-left">
-              <h3 className="text-slate-900 text-lg font-bold mb-1">
-                {role.title}
-              </h3>
-              <p className="hidden md:block text-slate-500 text-sm leading-relaxed">
-                {role.description}
-              </p>
-            </div>
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity pr-2">
-              <MdChevronRight className="w-6 h-6 text-primary" />
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </OnboardingPageWrapper>
   );
 };

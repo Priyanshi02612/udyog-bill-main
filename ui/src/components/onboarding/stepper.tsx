@@ -1,9 +1,7 @@
 "use client";
 
-import {
-  ContextType,
-  OnboardingContext,
-} from "../../context/onboarding.context";
+import { OnboardingContext } from "../../context/onboarding.context";
+import { OnBoardingContextType } from "../../utils/types";
 import { useContext } from "react";
 import { Button } from "../ui/button";
 
@@ -23,7 +21,9 @@ const STEPS = [
 ];
 
 export default function Stepper() {
-  const { step, setStep } = useContext(OnboardingContext) as ContextType;
+  const { step, setStep } = useContext(
+    OnboardingContext,
+  ) as OnBoardingContextType;
 
   const totalSteps = STEPS.length;
   const currentStepIndex = step - 1;

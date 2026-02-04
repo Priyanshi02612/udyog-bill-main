@@ -1,10 +1,6 @@
 "use client";
 
-type OnboardingPageWrapperProps = {
-  title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-};
+import { OnboardingPageWrapperProps } from "../../utils/types";
 
 export default function OnboardingPageWrapper({
   title,

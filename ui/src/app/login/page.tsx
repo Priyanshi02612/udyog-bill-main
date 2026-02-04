@@ -166,7 +166,7 @@ const Login = () => {
               <div className="flex items-center justify-center gap-2 text-sm">
                 <span className="text-slate-500">{`Don't have an account?`}</span>
                 <Link
-                  href="/"
+                  href="/sign-up"
                   className="text-primary font-bold hover:underline"
                 >
                   Sign Up

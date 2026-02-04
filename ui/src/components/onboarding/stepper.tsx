@@ -4,6 +4,7 @@ import { OnboardingContext } from "../../context/onboarding.context";
 import { OnBoardingContextType } from "../../utils/types";
 import { useContext } from "react";
 import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
 
 const STEPS = [
   {
@@ -24,6 +25,7 @@ export default function Stepper() {
   const { step, setStep } = useContext(
     OnboardingContext,
   ) as OnBoardingContextType;
+  const router = useRouter();
 
   const totalSteps = STEPS.length;
   const currentStepIndex = step - 1;
@@ -38,7 +40,10 @@ export default function Stepper() {
   const handleNext = () => {
     if (step < totalSteps) {
       setStep(step + 1);
+      return;
     }
+
+    router.push("/");
   };
 
   return (
@@ -52,12 +57,7 @@ export default function Stepper() {
           </Button>
         )}
 
-        <Button
-          size="sm"
-          className="w-max md:w-50"
-          onClick={handleNext}
-          disabled={step === totalSteps}
-        >
+        <Button size="sm" className="w-max md:w-50" onClick={handleNext}>
           {STEPS[currentStepIndex].cta}
         </Button>
       </div>

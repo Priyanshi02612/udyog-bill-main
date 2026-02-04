@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Header } from "../../components/header";
 import Stepper from "../../components/onboarding/stepper";
-import { OnboardingProvider } from "../../context/onboarding.context";
+import { AuthProvider } from "../../context/auth.context";
 
 export default function AuthLayout({
   children,
@@ -11,7 +11,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <OnboardingProvider>
+    <AuthProvider>
       <div className="bg-background-light textile-pattern hero-gradient min-h-screen flex flex-col">
         <Header />
 
@@ -35,6 +35,6 @@ export default function AuthLayout({
           </Link>
         </div>
       </div>
-    </OnboardingProvider>
+    </AuthProvider>
   );
 }

@@ -1,16 +1,17 @@
 export type Role = "manufacturer" | "wholesaler" | "retailer";
 
-export type OnBoardingContextType = {
-  step: number;
-  setStep: (step: number) => void;
-  data: OnboardingData;
-  updateData: (data: Partial<OnboardingData>) => void;
+export type AuthContextType = {
+  onBoardingStep: number;
+  setOnBoardingStep: (step: number) => void;
+  onBoardingData: OnboardingData;
+  handleOnBoardingData: (data: Partial<OnboardingData>) => void;
 };
 
 export type OnboardingData = {
   name?: string;
-  email?: string;
-  password?: string;
+  email: string;
+  password: string;
+  phone?: string;
 
   businessName?: string;
   gstin?: string;

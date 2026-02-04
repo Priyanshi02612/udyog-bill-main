@@ -8,8 +8,8 @@ import {
   MdStorefront,
 } from "react-icons/md";
 import OnboardingPageWrapper from "./page-wrapper";
-import { OnboardingContext } from "../../context/onboarding.context";
-import { OnBoardingContextType, Role } from "../../utils/types";
+import { AuthContext } from "../../context/auth.context";
+import { AuthContextType, Role } from "../../utils/types";
 
 const roleOptions: {
   title: string;
@@ -41,12 +41,12 @@ const roleOptions: {
 ];
 
 const RoleSelection = () => {
-  const { data, updateData } = useContext(
-    OnboardingContext,
-  ) as OnBoardingContextType;
+  const { onBoardingData, handleOnBoardingData } = useContext(
+    AuthContext,
+  ) as AuthContextType;
 
   const handleSelectRole = (role: Role) => {
-    updateData({ role });
+    handleOnBoardingData({ role });
   };
 
   return (
@@ -56,7 +56,7 @@ const RoleSelection = () => {
     >
       <div className="flex flex-col gap-4">
         {roleOptions.map((role) => {
-          const isSelected = data.role === role.role;
+          const isSelected = onBoardingData.role === role.role;
 
           return (
             <div

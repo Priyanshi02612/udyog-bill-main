@@ -1,7 +1,7 @@
 "use client";
 
-import { OnboardingContext } from "../../context/onboarding.context";
-import { OnBoardingContextType } from "../../utils/types";
+import { AuthContext } from "../../context/auth.context";
+import { AuthContextType } from "../../utils/types";
 import { useContext } from "react";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
@@ -22,24 +22,24 @@ const STEPS = [
 ];
 
 export default function Stepper() {
-  const { step, setStep } = useContext(
-    OnboardingContext,
-  ) as OnBoardingContextType;
+  const { onBoardingStep, setOnBoardingStep } = useContext(
+    AuthContext,
+  ) as AuthContextType;
   const router = useRouter();
 
   const totalSteps = STEPS.length;
-  const currentStepIndex = step - 1;
-  const progressPercent = ((step - 1) / (totalSteps - 1)) * 100;
+  const currentStepIndex = onBoardingStep - 1;
+  const progressPercent = ((onBoardingStep - 1) / (totalSteps - 1)) * 100;
 
   const handleBack = () => {
-    if (step > 1) {
-      setStep(step - 1);
+    if (onBoardingStep > 1) {
+      setOnBoardingStep(onBoardingStep - 1);
     }
   };
 
   const handleNext = () => {
-    if (step < totalSteps) {
-      setStep(step + 1);
+    if (onBoardingStep < totalSteps) {
+      setOnBoardingStep(onBoardingStep + 1);
       return;
     }
 
@@ -49,9 +49,9 @@ export default function Stepper() {
   return (
     <div className="w-full flex flex-col items-center gap-8">
       <div
-        className={`w-full flex items-center ${step === 1 ? "justify-end" : "justify-between"}`}
+        className={`w-full flex items-center ${onBoardingStep === 1 ? "justify-end" : "justify-between"}`}
       >
-        {step !== 1 && (
+        {onBoardingStep !== 1 && (
           <Button size="sm" className="w-max md:w-50" onClick={handleBack}>
             Back
           </Button>
@@ -74,7 +74,7 @@ export default function Stepper() {
           </div>
 
           <p className="text-primary text-sm font-bold">
-            Step {step} of {totalSteps}
+            Step {onBoardingStep} of {totalSteps}
           </p>
         </div>
 

@@ -1,18 +1,16 @@
 "use client";
 
+import { AuthContextType } from "../../utils/types";
 import BasicInfo from "../../components/onboarding/basic-info";
 import RoleSelection from "../../components/onboarding/role-selection";
 import VerifyOTP from "../../components/onboarding/verify-otp";
-import {
-  ContextType,
-  OnboardingContext,
-} from "../../context/onboarding.context";
+import { AuthContext } from "../../context/auth.context";
 import { useContext } from "react";
 
 export default function SignUpPage() {
-  const { step } = useContext(OnboardingContext) as ContextType;
+  const { onBoardingStep } = useContext(AuthContext) as AuthContextType;
 
-  if (step === 1) return <RoleSelection />;
-  if (step === 2) return <BasicInfo />;
+  if (onBoardingStep === 1) return <RoleSelection />;
+  if (onBoardingStep === 2) return <BasicInfo />;
   return <VerifyOTP />;
 }

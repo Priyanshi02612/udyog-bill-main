@@ -1,3 +1,6 @@
+import { User } from "firebase/auth";
+import { Dispatch, SetStateAction } from "react";
+
 export type Role = "manufacturer" | "wholesaler" | "retailer";
 
 export type AuthContextType = {
@@ -5,9 +8,15 @@ export type AuthContextType = {
   setOnBoardingStep: (step: number) => void;
   onBoardingData: OnboardingData;
   handleOnBoardingData: (data: Partial<OnboardingData>) => void;
+  validateForm: () => boolean;
+  otp: string[];
+  setOtp: Dispatch<SetStateAction<string[]>>;
+  user: User | null;
+  resetOnBoardingState: () => void;
 };
 
 export type OnboardingData = {
+  firebaseUid?: string;
   name?: string;
   email: string;
   password: string;

@@ -17,9 +17,16 @@ const states = [
 ];
 
 const BasicInfo = () => {
-  const { onBoardingData, handleOnBoardingData } = useContext(
+  const { onBoardingData, handleOnBoardingData, user } = useContext(
     AuthContext,
   ) as AuthContextType;
+
+  const handleChangeForm = (
+    key: keyof typeof onBoardingData,
+    value: string,
+  ) => {
+    handleOnBoardingData({ [key]: value });
+  };
 
   return (
     <OnboardingPageWrapper
@@ -33,13 +40,14 @@ const BasicInfo = () => {
               label="Full Name"
               placeholder="Your full name"
               value={onBoardingData.name}
-              onChange={(e) => handleOnBoardingData({ name: e.target.value })}
+              onChange={(e) => handleChangeForm("name", e.target.value)}
             />
             <Input
               label="Email"
               placeholder="you@company.com"
               value={onBoardingData.email}
-              onChange={(e) => handleOnBoardingData({ email: e.target.value })}
+              disabled={!!user?.email}
+              onChange={(e) => handleChangeForm("email", e.target.value)}
             />
           </div>
 
@@ -49,7 +57,7 @@ const BasicInfo = () => {
               type="password"
               placeholder="Create a strong password"
               value={onBoardingData.password}
-              onChange={(e) => handleOnBoardingData({ password: e.target.value })}
+              onChange={(e) => handleChangeForm("password", e.target.value)}
             />
 
             <Input
@@ -58,7 +66,7 @@ const BasicInfo = () => {
               maxLength={10}
               placeholder="9087654567"
               value={onBoardingData.phone}
-              onChange={(e) => handleOnBoardingData({ phone: e.target.value })}
+              onChange={(e) => handleChangeForm("phone", e.target.value)}
             />
           </div>
 
@@ -69,28 +77,28 @@ const BasicInfo = () => {
               label="Legal Business Name"
               placeholder="e.g. Paramount Textiles Pvt Ltd"
               value={onBoardingData.businessName}
-              onChange={(e) => handleOnBoardingData({ businessName: e.target.value })}
+              onChange={(e) => handleChangeForm("businessName", e.target.value)}
             />
 
             <Input
               label="GSTIN"
               placeholder="22AAAAA0000A1Z5"
               value={onBoardingData.gstin}
-              onChange={(e) => handleOnBoardingData({ gstin: e.target.value })}
+              onChange={(e) => handleChangeForm("gstin", e.target.value)}
             />
 
             <Input
               label="Business Address"
               placeholder="Full registered office address"
               value={onBoardingData.address}
-              onChange={(e) => handleOnBoardingData({ address: e.target.value })}
+              onChange={(e) => handleChangeForm("address", e.target.value)}
             />
 
             <Dropdown
               label="State / Region"
               options={states}
               value={onBoardingData.state}
-              onChange={(e) => handleOnBoardingData({ state: e.target.value })}
+              onChange={(e) => handleChangeForm("state", e.target.value)}
             />
           </div>
         </div>

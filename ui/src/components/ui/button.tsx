@@ -40,7 +40,7 @@ export const Button: React.FC<ButtonProps> = ({
     primary:
       "bg-primary text-white rounded-xl hover:bg-primary/90 shadow-md shadow-primary/30",
     secondary:
-      "bg-primary/10 text-primary rounded-xl hover:bg-primary/20",
+      "bg-white text-primary rounded-xl hover:bg-primary/20",
     "outline-primary":
       "border-2 border-primary text-primary rounded-xl hover:bg-primary/10",
     "outline-secondary":

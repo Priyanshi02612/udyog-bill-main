@@ -1,63 +1,82 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import loginCoverImage from "../../assets/login-cover.png";
 import logo from "../../assets/logo.png";
 import { Button } from "../../components/ui/button";
-import {
-  MdFactory,
-  MdHelp,
-  MdInventory,
-  MdRemoveRedEye,
-  MdStorefront,
-} from "react-icons/md";
-import { useState } from "react";
-import { Input } from "../../../src/components/ui/input";
-import Link from "next/link";
-import { auth } from "../../../src/lib/firebase/config";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { useRouter } from "next/navigation";
+import { Input } from "../../components/ui/input";
+import { auth } from "../../lib/firebase/config";
+import { UsersService } from "../../lib/api/users";
+import { AuthContext } from "../../context/auth.context";
+import { AuthContextType } from "../../utils/types";
 
-const roleOptions = [
-  {
-    id: 1,
-    title: "Manufacturer",
-    role: "manufacturer",
-    icon: <MdFactory className="w-6 h-6 text-primary" />,
-  },
-  {
-    id: 2,
-    title: "Wholesaler",
-    role: "wholesaler",
-    icon: <MdInventory className="w-6 h-6 text-primary" />,
-  },
-  {
-    id: 3,
-    title: "Retailer",
-    role: "retailer",
-    icon: <MdStorefront className="w-6 h-6 text-primary" />,
-  },
-];
+import { MdHelp, MdRemoveRedEye } from "react-icons/md";
+import { useContext, useState } from "react";
+import toast from "react-hot-toast";
+
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
 
 const Login = () => {
-  const [role, setRole] = useState<string>("");
+  const { user, resetOnBoardingState } = useContext(
+    AuthContext,
+  ) as AuthContextType;
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const router = useRouter();
 
-  const handleLogin = () => {
-    signInWithEmailAndPassword(auth, email, password)
-      .then((value) => {
-        console.log(value);
-        setEmail("");
-        setPassword("");
-        router.push("/");
-      })
-      .catch((error) => {
-        console.error("Error signing in:", error);
-      });
+  const handleLogin = async () => {
+    try {
+      const firebaseUser = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+
+      const response = await UsersService.getUserByFirebaseId(
+        firebaseUser.user.uid,
+      );
+
+      if (!response.data.isOnboarded) {
+        router.push("/sign-up");
+        return;
+      }
+
+      if (response.data.role === "manufacturer") {
+        router.push("/manufacturer");
+        return;
+      }
+
+      if (response.data.role === "wholesaler") {
+        router.push("/wholesaler");
+        return;
+      }
+
+      if (response.data.role === "retailer") {
+        router.push("/retailer");
+        return;
+      }
+    } catch (error: unknown) {
+      if (error instanceof FirebaseError) {
+        toast.error(error.message);
+      } else if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Something went wrong while logging in");
+      }
+    }
+  };
+
+  const handleSignUp = async () => {
+    if (user) {
+      await signOut(auth);
+      resetOnBoardingState();
+    }
+
+    router.push("/sign-up");
   };
 
   return (
@@ -75,45 +94,6 @@ const Login = () => {
             <h2 className="text-[#0d161b] text-center text-3xl font-black leading-tight tracking-tight mb-5">
               Welcome back
             </h2>
-
-            <div className="text-left md:text-center mb-2">
-              <h2 className="text-[#0d161b] text-lg font-black leading-tight tracking-tight mb-2">
-                Select Your Role
-              </h2>
-              <p className="text-slate-500 text-sm">
-                Choose your account type to continue to your dashboard.
-              </p>
-            </div>
-
-            <div className="flex items-center justify-start md:justify-center gap-3 mb-5 flex-wrap md:flex-nowrap">
-              {roleOptions.map((feature) => (
-                <div className="relative" key={feature.id}>
-                  <input
-                    className="hidden peer"
-                    id={`role-${feature.id}`}
-                    name="user-role"
-                    type="radio"
-                    value={feature.role}
-                    checked={role === feature.role}
-                    onChange={(e) => setRole(e.target.value)}
-                  />
-
-                  <label
-                    htmlFor={`role-${feature.id}`}
-                    className={`flex items-center gap-2 p-3 border-2 rounded-xl cursor-pointer transition-all
-                      ${role === feature.role ? "border-primary/50 bg-primary/5" : "border-slate-100 hover:border-primary/50"}
-                    `}
-                  >
-                    <div className="size-8 rounded-lg bg-slate-50 flex items-center justify-center">
-                      {feature.icon}
-                    </div>
-                    <h3 className="font-bold text-[#0d161b]">
-                      {feature.title}
-                    </h3>
-                  </label>
-                </div>
-              ))}
-            </div>
 
             <div className="flex flex-col gap-3">
               <Input
@@ -165,12 +145,9 @@ const Login = () => {
 
               <div className="flex items-center justify-center gap-2 text-sm">
                 <span className="text-slate-500">{`Don't have an account?`}</span>
-                <Link
-                  href="/sign-up"
-                  className="text-primary font-bold hover:underline"
-                >
+                <Button variant="link" onClick={handleSignUp}>
                   Sign Up
-                </Link>
+                </Button>
               </div>
             </div>
 

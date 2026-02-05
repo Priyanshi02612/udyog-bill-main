@@ -9,8 +9,17 @@ export const Footer = () => {
       <div className="max-w-7xl mx-auto px-6 lg:px-10 bg-slate-50 pb-8 border-t border-slate-200">
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="py-4 text-center md:text-left">
-            <Link href="/" className="flex items-center justify-center md:justify-start gap-1 cursor-pointer">
-              <Image src={logo} alt="logo" width={96} height={96} />
+            <Link
+              href="/"
+              className="flex items-center justify-center md:justify-start gap-1 cursor-pointer"
+            >
+              <Image
+                src={logo}
+                alt="logo"
+                width={96}
+                height={96}
+                className="h-20 w-auto"
+              />
               <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">
                 UdyogBill
               </h2>

@@ -1,13 +1,16 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useContext, useRef } from "react";
 import OnboardingPageWrapper from "./page-wrapper";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { MdOutlineSupportAgent } from "react-icons/md";
+import { AuthService } from "../../lib/api/auth";
+import { AuthContext } from "../../context/auth.context";
+import { AuthContextType } from "../../utils/types";
 
 const VerifyOTP = () => {
-  const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
+  const { otp, setOtp } = useContext(AuthContext) as AuthContextType;
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const digitRegex = /^\d$/;
 
@@ -54,6 +57,16 @@ const VerifyOTP = () => {
     }
   };
 
+  const handleResendOTP = async () => {
+    try {
+      const userData = localStorage.getItem("UB_USER");
+      const data = JSON.parse(userData || "");
+      await AuthService.sendOTP(data.email);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <OnboardingPageWrapper
       title="Verify Your Identity"
@@ -78,7 +91,9 @@ const VerifyOTP = () => {
           ))}
         </div>
         <div className="flex flex-col items-center gap-3">
-          <Button variant="link">Resend OTP</Button>
+          <Button variant="link" onClick={handleResendOTP}>
+            Resend OTP
+          </Button>
           <Button
             variant="link-secondary"
             size="sm"

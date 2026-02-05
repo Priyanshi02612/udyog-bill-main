@@ -2,6 +2,15 @@ export interface AppConfig {
   database: {
     connectionString: string;
   };
+  mailer: {
+    host: string;
+    port: number;
+    secure: boolean;
+    auth: {
+      user: string;
+      pass: string;
+    };
+  };
 }
 
 export default (): AppConfig => {
@@ -13,6 +22,15 @@ export default (): AppConfig => {
   return {
     database: {
       connectionString: databaseUrl,
+    },
+    mailer: {
+      host: process.env.MAIL_HOST ?? '',
+      port: Number(process.env.MAIL_PORT ?? 587),
+      secure: process.env.MAIL_SECURE === 'true',
+      auth: {
+        user: process.env.MAIL_USER ?? '',
+        pass: process.env.MAIL_PASSWORD ?? '',
+      },
     },
   };
 };

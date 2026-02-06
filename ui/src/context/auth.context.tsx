@@ -38,6 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const resetOnBoardingState = () => {
     setUser(null);
@@ -63,10 +64,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const fetchUserDetails = async () => {
       try {
+        setLoading(true);
         const response = await UsersService.getUserByFirebaseId(user?.uid);
         setOnBoardingData(response.data);
       } catch (error) {
         console.log(error);
+      } finally {
+        setTimeout(() => {
+          setLoading(false);
+        }, 2000);
       }
     };
 
@@ -140,6 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setOtp,
         user,
         resetOnBoardingState,
+        loading,
       }}
     >
       {children}

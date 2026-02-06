@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "../../components/ui/button";
-import { auth } from "../../lib/firebase/config";
+import { auth } from "../../../lib/firebase/config";
+import { Button } from "../../../components/ui/button";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 

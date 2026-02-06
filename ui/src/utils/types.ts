@@ -13,6 +13,7 @@ export type AuthContextType = {
   setOtp: Dispatch<SetStateAction<string[]>>;
   user: User | null;
   resetOnBoardingState: () => void;
+  loading: boolean;
 };
 
 export type OnboardingData = {

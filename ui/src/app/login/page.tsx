@@ -36,28 +36,33 @@ const Login = () => {
         password,
       );
 
-      const response = await UsersService.getUserByFirebaseId(
-        firebaseUser.user.uid,
-      );
+      const firebaseUid = firebaseUser.user.uid;
 
-      if (!response.data.isOnboarded) {
-        router.push("/sign-up");
+      const response = await UsersService.getUserByFirebaseId(firebaseUid);
+      const userData = response.data;
+      localStorage.setItem("userRole", userData.role);
+
+      if (!userData.isOnboarded) {
+        router.replace("/sign-up");
         return;
       }
 
-      if (response.data.role === "manufacturer") {
-        router.push("/manufacturer");
-        return;
-      }
+      switch (userData.role) {
+        case "manufacturer":
+          router.replace("/manufacturer/dashboard");
+          break;
 
-      if (response.data.role === "wholesaler") {
-        router.push("/wholesaler");
-        return;
-      }
+        case "wholesaler":
+          router.replace("/wholesaler");
+          break;
 
-      if (response.data.role === "retailer") {
-        router.push("/retailer");
-        return;
+        case "retailer":
+          router.replace("/retailer");
+          break;
+
+        default:
+          toast.error("Invalid user role");
+          await signOut(auth);
       }
     } catch (error: unknown) {
       if (error instanceof FirebaseError) {

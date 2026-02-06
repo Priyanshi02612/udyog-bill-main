@@ -35,4 +35,7 @@ export class SignupDto {
 
   @IsOptional()
   role?: UserRole;
+
+  @IsOptional()
+  onboardingStep?: number;
 }

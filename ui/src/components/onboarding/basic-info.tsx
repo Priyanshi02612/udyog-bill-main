@@ -1,11 +1,12 @@
 "use client";
 
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { Dropdown } from "../ui/dropdown";
 import { Input } from "../ui/input";
 import OnboardingPageWrapper from "./page-wrapper";
 import { AuthContext } from "../../context/auth.context";
-import { AuthContextType } from "../../utils/types";
+import { AuthContextType, OnboardingContextType } from "../../utils/types";
+import { OnboardingContext } from "@/src/context/onboarding.context";
 
 const states = [
   { label: "Select your state", value: "" },
@@ -17,9 +18,16 @@ const states = [
 ];
 
 const BasicInfo = () => {
-  const { onBoardingData, handleOnBoardingData, user } = useContext(
-    AuthContext,
-  ) as AuthContextType;
+  const { onBoardingData, handleOnBoardingData } = useContext(
+    OnboardingContext,
+  ) as OnboardingContextType;
+  const { user } = useContext(AuthContext) as AuthContextType;
+
+  useEffect(() => {
+    if (user) {
+      handleOnBoardingData(user);
+    }
+  },[]);
 
   const handleChangeForm = (
     key: keyof typeof onBoardingData,

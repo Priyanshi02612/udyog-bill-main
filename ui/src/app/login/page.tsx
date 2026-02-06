@@ -9,7 +9,7 @@ import { Input } from "../../components/ui/input";
 import { auth } from "../../lib/firebase/config";
 import { UsersService } from "../../lib/api/users";
 import { AuthContext } from "../../context/auth.context";
-import { AuthContextType } from "../../utils/types";
+import { AuthContextType, OnboardingContextType } from "../../utils/types";
 
 import { MdHelp, MdRemoveRedEye } from "react-icons/md";
 import { useContext, useState } from "react";
@@ -17,11 +17,13 @@ import toast from "react-hot-toast";
 
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
+import { OnboardingContext } from "@/src/context/onboarding.context";
 
 const Login = () => {
-  const { user, resetOnBoardingState } = useContext(
-    AuthContext,
-  ) as AuthContextType;
+  const { user } = useContext(AuthContext) as AuthContextType;
+  const { resetOnBoardingState } = useContext(
+    OnboardingContext,
+  ) as OnboardingContextType;
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,7 +42,6 @@ const Login = () => {
 
       const response = await UsersService.getUserByFirebaseId(firebaseUid);
       const userData = response.data;
-      localStorage.setItem("userRole", userData.role);
 
       if (!userData.isOnboarded) {
         router.replace("/sign-up");

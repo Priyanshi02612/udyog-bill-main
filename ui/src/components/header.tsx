@@ -8,13 +8,15 @@ import { signOut } from "firebase/auth";
 import { auth } from "../lib/firebase/config";
 import Link from "next/link";
 import { useContext } from "react";
-import { AuthContext } from "../context/auth.context";
-import { AuthContextType } from "../utils/types";
+import { OnboardingContextType } from "../utils/types";
+import { OnboardingContext } from "../context/onboarding.context";
 
 export const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { resetOnBoardingState } = useContext(AuthContext) as AuthContextType;
+  const { resetOnBoardingState } = useContext(
+    OnboardingContext,
+  ) as OnboardingContextType;
 
   const handleLogin = async () => {
     await signOut(auth);

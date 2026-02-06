@@ -1,19 +1,21 @@
-import { User } from "firebase/auth";
-import { Dispatch, SetStateAction } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export type Role = "manufacturer" | "wholesaler" | "retailer";
 
-export type AuthContextType = {
+export type OnboardingContextType = {
   onBoardingStep: number;
-  setOnBoardingStep: (step: number) => void;
+  setOnBoardingStep: React.Dispatch<React.SetStateAction<number>>;
   onBoardingData: OnboardingData;
   handleOnBoardingData: (data: Partial<OnboardingData>) => void;
   validateForm: () => boolean;
   otp: string[];
-  setOtp: Dispatch<SetStateAction<string[]>>;
-  user: User | null;
+  setOtp: React.Dispatch<React.SetStateAction<string[]>>;
   resetOnBoardingState: () => void;
-  loading: boolean;
+};
+
+export type AuthContextType = {
+  user: any | null;
+  authLoading: boolean;
 };
 
 export type OnboardingData = {
@@ -29,6 +31,7 @@ export type OnboardingData = {
   state?: string;
 
   role?: Role;
+  onboardingStep?: number;
 };
 
 export type OnboardingPageWrapperProps = {

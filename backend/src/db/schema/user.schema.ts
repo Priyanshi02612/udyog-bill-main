@@ -23,6 +23,9 @@ export class User {
   @Prop({ enum: UserRole })
   role!: UserRole;
 
+  @Prop()
+  onboardingStep?: number;
+
   @Prop({ default: false })
   isOnboarded!: boolean;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import {
   MdChevronRight,
   MdFactory,
@@ -8,8 +8,13 @@ import {
   MdStorefront,
 } from "react-icons/md";
 import OnboardingPageWrapper from "./page-wrapper";
-import { AuthContext } from "../../context/auth.context";
-import { AuthContextType, Role } from "../../utils/types";
+import {
+  AuthContextType,
+  OnboardingContextType,
+  Role,
+} from "../../utils/types";
+import { OnboardingContext } from "@/src/context/onboarding.context";
+import { AuthContext } from "@/src/context/auth.context";
 
 const roleOptions: {
   title: string;
@@ -42,12 +47,28 @@ const roleOptions: {
 
 const RoleSelection = () => {
   const { onBoardingData, handleOnBoardingData } = useContext(
-    AuthContext,
-  ) as AuthContextType;
+    OnboardingContext,
+  ) as OnboardingContextType;
+
+  const { user, authLoading } = useContext(AuthContext) as AuthContextType;
+
+  useEffect(() => {
+    if (user) {
+      handleOnBoardingData({ role: user.role });
+    }
+  }, [user]);
 
   const handleSelectRole = (role: Role) => {
     handleOnBoardingData({ role });
   };
+
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center gap-2 h-[calc(100vh-64px)]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
+      </div>
+    );
+  }
 
   return (
     <OnboardingPageWrapper
@@ -56,7 +77,8 @@ const RoleSelection = () => {
     >
       <div className="flex flex-col gap-4">
         {roleOptions.map((role) => {
-          const isSelected = onBoardingData.role === role.role;
+          const isSelected =
+            onBoardingData.role === role.role || user?.role === role.role;
 
           return (
             <div

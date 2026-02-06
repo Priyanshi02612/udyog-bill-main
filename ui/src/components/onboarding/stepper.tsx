@@ -1,7 +1,7 @@
 "use client";
 
 import { AuthContext } from "../../context/auth.context";
-import { AuthContextType } from "../../utils/types";
+import { AuthContextType, OnboardingContextType } from "../../utils/types";
 import { useContext } from "react";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
@@ -14,6 +14,7 @@ import {
 import toast from "react-hot-toast";
 import { auth } from "../../lib/firebase/config";
 import { AuthService } from "../../lib/api/auth";
+import { OnboardingContext } from "@/src/context/onboarding.context";
 
 const STEPS = [
   {
@@ -36,9 +37,9 @@ export default function Stepper() {
     setOnBoardingStep,
     onBoardingData,
     validateForm,
-    user,
     otp,
-  } = useContext(AuthContext) as AuthContextType;
+  } = useContext(OnboardingContext) as OnboardingContextType;
+  const { user } = useContext(AuthContext) as AuthContextType;
   const router = useRouter();
 
   const totalSteps = STEPS.length;
@@ -49,7 +50,10 @@ export default function Stepper() {
     try {
       if (onBoardingData.firebaseUid) {
         await updatePassword(user as User, onBoardingData.password);
-        const response = await AuthService.createUSer(onBoardingData);
+        const response = await AuthService.createUSer({
+          ...onBoardingData,
+          onboardingStep: onBoardingStep,
+        });
         if (response.data) {
           localStorage.setItem("UB_USER", JSON.stringify(response.data));
           await AuthService.sendOTP(response.data.email);
@@ -67,6 +71,7 @@ export default function Stepper() {
         const response = await AuthService.createUSer({
           ...onBoardingData,
           firebaseUid: userData.user.uid,
+          onboardingStep: onBoardingStep,
         });
 
         if (response.data) {

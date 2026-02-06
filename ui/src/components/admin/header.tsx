@@ -1,11 +1,17 @@
 "use client";
 
-import { OnboardingData } from "../../utils/types";
+import { AuthContext } from "../../context/auth.context";
+import { AuthContextType } from "../../utils/types";
 import Link from "next/link";
+import { useContext } from "react";
 import Avatar from "react-avatar";
 import { MdNotifications } from "react-icons/md";
 
-export const Header = ({ user }: { user: OnboardingData }) => {
+export const Header = () => {
+  const { user } = useContext(AuthContext) as AuthContextType;
+
+  if (!user) return null;
+
   return (
     <div className="h-16 border-b border-slate-200 bg-white px-8 flex items-center justify-end sticky top-0 z-10">
       <div className="flex items-center gap-2">

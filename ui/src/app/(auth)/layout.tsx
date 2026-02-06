@@ -2,11 +2,11 @@
 
 import { useContext, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { AuthContext } from "../../context/auth.context";
 import { AuthContextType } from "../../utils/types";
 import { Sidebar } from "../../components/admin/sidebar";
 import { Header } from "../../components/admin/header";
 import { UserRole } from "../../utils/constants";
+import { AuthContext } from "@/src/context/auth.context";
 
 export default function AuthLayout({
   children,
@@ -15,38 +15,34 @@ export default function AuthLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { onBoardingData, loading } = useContext(
-    AuthContext,
-  ) as AuthContextType;
-
+  const { user, authLoading } = useContext(AuthContext) as AuthContextType;
   const userRole = localStorage.getItem("userRole");
 
   useEffect(() => {
-    if (!loading) {
-      if (!onBoardingData) {
-        router.replace("/login");
-        return;
-      }
+    if (authLoading) return;
 
-      if (
-        pathname.startsWith("/manufacturer") &&
-        userRole !== UserRole.MANUFACTURER
-      ) {
-        router.replace(`/${userRole}/dashboard`);
-      }
-
-      if (
-        pathname.startsWith("/wholesaler") &&
-        userRole !== UserRole.WHOLESALER
-      ) {
-        router.replace(`/${userRole}`);
-      }
-
-      if (pathname.startsWith("/retailer") && userRole !== UserRole.RETAILER) {
-        router.replace(`/${userRole}`);
-      }
+    if (!user) {
+      router.replace("/login");
+      return;
     }
-  }, [loading, onBoardingData, pathname, router, userRole]);
+
+    const role = user.role;
+
+    if (
+      pathname.startsWith("/manufacturer") &&
+      role !== UserRole.MANUFACTURER
+    ) {
+      router.replace(`/${role}/dashboard`);
+    }
+
+    if (pathname.startsWith("/wholesaler") && role !== UserRole.WHOLESALER) {
+      router.replace(`/${role}/dashboard`);
+    }
+
+    if (pathname.startsWith("/retailer") && role !== UserRole.RETAILER) {
+      router.replace(`/${role}/dashboard`);
+    }
+  }, [authLoading, user, pathname, router]);
 
   return (
     <div className="bg-background-light text-slate-900 antialiased">
@@ -57,9 +53,9 @@ export default function AuthLayout({
           className="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark"
           style={{ scrollbarWidth: "none" }}
         >
-          <Header user={onBoardingData} />
+          <Header />
 
-          {loading || !onBoardingData ? (
+          {authLoading || !user ? (
             <div className="flex items-center justify-center gap-2 h-[calc(100vh-64px)]">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
             </div>

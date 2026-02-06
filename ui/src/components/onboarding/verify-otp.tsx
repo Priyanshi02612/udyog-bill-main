@@ -6,11 +6,13 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { MdOutlineSupportAgent } from "react-icons/md";
 import { AuthService } from "../../lib/api/auth";
-import { AuthContext } from "../../context/auth.context";
-import { AuthContextType } from "../../utils/types";
+import { OnboardingContextType } from "../../utils/types";
+import { OnboardingContext } from "../../context/onboarding.context";
 
 const VerifyOTP = () => {
-  const { otp, setOtp } = useContext(AuthContext) as AuthContextType;
+  const { otp, setOtp } = useContext(
+    OnboardingContext,
+  ) as OnboardingContextType;
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const digitRegex = /^\d$/;
 

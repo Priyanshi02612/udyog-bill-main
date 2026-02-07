@@ -10,12 +10,14 @@ import {
   MdInventory,
   MdReceiptLong,
   MdSettings,
+  MdClose,
 } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { Button } from "../ui/button";
 import { auth } from "../../lib/firebase/config";
 import { UserRole } from "../../utils/constants";
+import clsx from "clsx";
 
 const navbarOptions = {
   [UserRole.MANUFACTURER]: [
@@ -61,30 +63,48 @@ const navbarOptions = {
   ],
 };
 
-export const Sidebar = ({ role }: { role: UserRole }) => {
+export const Sidebar = ({
+  role,
+  isOpen,
+  onClose,
+}: {
+  role: UserRole;
+  isOpen: boolean;
+  onClose: () => void;
+}) => {
   const router = useRouter();
 
   return (
-    <div className="w-64 shrink-0 border-r border-slate-200 bg-white flex flex-col">
-      <Link href="/manufacturer/dashboard" className="p-6 flex items-center gap-3">
-        <Image
-          src={logo}
-          alt="logo"
-          width={50}
-          height={50}
-          className="h-10 w-auto"
-        />
-        <h1 className="text-xl font-bold tracking-tight text-slate-900">
-          UdyogBill
-        </h1>
-      </Link>
+    <div
+      className={clsx(
+        "fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col transition-transform duration-300",
+        {
+          "-translate-x-full lg:translate-x-0": !isOpen,
+          "translate-x-0": isOpen,
+        },
+      )}
+    >
+      <div className="p-6 flex items-center justify-between">
+        <Link
+          href="/manufacturer/dashboard"
+          className="flex items-center gap-3"
+        >
+          <Image src={logo} alt="logo" width={40} height={40} />
+          <h1 className="text-xl font-bold text-slate-900">UdyogBill</h1>
+        </Link>
+
+        <button className="lg:hidden" onClick={onClose}>
+          <MdClose className="w-6 h-6 text-primary" />
+        </button>
+      </div>
 
       <div className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
         {navbarOptions[role].map((navOption, index) => (
           <Link
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium hover:bg-primary-soft transition duration-300"
-            href={navOption.to}
             key={index}
+            href={navOption.to}
+            onClick={onClose}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium hover:bg-primary-soft transition"
           >
             {navOption.icon}
             {navOption.title}
@@ -94,8 +114,9 @@ export const Sidebar = ({ role }: { role: UserRole }) => {
 
       <div className="p-4 border-t border-slate-200">
         <Link
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium hover:bg-primary-soft transition duration-300"
           href="/manufacturer/dashboard"
+          onClick={onClose}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium hover:bg-primary-soft"
         >
           <MdSettings className="w-6 h-6 text-primary" />
           Settings

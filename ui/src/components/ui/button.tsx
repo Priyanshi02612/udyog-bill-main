@@ -13,6 +13,7 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   size?: "sm" | "md" | "lg";
   leadingIcon?: React.ReactNode;
   trailingIcon?: React.ReactNode;
+  loading?: boolean;
 };
 
 export const Button: React.FC<ButtonProps> = ({
@@ -20,6 +21,7 @@ export const Button: React.FC<ButtonProps> = ({
   size = "md",
   leadingIcon,
   trailingIcon,
+  loading = false,
   children,
   className,
   ...props
@@ -39,8 +41,7 @@ export const Button: React.FC<ButtonProps> = ({
   const variantStyles = {
     primary:
       "bg-primary text-white rounded-xl hover:bg-primary/90 shadow-md shadow-primary/30",
-    secondary:
-      "bg-white text-primary rounded-xl hover:bg-primary/20",
+    secondary: "bg-white text-primary rounded-xl hover:bg-primary/20",
     "outline-primary":
       "border-2 border-primary text-primary rounded-xl hover:bg-primary/10",
     "outline-secondary":
@@ -58,24 +59,40 @@ export const Button: React.FC<ButtonProps> = ({
         variantStyles[variant],
         className,
       )}
+      disabled={loading}
       {...props}
     >
-      {leadingIcon && !isIconOnly && (
-        <span className="mr-2 flex items-center transition-transform duration-300 group-hover:-translate-x-[5%]">
-          {leadingIcon}
-        </span>
+      {loading && (
+        <span
+          className={clsx(
+            "animate-spin rounded-full border-2 border-current border-t-transparent",
+            isIconOnly ? "w-5 h-5" : "w-4 h-4",
+          )}
+        />
       )}
 
-      {!isIconOnly && children}
+      {!loading && (
+        <>
+          {leadingIcon && !isIconOnly && (
+            <span className="mr-2 flex items-center transition-transform duration-300 group-hover:-translate-x-[5%]">
+              {leadingIcon}
+            </span>
+          )}
 
-      {trailingIcon && !isIconOnly && (
-        <span className="ml-2 flex items-center transition-transform duration-300 group-hover:translate-x-[5%]">
-          {trailingIcon}
-        </span>
-      )}
+          {!isIconOnly && children}
 
-      {isIconOnly && leadingIcon && (
-        <span className="flex items-center justify-center">{leadingIcon}</span>
+          {trailingIcon && !isIconOnly && (
+            <span className="ml-2 flex items-center transition-transform duration-300 group-hover:translate-x-[5%]">
+              {trailingIcon}
+            </span>
+          )}
+
+          {isIconOnly && leadingIcon && (
+            <span className="flex items-center justify-center">
+              {leadingIcon}
+            </span>
+          )}
+        </>
       )}
     </button>
   );

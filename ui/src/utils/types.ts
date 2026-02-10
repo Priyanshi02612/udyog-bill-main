@@ -4,6 +4,8 @@ export type Role = "manufacturer" | "wholesaler" | "retailer";
 
 export type ItemCategory = "FABRIC" | "MATERIAL" | "THREAD";
 
+export type InvoiceStatus = "DRAFT" | "SENT" | "ACCEPTED" | "REJECTED" | "PAID" | "OVERDUE";
+
 export type OnboardingContextType = {
   onBoardingStep: number;
   setOnBoardingStep: React.Dispatch<React.SetStateAction<number>>;
@@ -86,3 +88,41 @@ export type AddEditTextileItemModalProps = {
 };
 
 export type Errors = Partial<Record<keyof AddItemFormState, string>>;
+
+export type Party = {
+  id: number;
+  businessName: string;
+  gstin: string;
+  contactPerson: string;
+  phone: string;
+  email: string;
+  address: string;
+  outstanding: number;
+  overdueInvoices: number;
+  invoices: Invoice[];
+};
+
+export type Invoice = {
+  id: number;
+  invoiceNumber: string;
+  buyerId: string;
+  sellerId: string;
+  invoiceDate: string;
+  items: InvoiceItem[];
+  subtotal: number;
+  sgst: number;
+  cgst: number;
+  total: number;
+  status: InvoiceStatus;
+  dueDate: string;
+  notes?: string;
+  paymentTerms?: string;
+};
+
+export type InvoiceItem = {
+  id: string;
+  itemId: string;
+  invoiceId: string;
+  quantity: number;
+  price: number;
+};

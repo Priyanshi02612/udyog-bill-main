@@ -1,149 +1,191 @@
-import { TbShirtFilled } from "react-icons/tb";
-import { MdTexture } from "react-icons/md";
-import { RiShapesFill } from "react-icons/ri";
-import { Dropdown } from "@/src/components/ui/dropdown";
+"use client";
 
-const processTypes = [
-  { label: "Process Type", value: "" },
-  { label: "Maharashtra", value: "maharashtra" },
-  { label: "Gujarat", value: "gujarat" },
-  { label: "Tamil Nadu", value: "tamilnadu" },
-  { label: "Karnataka", value: "karnataka" },
-  { label: "Delhi", value: "delhi" },
-];
+import { useMemo, useState } from "react";
+import { MdAdd, MdTexture } from "react-icons/md";
+import { GiRolledCloth } from "react-icons/gi";
+import { RiShapesFill } from "react-icons/ri";
+import Link from "next/link";
+import { Badge } from "../../../../components/ui/badge";
+import { Button } from "../../../../components/ui/button";
+import Pagination from "../../../../components/pagination";
+import AddEditTextileItemModal from "../../../../components/admin/modal/add-item-modal";
+import { initialItems } from "../../../../utils/data";
+import { Item, ItemCategory } from "../../../../utils/types";
 
 const filters = [
   {
-    label: "Cloth",
-    icon: <TbShirtFilled className="w-5 h-5" />,
+    label: "FABRIC",
+    value: "Fabric",
+    icon: <GiRolledCloth className="w-4 h-4" />,
   },
   {
-    label: "Thread",
-    icon: <MdTexture className="w-5 h-5" />,
+    label: "THREAD",
+    value: "Thread",
+    icon: <MdTexture className="w-4 h-4" />,
   },
   {
-    label: "Material",
-    icon: <RiShapesFill className="w-5 h-5" />,
+    label: "MATERIAL",
+    value: "Material",
+    icon: <RiShapesFill className="w-4 h-4" />,
   },
 ];
 
-const Inventory = () => {
+export default function ManufacturerInventoryPage() {
+  const [items, setItems] = useState<Item[]>(initialItems);
+  const [activeItemCategory, setActiveItemCategory] = useState<
+    ItemCategory | "All"
+  >("All");
+  const [open, setOpen] = useState(false);
+
+  const [page, setPage] = useState(1);
+  const pageSize = 7;
+
+  const handleAddItem = () => {
+    setOpen(true);
+  };
+
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      const categoryMatch =
+        activeItemCategory === "All" || item.category === activeItemCategory;
+
+      return categoryMatch;
+    });
+  }, [items, activeItemCategory]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
+
+  const safePage = Math.min(page, totalPages);
+
+  const paginatedItems = useMemo(() => {
+    const start = (safePage - 1) * pageSize;
+    const end = start + pageSize;
+    return filteredItems.slice(start, end);
+  }, [filteredItems, safePage, pageSize]);
+
   return (
-    <div className="flex flex-col flex-1 px-10 py-8 max-w-7xl mx-auto w-full">
-      <div className="flex flex-wrap justify-between items-end gap-4 mb-8">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-[#0d161b] text-3xl font-black leading-tight tracking-tight">
-            Items Inventory
-          </h1>
-          <p className="text-[#4c799a] text-base font-normal">
-            Manage and track your textile materials, threads, and cloth stocks.
+    <div className="p-8 pb-0 min-h-[calc(100vh-124px)] relative">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-8 gap-2">
+        <div>
+          <h1 className="text-3xl font-black">Items Inventory</h1>
+          <p className="text-primary text-xs md:text-base">
+            Manage and track your textile stocks
           </p>
         </div>
-        <button className="flex min-w-35 cursor-pointer items-center justify-center gap-2 rounded-lg h-11 px-6 bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
-          <span className="material-symbols-outlined text-[20px]">add</span>
-          <span>Add New Item</span>
-        </button>
-      </div>
 
-      <div className="flex gap-2 mb-6 flex-wrap">
-        <button className="inline-flex items-center rounded-full bg-primary text-white shadow-sm px-4 py-2 text-xs font-medium inset-ring inset-ring-gray-400/20">
+        <Button
+          size="sm"
+          leadingIcon={<MdAdd className="w-6 h-6" />}
+          onClick={handleAddItem}
+          className="self-end w-[50%] md:w-max"
+        >
+          Add New Item
+        </Button>
+      </div>
+      <div className="flex gap-2 mb-6 flex-wrap items-center text-xs md:text-base">
+        <button
+          onClick={() => setActiveItemCategory("All")}
+          className={`inline-flex items-center rounded-full px-4 py-2 text-sm ${
+            activeItemCategory === "All"
+              ? "bg-primary text-white"
+              : "bg-white text-primary"
+          }`}
+        >
           All Items
         </button>
 
-        {filters.map((filter, index) => (
+        {filters.map((filter) => (
           <button
-            key={index}
-            className="inline-flex items-center rounded-full bg-slate-200 text-primary shadow-sm px-4 py-2 text-xs font-medium inset-ring inset-ring-gray-400/20"
+            key={filter.label}
+            onClick={() => setActiveItemCategory(filter.value as ItemCategory)}
+            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm ${
+              activeItemCategory === filter.value
+                ? "bg-primary text-white"
+                : "bg-white text-primary"
+            }`}
           >
             {filter.icon}
             <span className="font-medium">{filter.label}</span>
           </button>
         ))}
-
-        <div className="h-9 w-px bg-slate-200 mx-2"></div>
-        <Dropdown options={processTypes} />
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-[#e7eef3] bg-white shadow-sm">
-        <div className="overflow-x-auto @container">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50 border-b border-[#e7eef3]">
-                <th className="px-6 py-4 text-[#4c799a] text-xs font-bold uppercase tracking-wider">
-                  Item Name
-                </th>
-                <th className="px-6 py-4 text-[#4c799a] text-xs font-bold uppercase tracking-wider">
-                  Item Type
-                </th>
-                <th className="px-6 py-4 text-[#4c799a] text-xs font-bold uppercase tracking-wider">
-                  Process Type
-                </th>
-                <th className="px-6 py-4 text-[#4c799a] text-xs font-bold uppercase tracking-wider text-center">
-                  HSN Code
-                </th>
-                <th className="px-6 py-4 text-[#4c799a] text-xs font-bold uppercase tracking-wider">
-                  Base Price
-                </th>
-                <th className="px-6 py-4 text-[#4c799a] text-xs font-bold uppercase tracking-wider text-center">
-                  GST %
-                </th>
-                <th className="px-6 py-4 text-[#4c799a] text-xs font-bold uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-4 text-[#4c799a] text-xs font-bold uppercase tracking-wider w-10"></th>
+      <div className="min-h-132.5 md:min-h-125 xl:min-h-118.5">
+        <div
+          className="overflow-hidden overflow-x-scroll xl:overflow-auto rounded-xl border border-gray-300 bg-white"
+          style={{ scrollbarWidth: "thin" }}
+        >
+          <table className="w-full text-left text-xs xl:text-base">
+            <thead className="bg-gray-100 text-primary">
+              <tr>
+                {[
+                  "Item Name",
+                  "Item Category",
+                  "HSN",
+                  "Price",
+                  "GST",
+                  "Status",
+                ].map((h) => (
+                  <th key={h} className="px-6 py-4 text-sm font-bold uppercase">
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#e7eef3]">
-              <tr className="hover:bg-slate-50/80 transition-colors group">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-3">
-                    <div className="size-10 rounded bg-blue-50 flex items-center justify-center text-blue-600">
-                      <span className="material-symbols-outlined">
-                        inventory_2
-                      </span>
-                    </div>
-                    <div className="font-semibold text-sm text-[#0d161b]">
-                      Premium Cotton
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-purple-50 text-purple-700">
-                    CLOTH
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border border-slate-200 bg-slate-50 text-slate-600">
-                    DYEING
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-mono text-[#4c799a]">
-                  5208
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#0d161b]">
-                  ₹850/meter
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-[#4c799a]">
-                  5%
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700">
-                    <span className="size-1.5 rounded-full bg-green-500"></span>
-                    Active
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-slate-400">
-                  <button className="material-symbols-outlined hover:text-primary transition-colors">
-                    more_vert
-                  </button>
-                </td>
-              </tr>
+
+            <tbody className="divide-y">
+              {filteredItems.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={8}
+                    className="px-6 py-10 text-center text-gray-400"
+                  >
+                    No items found
+                  </td>
+                </tr>
+              )}
+
+              {paginatedItems.map((item, index) => (
+                <tr
+                  key={index}
+                  className="hover:bg-gray-50 border-t border-gray-200"
+                >
+                  <td className="px-6 py-4 xl:min-w-79 max-w-30 truncate">
+                    <Link href={`/manufacturer/inventory/${item._id}`}>
+                      {item.name}
+                    </Link>
+                  </td>
+                  <td className="px-6 py-4">{item.category}</td>
+                  <td className="px-6 py-4">{item.hsnCode}</td>
+                  <td className="px-6 py-4">
+                    ₹{item.basePrice} /{item.unit}
+                  </td>
+                  <td className="px-6 py-4">{item.gstPercentage}%</td>
+                  <td className="px-6 py-4">
+                    <Badge
+                      label={item.isActive ? "Active" : "inactive"}
+                      variant={item.isActive ? "success" : "danger"}
+                    />
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      <Pagination
+        totalItems={filteredItems.length}
+        currentPage={safePage}
+        pageSize={pageSize}
+        onPageChange={setPage}
+      />
+
+      <AddEditTextileItemModal
+        open={open}
+        mode="add"
+        onClose={() => setOpen(false)}
+      />
     </div>
   );
-};
-
-export default Inventory;
+}

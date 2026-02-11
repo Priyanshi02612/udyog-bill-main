@@ -2,10 +2,9 @@
 
 import { AuthContext } from "../../context/auth.context";
 import { AuthContextType } from "../../utils/types";
-import Link from "next/link";
 import { useContext } from "react";
 import Avatar from "react-avatar";
-import { MdMenu, MdNotifications } from "react-icons/md";
+import { MdMenu } from "react-icons/md";
 
 export const Header = ({ onMenuOpen }: { onMenuOpen: () => void }) => {
   const { user } = useContext(AuthContext) as AuthContextType;
@@ -18,25 +17,14 @@ export const Header = ({ onMenuOpen }: { onMenuOpen: () => void }) => {
         <MdMenu className="w-6 h-6" />
       </button>
 
-      <div className="flex items-center gap-2">
-        <Link href="/manufacturer/dashboard" className="relative">
-          <MdNotifications className="w-8 h-8 text-slate-400" />
-          <span className="absolute top-0 right-0 size-3 bg-primary rounded-full border-2 border-white"></span>
-        </Link>
+      <div className="flex gap-2 items-center">
+        <div className="size-8 rounded-full bg-slate-200 overflow-hidden">
+          <Avatar name={user.name} color="#8b5a2b" size="32" round />
+        </div>
 
-        <div className="h-8 w-px bg-slate-200 mx-2"></div>
-
-        <div className="flex gap-2 items-center">
-          <div className="size-8 rounded-full bg-slate-200 overflow-hidden">
-            <Avatar name={user.name} color="#8b5a2b" size="32" round />
-          </div>
-
-          <div className="hidden md:flex flex-col">
-            <span className="text-sm font-bold">{user.name}</span>
-            <span className="text-xs text-slate-500 uppercase">
-              {user.role}
-            </span>
-          </div>
+        <div className="hidden md:flex flex-col">
+          <span className="text-sm font-bold">{user.name}</span>
+          <span className="text-xs text-slate-500 uppercase">{user.role}</span>
         </div>
       </div>
     </div>

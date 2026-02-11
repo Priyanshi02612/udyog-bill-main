@@ -1,10 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { KpiCardProps } from "../components/admin/kpi-card";
+
 export type Role = "manufacturer" | "wholesaler" | "retailer";
 
 export type ItemCategory = "FABRIC" | "MATERIAL" | "THREAD";
 
-export type InvoiceStatus = "DRAFT" | "SENT" | "ACCEPTED" | "REJECTED" | "PAID" | "OVERDUE";
+export type InvoiceStatus =
+  | "DRAFT"
+  | "SENT"
+  | "ACCEPTED"
+  | "REJECTED"
+  | "PAID"
+  | "OVERDUE";
 
 export type OnboardingContextType = {
   onBoardingStep: number;
@@ -126,3 +134,14 @@ export type InvoiceItem = {
   quantity: number;
   price: number;
 };
+
+export interface Insight {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+}
+
+export interface DashboardData {
+  kpis: KpiCardProps[];
+  insights: Insight[];
+}

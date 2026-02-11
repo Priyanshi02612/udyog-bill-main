@@ -12,7 +12,7 @@ import {
   MdSettings,
   MdClose,
 } from "react-icons/md";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { Button } from "../ui/button";
 import { auth } from "../../lib/firebase/config";
@@ -73,6 +73,16 @@ export const Sidebar = ({
   onClose: () => void;
 }) => {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const activeTab =
+    navbarOptions[role].find((item) => pathname.startsWith(item.to))?.to ||
+    "/manufacturer/dashboard";
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push("/");
+  };
 
   return (
     <div
@@ -104,7 +114,9 @@ export const Sidebar = ({
             key={index}
             href={navOption.to}
             onClick={onClose}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium hover:bg-primary-soft transition"
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium hover:bg-primary-soft transition
+              ${activeTab === navOption.to ? "bg-primary-soft" : ""}
+            `}
           >
             {navOption.icon}
             {navOption.title}
@@ -126,10 +138,7 @@ export const Sidebar = ({
           className="mt-2 w-full"
           size="sm"
           trailingIcon={<MdLogout className="w-5 h-5" />}
-          onClick={async () => {
-            await signOut(auth);
-            router.push("/");
-          }}
+          onClick={handleLogout}
         >
           Log out
         </Button>

@@ -8,7 +8,7 @@ import ConfirmModal from "../../../../components/ui/modal";
 import { MOCK_WHOLESALERS } from "../../../../utils/data";
 import { Party } from "../../../../utils/types";
 import { formatCurrency } from "../../../../utils/helpers";
-import { ReactNode, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   MdAccountBalanceWallet,
   MdDelete,
@@ -18,34 +18,9 @@ import {
   MdVisibility,
 } from "react-icons/md";
 import toast from "react-hot-toast";
+import { KpiCard } from "../../../../components/admin/kpi-card";
 
 const PAGE_SIZE = 5;
-
-const StatCard = ({
-  icon,
-  label,
-  value,
-  color,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string | number;
-  color: string;
-}) => (
-  <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex gap-3 items-center">
-    <span
-      className={`size-10 flex items-center justify-center rounded-lg
-          ${color === "primary" ? "bg-primary/10" : color === "blue" ? "bg-blue-100" : "bg-red-100"}
-        `}
-    >
-      {icon}
-    </span>
-    <div>
-      <p className="text-slate-500 text-sm font-medium">{label}</p>
-      <p className="text-xl font-bold text-slate-900 mt-1">{value}</p>
-    </div>
-  </div>
-);
 
 const Wholesalers = () => {
   const [page, setPage] = useState(1);
@@ -110,19 +85,19 @@ const Wholesalers = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <StatCard
+        <KpiCard
           icon={<MdAccountBalanceWallet className="w-6 h-6 text-primary" />}
           label="Total Outstanding"
           value={formatCurrency(stats.totalOutstanding)}
           color="primary"
         />
-        <StatCard
+        <KpiCard
           icon={<MdStorefront className="w-6 h-6 text-blue-600" />}
           label="Active Parties"
           value={stats.activeParties}
           color="blue"
         />
-        <StatCard
+        <KpiCard
           icon={<MdEventBusy className="w-6 h-6 text-danger" />}
           label="Overdue Payments"
           value={stats.overdueCount}

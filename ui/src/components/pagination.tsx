@@ -49,10 +49,10 @@ export default function Pagination({
   const renderBackButton = () => {
     return (
       <Button
-        variant="icon"
+        variant="link"
         disabled={currentPage === 1}
-        leadingIcon={<MdChevronLeft className="w-6 h-6" />}
-        className="shadow-none rounded-md disabled:bg-gray-200 disabled:text-gray-400"
+        leadingIcon={<MdChevronLeft className="w-8 h-8" />}
+        className="disabled:text-gray-400"
         onClick={() => onPageChange(currentPage - 1)}
       />
     );
@@ -61,10 +61,10 @@ export default function Pagination({
   const renderNextButton = () => {
     return (
       <Button
-        variant="icon"
+        variant="link"
         disabled={currentPage === totalPages}
-        leadingIcon={<MdChevronRight className="w-6 h-6" />}
-        className="shadow-none rounded-md disabled:bg-gray-200 disabled:text-gray-400"
+        leadingIcon={<MdChevronRight className="w-8 h-8" />}
+        className="disabled:text-gray-400"
         onClick={() => onPageChange(currentPage + 1)}
       />
     );
@@ -102,9 +102,8 @@ export default function Pagination({
             <Button
               key={page}
               size="sm"
-              variant={currentPage === page ? "primary" : "outline-secondary"}
+              variant={currentPage === page ? "primary" : "secondary"}
               onClick={() => onPageChange(page)}
-              className="shadow-none rounded-md"
             >
               {page}
             </Button>

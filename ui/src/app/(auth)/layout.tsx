@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { AuthContextType } from "../../utils/types";
 import { Sidebar } from "../../components/admin/sidebar";
@@ -19,6 +19,12 @@ export default function AuthLayout({
   const userRole = localStorage.getItem("userRole");
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }, [pathname]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -56,6 +62,7 @@ export default function AuthLayout({
         />
 
         <main
+          ref={scrollRef}
           className="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark"
           style={{ scrollbarWidth: "none" }}
         >

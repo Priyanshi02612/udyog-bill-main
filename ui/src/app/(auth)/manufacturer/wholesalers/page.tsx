@@ -20,7 +20,7 @@ import {
 import toast from "react-hot-toast";
 import { KpiCard } from "../../../../components/admin/kpi-card";
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 6;
 
 const Wholesalers = () => {
   const [page, setPage] = useState(1);
@@ -193,7 +193,7 @@ const Wholesalers = () => {
         title="Remove Party"
         description="Are you sure you want to remove this party? This action cannot be undone."
         confirmText="Yes, Remove"
-        icon={<MdDelete className="h-6 w-6 text-danger" />}
+        icon={<MdDelete className="h-8 w-8 text-danger" />}
         onCancel={() => setDeleteModalOpen(false)}
         onConfirm={handleRemoveParty}
       />

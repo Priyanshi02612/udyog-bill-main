@@ -31,10 +31,10 @@ export default function ConfirmModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
-        <div className="flex items-center justify-between px-5 py-4">
-          <div className="flex-1 flex items-center justify-center gap-2">
-            <div className="bg-primary/10 p-2 rounded-lg">{icon || null}</div>
-            <h2 className="text-lg font-bold text-slate-900">{title}</h2>
+        <div className="flex justify-between px-5 py-4">
+          <div className="flex-1 flex flex-col items-center justify-center gap-2">
+            <div className="bg-danger/20 rounded-lg flex items-center justify-center size-12">{icon || null}</div>
+            <h2 className="text-xl font-bold text-slate-900">{title}</h2>
           </div>
 
           <MdClose
@@ -43,7 +43,7 @@ export default function ConfirmModal({
           />
         </div>
 
-        <div className="px-5 py-4 text-center">
+        <div className="px-5 text-center">
           <p className="text-sm text-slate-600">{description}</p>
         </div>
 

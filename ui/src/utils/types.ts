@@ -14,6 +14,10 @@ export type InvoiceStatus =
   | "PAID"
   | "OVERDUE";
 
+export type TaxMode = "CGST_SGST" | "IGST";
+
+export type GstType = "NO_GST" | "GST_5" | "GST_12" | "GST_18";
+
 export type OnboardingContextType = {
   onBoardingStep: number;
   setOnBoardingStep: React.Dispatch<React.SetStateAction<number>>;
@@ -110,6 +114,19 @@ export type Party = {
   invoices: Invoice[];
 };
 
+export type InvoicePartyInfo = {
+  id: string;
+  businessName: string;
+  gstin: string;
+  contactPerson: string;
+  phone: string;
+  email: string;
+  addressLine1: string;
+  city: string;
+  state: string;
+  pincode: string;
+};
+
 export type Invoice = {
   id: number;
   invoiceNumber: string;
@@ -118,8 +135,11 @@ export type Invoice = {
   invoiceDate: string;
   items: InvoiceItem[];
   subtotal: number;
+  gstType: GstType;
+  taxMode?: TaxMode;
   sgst: number;
   cgst: number;
+  igst: number;
   total: number;
   status: InvoiceStatus;
   dueDate: string;
@@ -129,10 +149,14 @@ export type Invoice = {
 
 export type InvoiceItem = {
   id: string;
-  itemId: string;
   invoiceId: string;
+  itemName: string;
+  itemId: string;
+  hsnCode: number;
   quantity: number;
-  price: number;
+  unit: string;
+  basePrice: number;
+  gstPercentage: number;
 };
 
 export interface Insight {
@@ -145,3 +169,56 @@ export interface DashboardData {
   kpis: KpiCardProps[];
   insights: Insight[];
 }
+
+export type CreateInvoiceLineItemPayload = {
+  itemId: string;
+  description: string;
+  hsnCode: string;
+  quantity: number;
+  unit: string;
+  basePrice: number;
+  discount: number;
+  taxableAmount: number;
+};
+
+export type CreateManufacturerInvoicePayload = {
+  sellerId: string;
+  buyerId: string;
+  invoiceDate: string;
+  financialYear: string;
+  notes?: string;
+  status: "DRAFT" | "SENT";
+  gstType: GstType;
+  taxMode?: TaxMode;
+  cgstRate: number;
+  sgstRate: number;
+  igstRate: number;
+  totalTaxAmount: number;
+  subtotal: number;
+  roundOff: number;
+  total: number;
+  items: InvoiceItem[];
+};
+
+export type ValidationErrors = {
+  wholesalerId?: string;
+  invoiceDate?: string;
+  financialYear?: string;
+  notes?: string;
+  items?: string;
+  itemErrors: Record<
+    string,
+    Partial<Record<keyof Omit<InvoiceItem, "id">, string>>
+  >;
+};
+
+export type InvoiceSubmitAction = "DRAFT" | "SENT";
+
+export type InvoiceCreateState = {
+  wholesalerId: string;
+  invoiceDate: string;
+  financialYear: string;
+  notes: string;
+  gstType: GstType;
+  taxMode: TaxMode;
+};

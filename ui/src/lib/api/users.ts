@@ -3,6 +3,10 @@ import { API_URL } from "./auth";
 
 export class UsersService {
   static async getUserByFirebaseId(firebaseUid: string | undefined) {
+    if (!firebaseUid) {
+      return null;
+    }
+
     try {
       const response = await axios.get(`${API_URL}/users/${firebaseUid}`);
 

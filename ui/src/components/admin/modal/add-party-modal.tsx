@@ -5,6 +5,7 @@ import { MdCall, MdClose, MdEmail, MdPersonAdd, MdStore } from "react-icons/md";
 import { toast } from "react-hot-toast";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
+import { EMAIL_REGEX, PHONE_REGEX } from "../../../utils/constants";
 
 export type PartyForm = {
   businessName: string;
@@ -57,12 +58,12 @@ export const AddPartyModal = ({
       return false;
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+    if (!EMAIL_REGEX.test(form.email)) {
       toast.error("Enter a valid email");
       return false;
     }
 
-    if (!/^\d{10}$/.test(form.phone)) {
+    if (!PHONE_REGEX.test(form.phone)) {
       toast.error("Enter a valid 10-digit phone number");
       return false;
     }

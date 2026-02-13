@@ -23,6 +23,10 @@ export enum GstType {
   GST_18 = "GST_18",
 }
 
+export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const PHONE_REGEX = /^\d{10}$/;
+export const GSTIN_REGEX = /^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}Z[A-Z\d]{1}$/;
+
 export const itemCategoryOptions = [
   { label: "Select Item Category", value: "" },
   { label: "Fabric", value: "Fabric" },
@@ -120,9 +124,16 @@ export const MAX_INVOICE_NOTES_LENGTH = 500;
 export const DEFAULT_INVOICE_ITEM_UNIT = "Meters";
 export const DEFAULT_INVOICE_ITEM_DISCOUNT = 0;
 
+export const MAX_NEW_FINANCIAL_YEARS = 3;
+
 export const gstTypeOptions = [
   { label: "No GST", value: GstType.NO_GST },
   { label: "GST 5%", value: GstType.GST_5 },
   { label: "GST 12%", value: GstType.GST_12 },
   { label: "GST 18%", value: GstType.GST_18 },
+];
+
+export const taxModeOptions = [
+  { label: "CGST + SGST", value: TaxMode.CGST_SGST },
+  { label: "IGST", value: TaxMode.IGST },
 ];

@@ -78,6 +78,7 @@ export const Sidebar = ({
   const activeTab =
     navbarOptions[role].find((item) => pathname.startsWith(item.to))?.to ||
     "/manufacturer/dashboard";
+  const isSettingsActive = pathname.startsWith("/manufacturer/profile");
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -115,7 +116,7 @@ export const Sidebar = ({
             href={navOption.to}
             onClick={onClose}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium hover:bg-primary-soft transition
-              ${activeTab === navOption.to ? "bg-primary-soft" : ""}
+              ${activeTab === navOption.to && !isSettingsActive ? "bg-primary-soft" : ""}
             `}
           >
             {navOption.icon}
@@ -126,9 +127,12 @@ export const Sidebar = ({
 
       <div className="p-4 border-t border-slate-200">
         <Link
-          href="/manufacturer/dashboard"
+          href="/manufacturer/profile"
           onClick={onClose}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium hover:bg-primary-soft"
+          className={clsx(
+            "flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium hover:bg-primary-soft",
+            isSettingsActive && "bg-primary-soft",
+          )}
         >
           <MdSettings className="w-6 h-6 text-primary" />
           Settings

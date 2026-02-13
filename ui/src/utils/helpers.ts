@@ -1,5 +1,5 @@
 import { INDIAN_NUMBER_TENS, INDIAN_NUMBER_UNITS } from "./constants";
-import { GstType, InvoiceItem, InvoiceStatus, TaxMode } from "./types";
+import { FinancialYear, GstType, InvoiceItem, InvoiceStatus, TaxMode } from "./types";
 import { GstType as GstTypeEnum, TaxMode as TaxModeEnum } from "./constants";
 
 export const formatCurrency = (amount: number) =>
@@ -199,3 +199,14 @@ export const getErrorMessage = (error: unknown) => {
 
   return "Internal server error";
 };
+
+export const buildFinancialYear = (
+  startYear: number,
+  endYear: number,
+): FinancialYear => ({
+  id: `FY${startYear}-${endYear}`,
+  label: `FY ${startYear} - ${endYear}`,
+  range: `April 1, ${startYear} - March 31, ${endYear}`,
+  startYear,
+  endYear,
+});

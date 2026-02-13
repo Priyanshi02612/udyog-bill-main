@@ -1,8 +1,9 @@
 "use client";
 
-import { createContext, useEffect, useState } from "react";
+import { createContext, useState } from "react";
 import toast from "react-hot-toast";
 import { OnboardingContextType, OnboardingData } from "../utils/types";
+import { EMAIL_REGEX, GSTIN_REGEX, PHONE_REGEX } from "../utils/constants";
 
 const labels: Record<keyof OnboardingData, string> = {
   name: "Full name",
@@ -66,7 +67,7 @@ export function OnboardingProvider({
       }
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(onBoardingData.email)) {
+    if (!EMAIL_REGEX.test(onBoardingData.email)) {
       toast.error("Enter a valid email");
       return false;
     }
@@ -76,16 +77,12 @@ export function OnboardingProvider({
       return false;
     }
 
-    if (!/^\d{10}$/.test(onBoardingData.phone || "")) {
+    if (!PHONE_REGEX.test(onBoardingData.phone || "")) {
       toast.error("Enter a valid 10-digit phone number");
       return false;
     }
 
-    if (
-      !/^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}Z[A-Z\d]{1}$/.test(
-        (onBoardingData.gstin || "").toUpperCase(),
-      )
-    ) {
+    if (!GSTIN_REGEX.test((onBoardingData.gstin || "").toUpperCase())) {
       toast.error("Invalid GSTIN format");
       return false;
     }

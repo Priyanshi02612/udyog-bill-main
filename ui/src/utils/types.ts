@@ -222,3 +222,24 @@ export type InvoiceCreateState = {
   gstType: GstType;
   taxMode: TaxMode;
 };
+
+export type FinancialYear = {
+  id: string;
+  label: string;
+  range: string;
+  startYear: number;
+  endYear: number;
+};
+
+export type ManufacturerProfileForm = {
+  businessName: string;
+  contactPerson: string;
+  phone: string;
+  gstin: string;
+  registeredAddress: string;
+  state: string;
+  defaultGstType: GstType;
+  defaultTaxMode: TaxMode;
+  financialYears: FinancialYear[];
+  activeFinancialYearId: string;
+};

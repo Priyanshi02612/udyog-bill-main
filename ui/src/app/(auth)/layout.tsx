@@ -41,14 +41,12 @@ export default function AuthLayout({
       role !== UserRole.MANUFACTURER
     ) {
       router.replace(`/${role}/dashboard`);
+      return;
     }
 
     if (pathname.startsWith("/wholesaler") && role !== UserRole.WHOLESALER) {
       router.replace(`/${role}/dashboard`);
-    }
-
-    if (pathname.startsWith("/retailer") && role !== UserRole.RETAILER) {
-      router.replace(`/${role}/dashboard`);
+      return;
     }
   }, [authLoading, user, pathname, router]);
 

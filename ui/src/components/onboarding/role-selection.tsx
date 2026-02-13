@@ -1,12 +1,7 @@
 "use client";
 
 import { useContext, useEffect } from "react";
-import {
-  MdChevronRight,
-  MdFactory,
-  MdInventory,
-  MdStorefront,
-} from "react-icons/md";
+import { MdChevronRight, MdFactory, MdInventory } from "react-icons/md";
 import OnboardingPageWrapper from "./page-wrapper";
 import {
   AuthContextType,
@@ -35,13 +30,6 @@ const roleOptions: {
       "Connect manufacturers with retailers, manage regional distribution hubs and large B2B orders",
     role: "wholesaler",
     icon: <MdInventory className="w-6 h-6 text-primary" />,
-  },
-  {
-    title: "Retailer",
-    description:
-      "Source fabrics, manage storefront inventory, and handle end-customer sales and returns.",
-    role: "retailer",
-    icon: <MdStorefront className="w-6 h-6 text-primary" />,
   },
 ];
 

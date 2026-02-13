@@ -3,7 +3,6 @@ import { AddItemFormState, InvoiceStatus } from "./types";
 export enum UserRole {
   MANUFACTURER = "manufacturer",
   WHOLESALER = "wholesaler",
-  RETAILER = "retailer",
 }
 
 export enum ItemCategory {

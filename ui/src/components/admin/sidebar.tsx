@@ -54,13 +54,6 @@ const navbarOptions = {
       icon: <MdReceiptLong className="w-6 h-6 text-primary" />,
     },
   ],
-  [UserRole.RETAILER]: [
-    {
-      title: "Dashboard",
-      to: "/retailer",
-      icon: <MdDashboard className="w-6 h-6 text-primary" />,
-    },
-  ],
 };
 
 export const Sidebar = ({

@@ -2,7 +2,7 @@
 
 import { KpiCardProps } from "../components/admin/kpi-card";
 
-export type Role = "manufacturer" | "wholesaler" | "retailer";
+export type Role = "manufacturer" | "wholesaler";
 
 export type ItemCategory = "FABRIC" | "MATERIAL" | "THREAD";
 

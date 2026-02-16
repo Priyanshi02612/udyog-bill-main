@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { MdAdd, MdTexture } from "react-icons/md";
 import { GiRolledCloth } from "react-icons/gi";
 import { RiShapesFill } from "react-icons/ri";
@@ -10,7 +10,10 @@ import { Button } from "../../../../components/ui/button";
 import Pagination from "../../../../components/pagination";
 import AddEditTextileItemModal from "../../../../components/admin/modal/add-item-modal";
 import { initialItems } from "../../../../utils/data";
-import { Item, ItemCategory } from "../../../../utils/types";
+import { AuthContextType, Item, ItemCategory } from "../../../../utils/types";
+import { ItemsService } from "../../../../lib/api/items";
+import toast from "react-hot-toast";
+import { AuthContext } from "../../../../context/auth.context";
 
 const filters = [
   {
@@ -31,7 +34,9 @@ const filters = [
 ];
 
 export default function ManufacturerInventoryPage() {
+  const { user, authLoading } = useContext(AuthContext) as AuthContextType;
   const [items, setItems] = useState<Item[]>(initialItems);
+  const [isLoading, setIsLoading] = useState(false);
   const [activeItemCategory, setActiveItemCategory] = useState<
     ItemCategory | "All"
   >("All");
@@ -43,6 +48,27 @@ export default function ManufacturerInventoryPage() {
   const handleAddItem = () => {
     setOpen(true);
   };
+
+  useEffect(() => {
+    if (!user) {
+      setItems([]);
+      return;
+    }
+
+    const fetchItems = async () => {
+      try {
+        setIsLoading(true);
+        const response = await ItemsService.getUsersInventory(user._id);
+        setItems((response.data as Item[]) || []);
+      } catch {
+        toast.error("Failed to load items");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchItems();
+  }, [user]);
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
@@ -62,6 +88,14 @@ export default function ManufacturerInventoryPage() {
     const end = start + pageSize;
     return filteredItems.slice(start, end);
   }, [filteredItems, safePage, pageSize]);
+
+  if (authLoading || isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-64px)]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 pb-0 min-h-[calc(100vh-124px)] relative">

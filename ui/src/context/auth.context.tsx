@@ -42,6 +42,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, [onboarding]);
 
+  console.log(user)
+
   return (
     <AuthContext.Provider value={{ user, authLoading, setUser }}>
       {children}

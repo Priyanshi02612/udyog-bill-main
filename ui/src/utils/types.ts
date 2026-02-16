@@ -35,6 +35,20 @@ export type AuthContextType = {
   authLoading: boolean;
 };
 
+export type UserContextType = {
+  userProfile: UserProfile;
+  setUserProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
+  addedFinancialYearCount: number;
+  savingProfile: boolean;
+  hasUnsavedProfileChanges: boolean;
+  canAddFinancialYear: boolean;
+  handleAddFinancialYear: () => void;
+  canActivateFinancialYear: (startYear: number) => boolean;
+  handleActivateFinancialYear: (financialYearId: string) => void;
+  handleDiscardProfileChanges: () => void;
+  handleSaveProfile: () => Promise<void>;
+};
+
 export type OnboardingData = {
   firebaseUid?: string;
   contactPerson?: string;
@@ -248,7 +262,7 @@ export type FinancialYear = {
   endYear: number;
 };
 
-export type ManufacturerProfileForm = {
+export type UserProfile = {
   businessName: string;
   contactPerson: string;
   phone: string;

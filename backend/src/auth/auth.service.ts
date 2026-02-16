@@ -5,15 +5,19 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { SignupDto } from './dto/sign-up.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../db/schema/user.schema';
+import { UserBusinessDetails } from '../db/schema/user-business-details.schema';
 import { Model } from 'mongoose';
 import { MailerService } from '@nestjs-modules/mailer';
 import { generateOtp, hashOtp } from '../common/helper';
+import { GstType, TaxMode } from '../common/enums';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
+    @InjectModel(UserBusinessDetails.name)
+    private readonly userBusinessDetailsModel: Model<UserBusinessDetails>,
     private readonly mailerService: MailerService,
   ) {}
 
@@ -73,27 +77,80 @@ export class AuthService {
     };
   }
 
+  private resolveFinancialYear(dto: SignupDto) {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+
+    const startYear = month >= 4 ? year : year - 1;
+    const endYear = startYear + 1;
+
+    const defaultFinancialYear = {
+      id: `FY${startYear}-${endYear}`,
+      label: `FY ${startYear} - ${endYear}`,
+      range: `April 1, ${startYear} - March 31, ${endYear}`,
+      startYear,
+      endYear,
+    };
+
+    const resolvedFinancialYears = dto.financialYears?.length
+      ? dto.financialYears
+      : [defaultFinancialYear];
+
+    const resolvedActiveFinancialYearId = resolvedFinancialYears.some(
+      (fy) => fy.id === dto.activeFinancialYearId,
+    )
+      ? dto.activeFinancialYearId!
+      : resolvedFinancialYears[0].id;
+
+    return {
+      financialYears: resolvedFinancialYears,
+      activeFinancialYearId: resolvedActiveFinancialYearId,
+    };
+  }
+
   async signup(dto: SignupDto) {
-    try {
-      const existingUser = await this.userModel.findOne({ email: dto.email });
-      if (existingUser) {
-        const updateUser = await this.userModel.findOneAndUpdate(
-          {
-            firebaseUid: dto.firebaseUid,
+    const normalizedGstin = dto.gstin?.trim().toUpperCase();
+
+    const { financialYears, activeFinancialYearId } =
+      this.resolveFinancialYear(dto);
+
+    const user = await this.userModel.findOneAndUpdate(
+      { $or: [{ email: dto.email }, { firebaseUid: dto.firebaseUid }] },
+      {
+        $set: {
+          email: dto.email,
+          firebaseUid: dto.firebaseUid,
+          role: dto.role,
+        },
+      },
+      { new: true, upsert: true, setDefaultsOnInsert: true },
+    );
+
+    const businessDetails =
+      await this.userBusinessDetailsModel.findOneAndUpdate(
+        { userId: user.id },
+        {
+          $set: {
+            userId: user.id,
+            contactPerson: dto.contactPerson,
+            businessName: dto.businessName,
+            gstin: normalizedGstin,
+            phone: dto.phone,
+            registeredAddress: dto.registeredAddress,
+            state: dto.state,
+            gstType: dto.gstType ?? GstType.GST_5,
+            gstTaxMode: dto.gstTaxMode ?? TaxMode.CGST_SGST,
+            financialYears,
+            activeFinancialYearId,
           },
-          { ...dto },
-          { new: true },
-        );
+        },
+        { new: true, upsert: true, setDefaultsOnInsert: true },
+      );
 
-        return updateUser;
-      }
-
-      const user = await this.userModel.create(dto);
-
-      return user;
-    } catch (error) {
-      console.log(error);
-      return;
-    }
+    return {
+      ...(user.toObject() as object),
+      ...((businessDetails?.toObject() as object) || {}),
+    };
   }
 }

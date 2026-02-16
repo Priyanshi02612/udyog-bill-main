@@ -8,6 +8,7 @@ import { MongooseConnectionLogger } from './db/mongoose-connection.logger';
 import { AuthModule } from './auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { UsersModule } from './users/users.module';
+import { ItemsModule } from './items/items.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { UsersModule } from './users/users.module';
       },
     }),
     UsersModule,
+    ItemsModule,
   ],
   controllers: [AppController],
   providers: [AppService, MongooseConnectionLogger],

@@ -22,6 +22,11 @@ import { buildFinancialYear } from "../utils/helpers";
 
 const normalizePhone = (value: string) => value.replace(/\D/g, "").slice(0, 10);
 
+const getCurrentFinancialStartYear = () => {
+  const today = new Date();
+  return today.getMonth() >= 3 ? today.getFullYear() : today.getFullYear() - 1;
+};
+
 const validateProfile = (profile: UserProfile): boolean => {
   if (!profile.businessName.trim()) {
     toast.error("Business name is required");
@@ -52,6 +57,10 @@ const buildPayload = (
 ): SignupPayload | null => {
   if (!authUser?.firebaseUid || !authUser?.email) return null;
 
+  const sortedFinancialYears = profile.financialYears
+    ? profile.financialYears.sort((a, b) => b.startYear - a.startYear)
+    : [];
+
   return {
     firebaseUid: authUser.firebaseUid,
     email: authUser.email,
@@ -60,6 +69,7 @@ const buildPayload = (
         ? UserRole.WHOLESALER
         : UserRole.MANUFACTURER,
     ...profile,
+    financialYears: sortedFinancialYears,
     businessName: profile.businessName.trim(),
     contactPerson: profile.contactPerson.trim(),
     phone: normalizePhone(profile.phone),
@@ -144,22 +154,22 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const handleAddFinancialYear = () => {
-    if (!canAddFinancialYear) {
-      toast.error(
-        `You can add only ${MAX_NEW_FINANCIAL_YEARS} new financial years.`,
-      );
+  const handleAddFinancialYear = (startYear: number) => {
+    const currentFinancialStartYear = getCurrentFinancialStartYear();
+    if (startYear < currentFinancialStartYear) {
+      toast.error("Previous financial years cannot be added.");
       return;
     }
 
-    const latestFinancialYear = userProfile?.financialYears.reduce(
-      (acc, year) => (year.endYear > acc.endYear ? year : acc),
+    const alreadyExists = userProfile.financialYears.some(
+      (financialYear) => financialYear.startYear === startYear,
     );
+    if (alreadyExists) {
+      toast.error("This financial year already exists.");
+      return;
+    }
 
-    const nextFinancialYear = buildFinancialYear(
-      latestFinancialYear.startYear + 1,
-      latestFinancialYear.endYear + 1,
-    );
+    const nextFinancialYear = buildFinancialYear(startYear, startYear + 1);
 
     setUserProfile((prev) => ({
       ...prev,

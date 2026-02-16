@@ -1,9 +1,10 @@
 "use client";
 
-import { useContext } from "react";
+import { useContext, useMemo, useState } from "react";
 import { MdAdd, MdCalendarToday } from "react-icons/md";
 import { AuthContext } from "../../../../context/auth.context";
 import { UserContext } from "../../../../context/user.context";
+import { AddFinancialYearModal } from "../../../../components/admin/modal/add-financial-year-modal";
 
 import { Button } from "../../../../components/ui/button";
 import { Dropdown } from "../../../../components/ui/dropdown";
@@ -16,6 +17,7 @@ import {
   taxModeOptions,
 } from "../../../../utils/constants";
 import { AuthContextType, UserContextType } from "../../../../utils/types";
+import toast from "react-hot-toast";
 
 const states = [
   { label: "Select your state", value: "" },
@@ -28,11 +30,14 @@ const states = [
 
 export default function ManufacturerProfileSettingsPage() {
   const { user, authLoading } = useContext(AuthContext) as AuthContextType;
+  const [isAddYearModalOpen, setIsAddYearModalOpen] = useState(false);
+  const [selectedStartYear, setSelectedStartYear] = useState("");
   const {
     userProfile,
     addedFinancialYearCount,
     hasUnsavedProfileChanges,
     savingProfile,
+    canAddFinancialYear,
     setUserProfile,
     handleAddFinancialYear,
     canActivateFinancialYear,
@@ -41,7 +46,48 @@ export default function ManufacturerProfileSettingsPage() {
     handleSaveProfile,
   } = useContext(UserContext) as UserContextType;
 
-  if (!userProfile) return null;
+  const currentFinancialStartYear = useMemo(() => {
+    const today = new Date();
+    return today.getMonth() >= 3
+      ? today.getFullYear()
+      : today.getFullYear() - 1;
+  }, []);
+
+  const availableStartYears = useMemo(() => {
+    const existingYears = new Set(
+      userProfile.financialYears.map((fy) => fy.startYear),
+    );
+
+    const years = [];
+
+    for (let i = 0; i < 8; i++) {
+      const year = currentFinancialStartYear + i;
+      if (!existingYears.has(year)) {
+        years.push({ label: `${year}`, value: `${year}` });
+      }
+    }
+
+    return years;
+  }, [currentFinancialStartYear, userProfile.financialYears]);
+
+  const handleOpenAddYearModal = () => {
+    if (!canAddFinancialYear) {
+      toast.error(
+        `You can add only ${MAX_NEW_FINANCIAL_YEARS} new financial years.`,
+      );
+      return;
+    }
+
+    setSelectedStartYear(availableStartYears[0].value);
+    setIsAddYearModalOpen(true);
+  };
+
+  const handleConfirmAddYear = () => {
+    if (!selectedStartYear) return;
+    handleAddFinancialYear(Number(selectedStartYear));
+    setIsAddYearModalOpen(false);
+    setSelectedStartYear("");
+  };
 
   if (authLoading) {
     return (
@@ -215,7 +261,7 @@ export default function ManufacturerProfileSettingsPage() {
               size="sm"
               variant="outline-secondary"
               leadingIcon={<MdAdd className="h-4 w-4" />}
-              onClick={handleAddFinancialYear}
+              onClick={handleOpenAddYearModal}
             >
               Add New Year
             </Button>
@@ -288,9 +334,26 @@ export default function ManufacturerProfileSettingsPage() {
                           Activate Year
                         </Button>
                       ) : (
-                        <p className="text-xs text-slate-500 text-right">
-                          Available from Apr 1, {financialYear.startYear}
-                        </p>
+                        <div className="flex flex-col">
+                          <p className="text-xs text-slate-500 text-right">
+                            Available from Apr 1, {financialYear.startYear}
+                          </p>
+
+                          <Button
+                            size="sm"
+                            variant="outline-danger"
+                            onClick={() => {
+                              setUserProfile((prev) => ({
+                                ...prev,
+                                financialYears: prev.financialYears.filter(
+                                  (fy) => fy.id !== financialYear.id,
+                                ),
+                              }));
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        </div>
                       )}
                     </div>
                   )}
@@ -330,6 +393,15 @@ export default function ManufacturerProfileSettingsPage() {
           </div>
         </div>
       </div>
+
+      <AddFinancialYearModal
+        open={isAddYearModalOpen}
+        selectedStartYear={selectedStartYear}
+        yearOptions={availableStartYears}
+        onChangeStartYear={setSelectedStartYear}
+        onClose={() => setIsAddYearModalOpen(false)}
+        onCreate={handleConfirmAddYear}
+      />
     </div>
   );
 }

@@ -42,7 +42,7 @@ export type UserContextType = {
   savingProfile: boolean;
   hasUnsavedProfileChanges: boolean;
   canAddFinancialYear: boolean;
-  handleAddFinancialYear: () => void;
+  handleAddFinancialYear: (startYear: number) => void;
   canActivateFinancialYear: (startYear: number) => boolean;
   handleActivateFinancialYear: (financialYearId: string) => void;
   handleDiscardProfileChanges: () => void;

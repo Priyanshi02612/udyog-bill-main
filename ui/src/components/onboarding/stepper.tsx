@@ -1,9 +1,6 @@
 "use client";
 
-import { AuthContext } from "../../context/auth.context";
-import { AuthContextType, OnboardingContextType } from "../../utils/types";
 import { useContext } from "react";
-import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 import {
   createUserWithEmailAndPassword,
@@ -12,26 +9,84 @@ import {
   User,
 } from "firebase/auth";
 import toast from "react-hot-toast";
+
+import { AuthContext } from "../../context/auth.context";
+import { OnboardingContext } from "../../context/onboarding.context";
 import { auth } from "../../lib/firebase/config";
 import { AuthService } from "../../lib/api/auth";
-import { OnboardingContext } from "@/src/context/onboarding.context";
+import { Button } from "../ui/button";
+import {
+  AuthContextType,
+  OnboardingContextType,
+  OnboardingData,
+  SignupPayload,
+} from "../../utils/types";
+import { UserRole } from "../../utils/constants";
 
 const STEPS = [
-  {
-    title: "Business Type Selection",
-    cta: "Continue to Details",
-  },
-  {
-    title: "Role Selection",
-    cta: "Continue to Verification",
-  },
-  {
-    title: "Verify OTP",
-    cta: "Finish Setup",
-  },
+  { title: "Role Selection", cta: "Continue to Details" },
+  { title: "Basic Information", cta: "Continue to Verification" },
+  { title: "Verify OTP", cta: "Finish Setup" },
 ];
 
+const isOnboardingValid = (onBoardingData: OnboardingData) => {
+  const {
+    contactPerson,
+    email,
+    password,
+    phone,
+    businessName,
+    gstin,
+    registeredAddress,
+    state,
+    role,
+  } = onBoardingData;
+
+  return (
+    contactPerson &&
+    email &&
+    password &&
+    phone &&
+    businessName &&
+    gstin &&
+    registeredAddress &&
+    state &&
+    role
+  );
+};
+
+const buildSignupPayload = (
+  firebaseUid: string,
+  onBoardingData: OnboardingData,
+): SignupPayload => {
+  const {
+    email,
+    contactPerson,
+    phone,
+    businessName,
+    gstin,
+    registeredAddress,
+    state,
+    role,
+  } = onBoardingData;
+
+  return {
+    firebaseUid,
+    email,
+    contactPerson: contactPerson || "",
+    phone: phone || "",
+    businessName: businessName || "",
+    gstin: gstin || "",
+    registeredAddress: registeredAddress || "",
+    state: state || "",
+    role: role || UserRole.MANUFACTURER,
+  };
+};
+
 export default function Stepper() {
+  const router = useRouter();
+
+  const { user } = useContext(AuthContext) as AuthContextType;
   const {
     onBoardingStep,
     setOnBoardingStep,
@@ -39,95 +94,92 @@ export default function Stepper() {
     validateForm,
     otp,
   } = useContext(OnboardingContext) as OnboardingContextType;
-  const { user } = useContext(AuthContext) as AuthContextType;
-  const router = useRouter();
 
   const totalSteps = STEPS.length;
   const currentStepIndex = onBoardingStep - 1;
   const progressPercent = ((onBoardingStep - 1) / (totalSteps - 1)) * 100;
 
-  const registerUser = async () => {
+  const registerUser = async (): Promise<boolean> => {
     try {
-      if (onBoardingData.firebaseUid) {
+      if (!isOnboardingValid(onBoardingData)) {
+        toast.error("Please complete all required onboarding fields.");
+        return false;
+      }
+
+      let firebaseUid = onBoardingData.firebaseUid;
+
+      if (firebaseUid && user) {
         await updatePassword(user as User, onBoardingData.password);
-        const response = await AuthService.createUSer({
-          ...onBoardingData,
-          onboardingStep: onBoardingStep,
-        });
-        if (response.data) {
-          localStorage.setItem("UB_USER", JSON.stringify(response.data));
-          await AuthService.sendOTP(response.data.email);
-        }
-        return;
+      } else {
+        const userCred = await createUserWithEmailAndPassword(
+          auth,
+          onBoardingData.email,
+          onBoardingData.password,
+        );
+        firebaseUid = userCred.user.uid;
       }
 
-      const userData = await createUserWithEmailAndPassword(
-        auth,
-        onBoardingData.email,
-        onBoardingData.password,
-      );
+      const payload = buildSignupPayload(firebaseUid!, onBoardingData);
+      const response = await AuthService.createUser(payload);
 
-      if (userData) {
-        const response = await AuthService.createUSer({
-          ...onBoardingData,
-          firebaseUid: userData.user.uid,
-          onboardingStep: onBoardingStep,
-        });
+      if (!response.data) return false;
 
-        if (response.data) {
-          localStorage.setItem("UB_USER", JSON.stringify(response.data));
-          await AuthService.sendOTP(response.data.email);
-        }
-      }
+      localStorage.setItem("UB_USER", JSON.stringify(response.data));
+      await AuthService.sendOTP(response.data.email);
+
+      return true;
     } catch (error) {
-      console.error(error);
+      console.error("Registration failed:", error);
+      return false;
     }
   };
 
-  const handleUserVerification = async () => {
+  const handleVerification = async () => {
     try {
-      const userData = localStorage.getItem("UB_USER");
-      const data = JSON.parse(userData || "");
+      const stored = localStorage.getItem("UB_USER");
+      if (!stored) return;
 
+      const data = JSON.parse(stored);
       const response = await AuthService.verifyOtp(data.email, otp.join(""));
-      if (response.data.user) {
+
+      if (response.data?.user) {
         toast.success(response.data.message);
-        router.push("/login");
         await signOut(auth);
         localStorage.removeItem("UB_USER");
         setOnBoardingStep(1);
+        router.push("/login");
       }
     } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleBack = () => {
-    if (onBoardingStep > 1) {
-      setOnBoardingStep(onBoardingStep - 1);
+      console.error("OTP verification failed:", error);
     }
   };
 
   const handleNext = async () => {
-    if (onBoardingStep === 1) {
-      if (!onBoardingData.role) {
-        toast.error("Select a role to continue.");
+    switch (onBoardingStep) {
+      case 1:
+        if (!onBoardingData.role) {
+          toast.error("Select a role to continue.");
+          return;
+        }
+        break;
+
+      case 2:
+        if (!validateForm()) return;
+        const success = await registerUser();
+        if (!success) return;
+        break;
+
+      case 3:
+        await handleVerification();
         return;
-      }
-      setOnBoardingStep(onBoardingStep + 1);
-      return;
     }
 
-    if (onBoardingStep === 2) {
-      if (!validateForm()) return;
+    setOnBoardingStep((prev) => prev + 1);
+  };
 
-      await registerUser();
-      setOnBoardingStep(onBoardingStep + 1);
-      return;
-    }
-
-    if (onBoardingStep === 3) {
-      await handleUserVerification();
+  const handleBack = () => {
+    if (onBoardingStep > 1) {
+      setOnBoardingStep((prev) => prev - 1);
     }
   };
 

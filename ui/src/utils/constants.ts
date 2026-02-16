@@ -123,7 +123,7 @@ export const MAX_INVOICE_NOTES_LENGTH = 500;
 export const DEFAULT_INVOICE_ITEM_UNIT = "Meters";
 export const DEFAULT_INVOICE_ITEM_DISCOUNT = 0;
 
-export const MAX_NEW_FINANCIAL_YEARS = 3;
+export const MAX_NEW_FINANCIAL_YEARS = 2;
 
 export const gstTypeOptions = [
   { label: "No GST", value: GstType.NO_GST },

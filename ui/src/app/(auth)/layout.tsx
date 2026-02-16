@@ -6,7 +6,7 @@ import { AuthContextType } from "../../utils/types";
 import { Sidebar } from "../../components/admin/sidebar";
 import { Header } from "../../components/admin/header";
 import { UserRole } from "../../utils/constants";
-import { AuthContext } from "@/src/context/auth.context";
+import { AuthContext } from "../../context/auth.context";
 
 export default function AuthLayout({
   children,
@@ -16,7 +16,7 @@ export default function AuthLayout({
   const router = useRouter();
   const pathname = usePathname();
   const { user, authLoading } = useContext(AuthContext) as AuthContextType;
-  const userRole = localStorage.getItem("userRole");
+  const userRole = user?.role as UserRole | undefined;
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -34,30 +34,33 @@ export default function AuthLayout({
       return;
     }
 
-    const role = user.role;
-
     if (
       pathname.startsWith("/manufacturer") &&
-      role !== UserRole.MANUFACTURER
+      userRole !== UserRole.MANUFACTURER
     ) {
-      router.replace(`/${role}/dashboard`);
+      router.replace(`/${userRole}/dashboard`);
       return;
     }
 
-    if (pathname.startsWith("/wholesaler") && role !== UserRole.WHOLESALER) {
-      router.replace(`/${role}/dashboard`);
+    if (
+      pathname.startsWith("/wholesaler") &&
+      userRole !== UserRole.WHOLESALER
+    ) {
+      router.replace(`/${userRole}/dashboard`);
       return;
     }
-  }, [authLoading, user, pathname, router]);
+  }, [authLoading, userRole, pathname, router, user]);
 
   return (
     <div className="bg-primary-soft text-slate-900 antialiased">
       <div className="flex h-screen overflow-hidden">
-        <Sidebar
-          role={userRole as UserRole}
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
+        {userRole && (
+          <Sidebar
+            role={userRole}
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+          />
+        )}
 
         <main
           ref={scrollRef}

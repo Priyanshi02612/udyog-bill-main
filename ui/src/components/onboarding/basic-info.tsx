@@ -6,7 +6,7 @@ import { Input } from "../ui/input";
 import OnboardingPageWrapper from "./page-wrapper";
 import { AuthContext } from "../../context/auth.context";
 import { AuthContextType, OnboardingContextType } from "../../utils/types";
-import { OnboardingContext } from "@/src/context/onboarding.context";
+import { OnboardingContext } from "../../context/onboarding.context";
 
 const states = [
   { label: "Select your state", value: "" },
@@ -25,9 +25,20 @@ const BasicInfo = () => {
 
   useEffect(() => {
     if (user) {
-      handleOnBoardingData(user);
+      handleOnBoardingData({
+        firebaseUid: user.firebaseUid,
+        contactPerson: user.contactPerson || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        businessName: user.businessName || "",
+        gstin: user.gstin || "",
+        registeredAddress: user.registeredAddress || "",
+        state: user.state || "",
+        role: user.role,
+        onboardingStep: user.onboardingStep,
+      });
     }
-  },[]);
+  }, [user, handleOnBoardingData]);
 
   const handleChangeForm = (
     key: keyof typeof onBoardingData,
@@ -45,10 +56,12 @@ const BasicInfo = () => {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
-              label="Full Name"
-              placeholder="Your full name"
-              value={onBoardingData.name}
-              onChange={(e) => handleChangeForm("name", e.target.value)}
+              label="Contact Person"
+              placeholder="Primary contact person"
+              value={onBoardingData.contactPerson}
+              onChange={(e) =>
+                handleChangeForm("contactPerson", e.target.value)
+              }
             />
             <Input
               label="Email"
@@ -96,10 +109,12 @@ const BasicInfo = () => {
             />
 
             <Input
-              label="Business Address"
+              label="Registered Address"
               placeholder="Full registered office address"
-              value={onBoardingData.address}
-              onChange={(e) => handleChangeForm("address", e.target.value)}
+              value={onBoardingData.registeredAddress}
+              onChange={(e) =>
+                handleChangeForm("registeredAddress", e.target.value)
+              }
             />
 
             <Dropdown

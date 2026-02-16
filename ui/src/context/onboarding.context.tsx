@@ -6,24 +6,24 @@ import { OnboardingContextType, OnboardingData } from "../utils/types";
 import { EMAIL_REGEX, GSTIN_REGEX, PHONE_REGEX } from "../utils/constants";
 
 const labels: Record<keyof OnboardingData, string> = {
-  name: "Full name",
+  contactPerson: "Contact person",
   email: "Email",
   password: "Password",
   phone: "Phone number",
   businessName: "Business name",
   gstin: "GSTIN",
-  address: "Business address",
+  registeredAddress: "Registered address",
   state: "State",
 };
 
 const initialOnBoardingData: OnboardingData = {
-  name: "",
+  contactPerson: "",
   email: "",
   password: "",
   phone: "",
   businessName: "",
   gstin: "",
-  address: "",
+  registeredAddress: "",
   state: "",
 };
 

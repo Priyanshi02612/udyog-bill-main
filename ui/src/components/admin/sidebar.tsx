@@ -93,7 +93,7 @@ export const Sidebar = ({
           href="/manufacturer/dashboard"
           className="flex items-center gap-3"
         >
-          <Image src={logo} alt="logo" width={40} height={40} />
+          <Image src={logo} alt="logo" width={40} height={40} className="w-10 h-10" />
           <h1 className="text-xl font-bold text-slate-900">UdyogBill</h1>
         </Link>
 

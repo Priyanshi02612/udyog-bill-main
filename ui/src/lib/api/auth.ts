@@ -1,10 +1,10 @@
 import axios from "axios";
-import { OnboardingData } from "../../utils/types";
+import { SignupPayload } from "../../utils/types";
 
 export const API_URL = process.env.BASE_URL || "http://localhost:8080";
 
 export class AuthService {
-  static async createUSer(createUsersData: OnboardingData) {
+  static async createUser(createUsersData: SignupPayload) {
     try {
       const response = await axios.post(
         `${API_URL}/auth/signup`,

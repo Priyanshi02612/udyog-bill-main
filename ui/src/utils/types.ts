@@ -31,23 +31,40 @@ export type OnboardingContextType = {
 
 export type AuthContextType = {
   user: any | null;
+  setUser: React.Dispatch<React.SetStateAction<any | null>>;
   authLoading: boolean;
 };
 
 export type OnboardingData = {
   firebaseUid?: string;
-  name?: string;
+  contactPerson?: string;
   email: string;
   password: string;
   phone?: string;
 
   businessName?: string;
   gstin?: string;
-  address?: string;
+  registeredAddress?: string;
   state?: string;
 
   role?: Role;
   onboardingStep?: number;
+};
+
+export type SignupPayload = {
+  firebaseUid: string;
+  email: string;
+  contactPerson: string;
+  phone: string;
+  businessName: string;
+  gstin: string;
+  registeredAddress: string;
+  state: string;
+  role: Role;
+  gstType?: GstType;
+  gstTaxMode?: TaxMode;
+  financialYears?: FinancialYear[];
+  activeFinancialYearId?: string;
 };
 
 export type OnboardingPageWrapperProps = {
@@ -238,8 +255,8 @@ export type ManufacturerProfileForm = {
   gstin: string;
   registeredAddress: string;
   state: string;
-  defaultGstType: GstType;
-  defaultTaxMode: TaxMode;
+  gstType: GstType;
+  gstTaxMode: TaxMode;
   financialYears: FinancialYear[];
   activeFinancialYearId: string;
 };

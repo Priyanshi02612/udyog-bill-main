@@ -19,11 +19,11 @@ export const Header = ({ onMenuOpen }: { onMenuOpen: () => void }) => {
 
       <div className="flex gap-2 items-center">
         <div className="size-8 rounded-full bg-slate-200 overflow-hidden">
-          <Avatar name={user.name} color="#8b5a2b" size="32" round />
+          <Avatar name={user.businessName} color="#8b5a2b" size="32" round />
         </div>
 
         <div className="hidden md:flex flex-col">
-          <span className="text-sm font-bold">{user.name}</span>
+          <span className="text-sm font-bold">{user.businessName}</span>
           <span className="text-xs text-slate-500 uppercase">{user.role}</span>
         </div>
       </div>

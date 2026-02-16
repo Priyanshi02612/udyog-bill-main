@@ -10,7 +10,7 @@ import { OnboardingContextType } from "../../utils/types";
 import { OnboardingContext } from "../../context/onboarding.context";
 
 const VerifyOTP = () => {
-  const { otp, setOtp } = useContext(
+  const { otp, setOtp, onBoardingData } = useContext(
     OnboardingContext,
   ) as OnboardingContextType;
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
@@ -72,7 +72,7 @@ const VerifyOTP = () => {
   return (
     <OnboardingPageWrapper
       title="Verify Your Identity"
-      subtitle="We've sent a 6-digit verification code to your email."
+      subtitle={`We've sent a 6-digit verification code to ${onBoardingData.email}.`}
     >
       <div className="w-full mb-8">
         <div className="flex justify-between gap-2 sm:gap-4 mb-8">

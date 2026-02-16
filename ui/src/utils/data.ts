@@ -1,14 +1,5 @@
 import { GstType, ItemCategory, TaxMode } from "./constants";
-import { buildFinancialYear } from "./helpers";
-import {
-  FinancialYear,
-  Invoice,
-  InvoiceItem,
-  InvoicePartyInfo,
-  Item,
-  ManufacturerProfileForm,
-  Party,
-} from "./types";
+import { Invoice, InvoiceItem, InvoicePartyInfo, Item, Party } from "./types";
 
 export const initialItems: Item[] = [
   {
@@ -576,24 +567,3 @@ export const MOCK_WHOLESALERS: Party[] = [
     invoices: [],
   },
 ];
-
-export const DEFAULT_FINANCIAL_YEARS: FinancialYear[] = [
-  buildFinancialYear(2025, 2026),
-  buildFinancialYear(2024, 2025),
-  buildFinancialYear(2023, 2024),
-  buildFinancialYear(2022, 2023),
-];
-
-export const DEFAULT_PROFILE_FORM: ManufacturerProfileForm = {
-  businessName: "Khurana Textiles Private Limited",
-  contactPerson: "Amit Khurana",
-  email: "amit@khuranatextiles.com",
-  phone: "9876543210",
-  gstin: "07AABCK1234F1Z5",
-  registeredAddress: "Industrial Area Phase II, Okhla, New Delhi",
-  state: "Delhi",
-  defaultGstType: GstType.GST_5,
-  defaultTaxMode: TaxMode.CGST_SGST,
-  financialYears: DEFAULT_FINANCIAL_YEARS,
-  activeFinancialYearId: DEFAULT_FINANCIAL_YEARS[0].id,
-};

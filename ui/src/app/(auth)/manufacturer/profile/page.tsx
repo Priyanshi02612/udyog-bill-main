@@ -1,14 +1,17 @@
 "use client";
 
 import { useContext, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { MdAdd, MdCalendarToday } from "react-icons/md";
+import { AuthContext } from "../../../../context/auth.context";
+import { buildFinancialYear } from "../../../../utils/helpers";
+import { AuthService } from "../../../../lib/api/auth";
 
 import { Button } from "../../../../components/ui/button";
 import { Dropdown } from "../../../../components/ui/dropdown";
 import { Input } from "../../../../components/ui/input";
 import {
-  EMAIL_REGEX,
   GSTIN_REGEX,
   GstType,
   gstTypeOptions,
@@ -16,15 +19,22 @@ import {
   PHONE_REGEX,
   TaxMode,
   taxModeOptions,
+  UserRole,
 } from "../../../../utils/constants";
-import { useRouter } from "next/navigation";
 import {
   AuthContextType,
   ManufacturerProfileForm,
+  SignupPayload,
 } from "../../../../utils/types";
-import { DEFAULT_PROFILE_FORM } from "@/src/utils/data";
-import { buildFinancialYear } from "@/src/utils/helpers";
-import { AuthContext } from "@/src/context/auth.context";
+
+const states = [
+  { label: "Select your state", value: "" },
+  { label: "Maharashtra", value: "maharashtra" },
+  { label: "Gujarat", value: "gujarat" },
+  { label: "Tamil Nadu", value: "tamilnadu" },
+  { label: "Karnataka", value: "karnataka" },
+  { label: "Delhi", value: "delhi" },
+];
 
 const normalizePhone = (value: string) =>
   value.replace(/[^0-9]/g, "").slice(0, 10);
@@ -42,11 +52,6 @@ const validateProfileForm = (form: ManufacturerProfileForm): boolean => {
       toast.error(`${key} is required`);
       return false;
     }
-  }
-
-  if (!EMAIL_REGEX.test(form.email.trim())) {
-    toast.error("Enter a valid email address.");
-    return false;
   }
 
   if (!PHONE_REGEX.test(normalizePhone(form.phone))) {
@@ -68,47 +73,71 @@ const validateProfileForm = (form: ManufacturerProfileForm): boolean => {
 };
 
 const buildProfilePayload = (form: ManufacturerProfileForm) => ({
+  ...form,
   businessName: form.businessName.trim(),
   contactPerson: form.contactPerson.trim(),
   phone: normalizePhone(form.phone),
   gstin: form.gstin.trim().toUpperCase(),
   registeredAddress: form.registeredAddress.trim(),
-  state: form.state.trim(),
-  defaultGstType: form.defaultGstType,
-  defaultTaxMode: form.defaultTaxMode,
-  activeFinancialYearId: form.activeFinancialYearId,
-  financialYears: form.financialYears,
 });
 
-export default function ManufacturerProfileSettingsPage() {
-  const [profileForm, setProfileForm] =
-    useState<ManufacturerProfileForm>(DEFAULT_PROFILE_FORM);
-  const [baseProfile, setBaseProfile] =
-    useState<ManufacturerProfileForm>(DEFAULT_PROFILE_FORM);
+const buildSignupPayload = (
+  form: ManufacturerProfileForm,
+  user: Record<string, unknown>,
+): SignupPayload | null => {
+  const firebaseUid = user.firebaseUid;
+  const email = user.email;
 
+  if (typeof firebaseUid !== "string" || typeof email !== "string") {
+    return null;
+  }
+
+  return {
+    firebaseUid,
+    email,
+    role:
+      user.role === UserRole.WHOLESALER
+        ? UserRole.WHOLESALER
+        : UserRole.MANUFACTURER,
+    ...buildProfilePayload(form),
+  };
+};
+
+export default function ManufacturerProfileSettingsPage() {
   const [savingProfile, setSavingProfile] = useState(false);
 
   const router = useRouter();
-  const { user } = useContext(AuthContext) as AuthContextType;
+  const { user, setUser } = useContext(AuthContext) as AuthContextType;
+
+  const [profileForm, setProfileForm] = useState<ManufacturerProfileForm>(user);
 
   const hasUnsavedProfileChanges = useMemo(
-    () => JSON.stringify(profileForm) !== JSON.stringify(baseProfile),
-    [profileForm, baseProfile],
+    () => JSON.stringify(profileForm) !== JSON.stringify(user),
+    [profileForm, user],
   );
 
   const initialFinancialYearCount = useMemo(
-    () => DEFAULT_PROFILE_FORM.financialYears.length,
-    [],
+    () => user.financialYears.length,
+    [user],
   );
 
-  const addedFinancialYearCount = useMemo(
-    () =>
-      Math.max(
-        0,
-        profileForm.financialYears.length - initialFinancialYearCount,
-      ),
-    [profileForm.financialYears.length, initialFinancialYearCount],
-  );
+  const addedFinancialYearCount = useMemo(() => {
+    if (profileForm.financialYears.length > 0) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      return profileForm.financialYears.filter((financialYear) => {
+        const fyStartDate = new Date(financialYear.startYear, 3, 1);
+        fyStartDate.setHours(0, 0, 0, 0);
+        return today.getTime() < fyStartDate.getTime();
+      }).length;
+    }
+
+    return Math.max(
+      0,
+      profileForm.financialYears.length - initialFinancialYearCount,
+    );
+  }, [profileForm.financialYears, initialFinancialYearCount]);
 
   const canAddFinancialYear = addedFinancialYearCount < MAX_NEW_FINANCIAL_YEARS;
 
@@ -122,7 +151,7 @@ export default function ManufacturerProfileSettingsPage() {
   };
 
   const handleDiscardProfileChanges = () => {
-    setProfileForm(baseProfile);
+    setProfileForm(user);
     router.push("/manufacturer/dashboard");
   };
 
@@ -131,11 +160,26 @@ export default function ManufacturerProfileSettingsPage() {
 
     try {
       setSavingProfile(true);
-      const payload = buildProfilePayload(profileForm);
-      console.log(payload);
-      setBaseProfile(profileForm);
+      if (!user) {
+        toast.error("Unable to update profile. Please login again.");
+        return;
+      }
+
+      const payload = buildSignupPayload(
+        profileForm,
+        user as Record<string, unknown>,
+      );
+
+      if (!payload) {
+        toast.error("Unable to update profile. Missing account details.");
+        return;
+      }
+
+      const response = await AuthService.createUser(payload);
+      delete response.data.__v;
+      setUser(response.data);
       toast.success("Profile settings updated.");
-      router.push("/manufacturer/dashboard");
+      router.replace("/manufacturer/dashboard");
     } catch (error) {
       console.error(error);
       toast.error("Failed to update profile settings.");
@@ -262,8 +306,9 @@ export default function ManufacturerProfileSettingsPage() {
               </p>
             </div>
 
-            <Input
-              label="State"
+            <Dropdown
+              label="State / Region"
+              options={states}
               value={profileForm.state}
               onChange={(event) =>
                 setProfileForm((prev) => ({
@@ -271,7 +316,6 @@ export default function ManufacturerProfileSettingsPage() {
                   state: event.target.value,
                 }))
               }
-              placeholder="State"
             />
 
             <div className="md:col-span-2 flex flex-col gap-2">
@@ -302,24 +346,24 @@ export default function ManufacturerProfileSettingsPage() {
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <Dropdown
               label="Default GST Type"
-              value={profileForm.defaultGstType}
+              value={profileForm.gstType}
               options={gstTypeOptions}
               onChange={(event) =>
                 setProfileForm((prev) => ({
                   ...prev,
-                  defaultGstType: event.target.value as GstType,
+                  gstType: event.target.value as GstType,
                 }))
               }
             />
 
             <Dropdown
               label="Default Tax Mode"
-              value={profileForm.defaultTaxMode}
+              value={profileForm.gstTaxMode}
               options={taxModeOptions}
               onChange={(event) =>
                 setProfileForm((prev) => ({
                   ...prev,
-                  defaultTaxMode: event.target.value as TaxMode,
+                  gstTaxMode: event.target.value as TaxMode,
                 }))
               }
             />
@@ -333,8 +377,7 @@ export default function ManufacturerProfileSettingsPage() {
                 Financial Year Control
               </h2>
               <p className="text-sm text-slate-500">
-                Add up to 3 new FYs. New FY can be activated only after its
-                start date.
+                {`Add up to ${MAX_NEW_FINANCIAL_YEARS} new FYs. New FY can be activated only after its start date.`}
               </p>
             </div>
 

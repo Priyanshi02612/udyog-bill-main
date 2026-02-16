@@ -10,7 +10,7 @@ import { AuthContextType } from "../utils/types";
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any | null>(null);
+  const [user, setUser] = useState<Record<string, unknown> | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const onboarding = useContext(OnboardingContext);
 
@@ -27,10 +27,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       try {
         const res = await UsersService.getUserByFirebaseId(firebaseUser.uid);
-        setUser(res.data);
+        const apiUser = res.data as Record<string, unknown>;
+        delete apiUser.__v;
 
-        // keep role in sync
-        localStorage.setItem("userRole", res.data.role);
+        setUser(apiUser);
       } catch (err) {
         console.error(err);
         setUser(null);
@@ -40,10 +40,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [onboarding]);
 
   return (
-    <AuthContext.Provider value={{ user, authLoading }}>
+    <AuthContext.Provider value={{ user, authLoading, setUser }}>
       {children}
     </AuthContext.Provider>
   );

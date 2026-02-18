@@ -12,6 +12,7 @@ import {
   InvitationStatus,
   ManufacturerWholesalerInvitation,
 } from '../db/schema/manufacturer-wholesaler-invitation.schema';
+import { UserBusinessDetails } from '../db/schema/user-business-details.schema';
 import { AddPartyDto } from './dto/add-party.dto';
 import { AcceptPartyInvitationDto } from './dto/accept-party-invitation.dto';
 
@@ -19,10 +20,59 @@ import { AcceptPartyInvitationDto } from './dto/accept-party-invitation.dto';
 export class ManufacturerService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
+    @InjectModel(UserBusinessDetails.name)
+    private readonly userBusinessDetailsModel: Model<UserBusinessDetails>,
     @InjectModel(ManufacturerWholesalerInvitation.name)
     private readonly invitationModel: Model<ManufacturerWholesalerInvitation>,
     private readonly mailerService: MailerService,
   ) {}
+
+  async getWholesalers(manufacturerUserId: string) {
+    if (!manufacturerUserId) {
+      throw new BadRequestException('manufacturerUserId is required');
+    }
+
+    const manufacturer = await this.userModel.findById(manufacturerUserId);
+    if (!manufacturer) {
+      throw new NotFoundException('Manufacturer not found');
+    }
+
+    const partyUserIds = [
+      ...new Set(manufacturer.wholesalerIds?.map((id) => id.toString()) ?? []),
+    ];
+
+    if (partyUserIds.length === 0) {
+      return [];
+    }
+
+    const [wholesalers, wholesalerBusinessDetails] = await Promise.all([
+      this.userModel.find({ _id: { $in: partyUserIds } }),
+      this.userBusinessDetailsModel.find({ userId: { $in: partyUserIds } }),
+    ]);
+
+    const businessDetailsByUserId = new Map(
+      wholesalerBusinessDetails.map((details) => [
+        details.userId.toString(),
+        details,
+      ]),
+    );
+
+    return wholesalers.map((wholesaler) => {
+      const details = businessDetailsByUserId.get(wholesaler.id);
+
+      return {
+        userId: wholesaler.id,
+        email: wholesaler.email,
+        businessName: details?.businessName,
+        contactPerson: details?.contactPerson,
+        gstin: details?.gstin,
+        phone: details?.phone,
+        outstanding: 0,
+        overdueInvoices: 0,
+        invoices: [],
+      };
+    });
+  }
 
   async addParty(dto: AddPartyDto) {
     const manufacturer = await this.userModel.findById(dto.manufacturerUserId);

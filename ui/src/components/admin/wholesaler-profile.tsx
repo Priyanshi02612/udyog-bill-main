@@ -47,7 +47,7 @@ const PartyDrawer = ({ open, onClose, party }: PartyDrawerProps) => {
 
           <div className="flex flex-col items-center text-center gap-2">
             <Avatar
-              name="Radhe Krishna Silks"
+              name={party.businessName}
               size="100"
               color="#8b5a2b1a"
               fgColor="#8b5a2b"

@@ -5,20 +5,20 @@ import PartyDrawer from "../../../../components/admin/wholesaler-profile";
 import Pagination from "../../../../components/pagination";
 import { Button } from "../../../../components/ui/button";
 import ConfirmModal from "../../../../components/ui/modal";
-import { MOCK_WHOLESALERS } from "../../../../utils/data";
-import { Party } from "../../../../utils/types";
-import { formatCurrency } from "../../../../utils/helpers";
-import { useMemo, useState } from "react";
+import { AuthContextType, Party } from "../../../../utils/types";
+import { formatCurrency, getErrorMessage } from "../../../../utils/helpers";
+import { useContext, useEffect, useMemo, useState } from "react";
 import {
   MdAccountBalanceWallet,
   MdDelete,
   MdEventBusy,
   MdPersonAdd,
-  MdStorefront,
   MdVisibility,
 } from "react-icons/md";
 import toast from "react-hot-toast";
 import { KpiCard } from "../../../../components/admin/kpi-card";
+import { ManufacturerService } from "../../../../lib/api/manufacturer";
+import { AuthContext } from "../../../../context/auth.context";
 
 const PAGE_SIZE = 6;
 
@@ -28,32 +28,49 @@ const Wholesalers = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [wholesalers, setWholesalers] = useState<Party[]>([]);
+
+  const { user } = useContext(AuthContext) as AuthContextType;
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchWholesalers = async () => {
+      try {
+        const response = await ManufacturerService.getWholesalers(user._id);
+        setWholesalers(response.data);
+      } catch (error) {
+        toast.error(getErrorMessage(error) || "Failed to fetch wholesalers");
+      }
+    };
+
+    fetchWholesalers();
+  }, [user]);
 
   const stats = useMemo(() => {
-    const totalOutstanding = MOCK_WHOLESALERS.reduce(
+    const totalOutstanding = wholesalers.reduce(
       (sum, w) => sum + w.outstanding,
       0,
     );
 
-    const overdueCount = MOCK_WHOLESALERS.filter(
+    const overdueCount = wholesalers.filter(
       (w) => w.overdueInvoices > 0,
     ).length;
 
     return {
       totalOutstanding,
-      activeParties: MOCK_WHOLESALERS.length,
       overdueCount,
     };
-  }, []);
+  }, [wholesalers]);
 
-  const totalPages = Math.ceil(MOCK_WHOLESALERS.length / PAGE_SIZE);
+  const totalPages = Math.ceil(wholesalers.length / PAGE_SIZE);
   const safePage = Math.min(page, totalPages);
 
   const paginatedItems = useMemo(() => {
     const start = (safePage - 1) * PAGE_SIZE;
     const end = start + PAGE_SIZE;
-    return MOCK_WHOLESALERS.slice(start, end);
-  }, [safePage]);
+    return wholesalers.slice(start, end);
+  }, [safePage, wholesalers]);
 
   const handleRemoveParty = () => {
     console.log("DELETED PARTY:", selectedParty);
@@ -92,12 +109,6 @@ const Wholesalers = () => {
           color="primary"
         />
         <KpiCard
-          icon={<MdStorefront className="w-6 h-6 text-blue-600" />}
-          label="Active Parties"
-          value={stats.activeParties}
-          color="blue"
-        />
-        <KpiCard
           icon={<MdEventBusy className="w-6 h-6 text-danger" />}
           label="Overdue Payments"
           value={stats.overdueCount}
@@ -119,9 +130,9 @@ const Wholesalers = () => {
             </thead>
 
             <tbody className="divide-y divide-gray-200">
-              {paginatedItems.map((party) => (
+              {paginatedItems.map((party, index) => (
                 <tr
-                  key={party.id}
+                  key={index}
                   className="hover:bg-slate-50 transition-colors cursor-pointer"
                 >
                   <td className="px-6 py-4 text-slate-900 max-w-50 truncate">
@@ -171,7 +182,7 @@ const Wholesalers = () => {
       </div>
 
       <Pagination
-        totalItems={MOCK_WHOLESALERS.length}
+        totalItems={wholesalers.length}
         currentPage={safePage}
         pageSize={PAGE_SIZE}
         onPageChange={setPage}
@@ -186,7 +197,10 @@ const Wholesalers = () => {
         }}
       />
 
-      <InviteWholesalerModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <InviteWholesalerModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+      />
 
       <ConfirmModal
         open={deleteModalOpen}

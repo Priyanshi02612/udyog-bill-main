@@ -5,6 +5,10 @@ import {
   ManufacturerWholesalerInvitation,
   ManufacturerWholesalerInvitationSchema,
 } from '../db/schema/manufacturer-wholesaler-invitation.schema';
+import {
+  UserBusinessDetails,
+  UserBusinessDetailsSchema,
+} from '../db/schema/user-business-details.schema';
 import { ManufacturerController } from './manufacturer.controller';
 import { ManufacturerService } from './manufacturer.service';
 
@@ -18,6 +22,10 @@ import { ManufacturerService } from './manufacturer.service';
       {
         name: ManufacturerWholesalerInvitation.name,
         schema: ManufacturerWholesalerInvitationSchema,
+      },
+      {
+        name: UserBusinessDetails.name,
+        schema: UserBusinessDetailsSchema,
       },
     ]),
   ],

@@ -72,11 +72,33 @@ const Wholesalers = () => {
     return wholesalers.slice(start, end);
   }, [safePage, wholesalers]);
 
-  const handleRemoveParty = () => {
-    console.log("DELETED PARTY:", selectedParty);
-    toast.success("Party removed successfully");
+  const handleRemoveParty = async () => {
+    if (!user?._id || !selectedParty) return;
 
-    setDeleteModalOpen(false);
+    const wholesalerUserId =
+      (selectedParty as Party & { userId?: string }).userId ??
+      String(selectedParty.id);
+
+    try {
+      await ManufacturerService.removeParty({
+        manufacturerUserId: user._id,
+        wholesalerUserId,
+      });
+
+      setWholesalers((prev) =>
+        prev.filter((party) => {
+          const partyUserId =
+            (party as Party & { userId?: string }).userId ?? String(party.id);
+          return partyUserId !== wholesalerUserId;
+        }),
+      );
+
+      toast.success("Party removed successfully");
+      setDeleteModalOpen(false);
+      setSelectedParty(null);
+    } catch (error) {
+      toast.error(getErrorMessage(error) || "Failed to remove party");
+    }
   };
 
   return (
@@ -131,10 +153,7 @@ const Wholesalers = () => {
 
             <tbody className="divide-y divide-gray-200">
               {paginatedItems.map((party, index) => (
-                <tr
-                  key={index}
-                  className="hover:bg-slate-50 transition-colors cursor-pointer"
-                >
+                <tr key={index} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 text-slate-900 max-w-50 truncate">
                     {party.businessName}
                   </td>
@@ -158,7 +177,7 @@ const Wholesalers = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
                       <MdVisibility
-                        className="w-5 h-5 text-slate-400 hover:text-primary"
+                        className="w-5 h-5 text-slate-400 hover:text-primary cursor-pointer"
                         onClick={() => {
                           setSelectedParty(party);
                           setDrawerOpen(true);
@@ -166,7 +185,7 @@ const Wholesalers = () => {
                       />
 
                       <MdDelete
-                        className="w-5 h-5 text-slate-400 hover:text-danger"
+                        className="w-5 h-5 text-slate-400 hover:text-danger cursor-pointer"
                         onClick={() => {
                           setSelectedParty(party);
                           setDeleteModalOpen(true);

@@ -15,6 +15,7 @@ import {
 import { UserBusinessDetails } from '../db/schema/user-business-details.schema';
 import { AddPartyDto } from './dto/add-party.dto';
 import { AcceptPartyInvitationDto } from './dto/accept-party-invitation.dto';
+import { RemovePartyDto } from './dto/remove-party.dto';
 
 @Injectable()
 export class ManufacturerService {
@@ -189,6 +190,60 @@ export class ManufacturerService {
       message: 'Invitation accepted successfully',
       manufacturerId: manufacturer.id,
       wholesalerId: wholesaler.id,
+    };
+  }
+
+  async removeParty(dto: RemovePartyDto) {
+    if (!dto.manufacturerUserId || !dto.wholesalerUserId) {
+      throw new BadRequestException(
+        'manufacturerUserId and wholesalerUserId are required',
+      );
+    }
+
+    const manufacturer = await this.userModel.findById(dto.manufacturerUserId);
+    if (!manufacturer) {
+      throw new NotFoundException('Manufacturer not found');
+    }
+
+    const wholesalerIds = manufacturer.wholesalerIds?.map((id) =>
+      id.toString(),
+    );
+
+    if (!wholesalerIds?.includes(dto.wholesalerUserId)) {
+      throw new NotFoundException(
+        'Wholesaler is not connected to manufacturer',
+      );
+    }
+
+    const wholesaler = await this.userModel.findById(dto.wholesalerUserId);
+
+    await Promise.all([
+      this.userModel.findByIdAndUpdate(manufacturer.id, {
+        $pull: { wholesalerIds: dto.wholesalerUserId },
+      }),
+      this.invitationModel.updateMany(
+        {
+          manufacturerId: manufacturer.id,
+          $or: [
+            { partyUserId: dto.wholesalerUserId },
+            ...(wholesaler?.email
+              ? [{ partyEmail: wholesaler.email.toLowerCase() }]
+              : []),
+          ],
+        },
+        {
+          $set: {
+            status: InvitationStatus.DISCONNECTED,
+            disconnectedAt: new Date(),
+          },
+        },
+      ),
+    ]);
+
+    return {
+      message: 'Wholesaler removed successfully',
+      manufacturerId: manufacturer.id,
+      wholesalerId: dto.wholesalerUserId,
     };
   }
 }

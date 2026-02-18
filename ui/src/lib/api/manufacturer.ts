@@ -66,4 +66,26 @@ export class ManufacturerService {
       throw error;
     }
   }
+
+  static async removeParty(payload: {
+    manufacturerUserId: string;
+    wholesalerUserId: string;
+  }) {
+    try {
+      const response = await axios.delete(`${API_URL}/manufacturer/remove-party`, {
+        data: payload,
+      });
+
+      if (!response.status) {
+        throw new Error(
+          response.data.message || `HTTP error! status: ${response.status}`,
+        );
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error while removing party:", error);
+      throw error;
+    }
+  }
 }

@@ -119,6 +119,7 @@ export type AddEditTextileItemModalProps = {
 export type Errors = Partial<Record<keyof Item, string>>;
 
 export type Party = {
+  userId?: string;
   id: number;
   businessName: string;
   gstin: string;

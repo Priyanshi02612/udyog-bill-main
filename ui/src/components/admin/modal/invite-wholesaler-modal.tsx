@@ -95,7 +95,10 @@ export const InviteWholesalerModal = ({
             size="sm"
             className="rounded-md bg-white hover:bg-white"
             leadingIcon={<MdClose className="w-7 h-7 text-primary" />}
-            onClick={onClose}
+            onClick={() => {
+              onClose();
+              setEmail("");
+            }}
           />
         </div>
 

@@ -7,6 +7,7 @@ export type ManufacturerWholesalerInvitationDocument =
 export enum InvitationStatus {
   PENDING = 'pending',
   ACCEPTED = 'accepted',
+  DISCONNECTED = 'disconnected',
 }
 
 @Schema({ timestamps: true })
@@ -32,6 +33,9 @@ export class ManufacturerWholesalerInvitation {
 
   @Prop()
   acceptedAt?: Date;
+
+  @Prop()
+  disconnectedAt?: Date;
 
   @Prop()
   partyUserId?: string;

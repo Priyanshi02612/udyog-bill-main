@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import loginCoverImage from "../../assets/login-cover.png";
 import logo from "../../assets/logo.png";
 import { Button } from "../../components/ui/button";
@@ -29,6 +29,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
 
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleLogin = async () => {
     try {
@@ -45,6 +46,12 @@ const Login = () => {
 
       if (!userData.isOnboarded) {
         router.replace("/sign-up");
+        return;
+      }
+
+      const redirect = searchParams.get("redirect");
+      if (redirect && redirect.startsWith("/")) {
+        router.replace(redirect);
         return;
       }
 

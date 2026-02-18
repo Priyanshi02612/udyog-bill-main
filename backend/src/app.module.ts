@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { UsersModule } from './users/users.module';
 import { ItemsModule } from './items/items.module';
+import { ManufacturerModule } from './manufacturer/manufacturer.module';
 
 @Module({
   imports: [
@@ -44,13 +45,14 @@ import { ItemsModule } from './items/items.module';
             },
           },
           defaults: {
-            from: `"No Reply" <${mailer?.auth.user}>`,
+            from: `"Udyog Bill Team" <${mailer?.auth.user}>`,
           },
         };
       },
     }),
     UsersModule,
     ItemsModule,
+    ManufacturerModule,
   ],
   controllers: [AppController],
   providers: [AppService, MongooseConnectionLogger],

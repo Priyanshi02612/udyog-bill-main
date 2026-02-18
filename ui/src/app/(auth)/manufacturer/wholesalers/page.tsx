@@ -1,6 +1,6 @@
 "use client";
 
-import { AddPartyModal } from "../../../../components/admin/modal/add-party-modal";
+import { InviteWholesalerModal } from "../../../../components/admin/modal/invite-wholesaler-modal";
 import PartyDrawer from "../../../../components/admin/wholesaler-profile";
 import Pagination from "../../../../components/pagination";
 import { Button } from "../../../../components/ui/button";
@@ -186,7 +186,7 @@ const Wholesalers = () => {
         }}
       />
 
-      <AddPartyModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <InviteWholesalerModal open={modalOpen} onClose={() => setModalOpen(false)} />
 
       <ConfirmModal
         open={deleteModalOpen}

@@ -1,12 +1,11 @@
 "use client";
 
-import { Fragment, useState } from "react";
-import { MdCall, MdClose, MdEdit, MdEmail, MdVerified } from "react-icons/md";
+import { Fragment } from "react";
+import { MdCall, MdClose, MdEmail, MdVerified } from "react-icons/md";
 import { Button } from "../ui/button";
 import Avatar from "react-avatar";
 import { Party } from "@/src/utils/types";
 import { formatCurrency } from "@/src/utils/helpers";
-import { AddPartyModal } from "./modal/add-party-modal";
 
 interface PartyDrawerProps {
   open: boolean;
@@ -15,8 +14,6 @@ interface PartyDrawerProps {
 }
 
 const PartyDrawer = ({ open, onClose, party }: PartyDrawerProps) => {
-  const [openEditModal, setOpenEditModal] = useState(false);
-
   if (!open || !party) return null;
 
   return (
@@ -139,24 +136,8 @@ const PartyDrawer = ({ open, onClose, party }: PartyDrawerProps) => {
               )}
             </div>
           </div>
-
-          <div className="flex justify-self-end">
-            <Button
-              size="sm"
-              leadingIcon={<MdEdit />}
-              onClick={() => setOpenEditModal(true)}
-            >
-              Edit Party
-            </Button>
-          </div>
         </div>
       </div>
-
-      <AddPartyModal
-        open={openEditModal}
-        onClose={() => setOpenEditModal(false)}
-        initialData={party}
-      />
     </Fragment>
   );
 };

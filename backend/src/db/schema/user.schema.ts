@@ -30,6 +30,9 @@ export class User {
 
   @Prop()
   otpExpiresAt?: Date;
+
+  @Prop({ type: [String] })
+  wholesalerIds!: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

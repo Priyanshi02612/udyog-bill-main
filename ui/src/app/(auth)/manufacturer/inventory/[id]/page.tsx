@@ -4,18 +4,20 @@ import Image from "next/image";
 import AddEditTextileItemModal from "../../../../../components/admin/modal/add-item-modal";
 import { Badge } from "../../../../../components/ui/badge";
 import { Button } from "../../../../../components/ui/button";
-import { initialItems } from "../../../../../utils/data";
-import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   MdArchitecture,
+  MdArrowBack,
   MdDelete,
   MdDescription,
   MdEdit,
   MdPayments,
 } from "react-icons/md";
 import toast from "react-hot-toast";
-import ConfirmModal from "@/src/components/ui/modal";
+import ConfirmModal from "../../../../../components/ui/modal";
+import { ItemsService } from "../../../../../lib/api/items";
+import { Item } from "../../../../../utils/types";
 
 function SpecificationField({
   label,
@@ -58,14 +60,25 @@ function MetricCard({
 
 export default function ItemSpecificationDetail() {
   const { id } = useParams();
+  const router = useRouter();
 
-  const getInitialItem = () => {
-    return initialItems.find((item) => item._id === id);
-  };
-
-  const [item, setItem] = useState(getInitialItem);
+  const [item, setItem] = useState<Item>();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchItem = async () => {
+      try {
+        const response = await ItemsService.getInventoryItemById(id as string);
+        setItem(response.data);
+      } catch (error) {
+        console.log(error);
+        toast.error("Failed to fetch item details. Please try again.");
+      }
+    };
+
+    fetchItem();
+  }, [id]);
 
   const handleDelete = () => {
     console.log("DELETE ITEM:", item?._id);
@@ -82,7 +95,18 @@ export default function ItemSpecificationDetail() {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-2">
           <div className="flex-col md:flex-row flex md:items-center gap-3">
-            <h1 className="text-4xl font-black tracking-tight">{item?.name}</h1>
+            <div className="flex items-start gap-3">
+              <button
+                type="button"
+                className="mt-1 text-primary hover:text-primary/80"
+                onClick={() => router.back()}
+              >
+                <MdArrowBack className="h-6 w-6" />
+              </button>
+              <h1 className="text-4xl font-black tracking-tight">
+                {item?.name}
+              </h1>
+            </div>
 
             <div className="flex gap-1">
               <Badge label={item?.category} variant="primary" showDot={false} />

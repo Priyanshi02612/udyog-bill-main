@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { MdAdd, MdTexture } from "react-icons/md";
 import { GiRolledCloth } from "react-icons/gi";
 import { RiShapesFill } from "react-icons/ri";
@@ -11,6 +11,7 @@ import Pagination from "../../../../components/pagination";
 import AddEditTextileItemModal from "../../../../components/admin/modal/add-item-modal";
 import { initialItems } from "../../../../utils/data";
 import { AuthContextType, Item, ItemCategory } from "../../../../utils/types";
+import { getErrorMessage } from "../../../../utils/helpers";
 import { ItemsService } from "../../../../lib/api/items";
 import toast from "react-hot-toast";
 import { AuthContext } from "../../../../context/auth.context";
@@ -49,26 +50,26 @@ export default function ManufacturerInventoryPage() {
     setOpen(true);
   };
 
-  useEffect(() => {
+  const fetchItems = useCallback(async () => {
     if (!user) {
       setItems([]);
       return;
     }
 
-    const fetchItems = async () => {
-      try {
-        setIsLoading(true);
-        const response = await ItemsService.getUsersInventory(user._id);
-        setItems((response.data as Item[]) || []);
-      } catch {
-        toast.error("Failed to load items");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchItems();
+    try {
+      setIsLoading(true);
+      const response = await ItemsService.getUsersInventory(user._id);
+      setItems((response.data as Item[]) || []);
+    } catch (error) {
+      toast.error(getErrorMessage(error) || "Failed to load inventory items");
+    } finally {
+      setIsLoading(false);
+    }
   }, [user]);
+
+  useEffect(() => {
+    fetchItems();
+  }, [fetchItems]);
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
@@ -219,6 +220,7 @@ export default function ManufacturerInventoryPage() {
         open={open}
         mode="add"
         onClose={() => setOpen(false)}
+        onSuccess={fetchItems}
       />
     </div>
   );

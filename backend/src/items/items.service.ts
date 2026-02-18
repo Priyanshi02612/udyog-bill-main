@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Item } from '../db/schema/item.schema';
@@ -13,6 +17,19 @@ export class ItemsService {
   ) {}
 
   async create(createItemDto: CreateItemDto) {
+    const duplicateFilter = {
+      ownerId: createItemDto.ownerId,
+      basePrice: createItemDto.basePrice,
+      gstPercentage: createItemDto.gstPercentage,
+    };
+
+    const existingItem = await this.itemModel.findOne(duplicateFilter).lean();
+    if (existingItem) {
+      throw new BadRequestException(
+        'An item with the same base price and GST percentage already exists',
+      );
+    }
+
     const item = await this.itemModel.create({
       ...createItemDto,
       description: createItemDto.description ?? '',

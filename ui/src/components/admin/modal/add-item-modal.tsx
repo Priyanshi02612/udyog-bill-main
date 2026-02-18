@@ -1,38 +1,49 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { MdClose } from "react-icons/md";
 import toast from "react-hot-toast";
 import { Input } from "../../ui/input";
 import { Button } from "../../ui/button";
 import { Dropdown } from "../../ui/dropdown";
-import {
-  AddItemFormState,
-  Errors,
-  AddEditTextileItemModalProps,
-} from "../../../utils/types";
-import { DEFAULT_FORM, itemCategoryOptions } from "../../../utils/constants";
 import { ColorPickerField } from "../../ui/color-picker";
 import { ImageUploader } from "../../ui/image-uploader";
+import {
+  Errors,
+  AddEditTextileItemModalProps,
+  Item,
+  AuthContextType,
+} from "../../../utils/types";
+import { getErrorMessage } from "../../../utils/helpers";
+import { DEFAULT_FORM, itemCategoryOptions } from "../../../utils/constants";
+import { AuthContext } from "../../../context/auth.context";
+import { ItemsService } from "../../../lib/api/items";
 
 export default function AddEditTextileItemModal({
   open,
   onClose,
   mode,
   initialData,
+  onSuccess,
 }: AddEditTextileItemModalProps) {
-  const getInitialForm = (): AddItemFormState => {
-    if (mode === "edit" && initialData) {
-      return {
-        ...DEFAULT_FORM,
-        ...initialData,
-        imagePreview: initialData.imageUrl || "",
-      };
-    }
-    return DEFAULT_FORM;
-  };
+  const [itemDetails, setItemDetails] = useState<Item>(DEFAULT_FORM);
+  const [submitting, setSubmitting] = useState(false);
+  const { user } = useContext(AuthContext) as AuthContextType;
 
-  const [form, setForm] = useState<AddItemFormState>(getInitialForm);
+  useEffect(() => {
+    const initializeForm = () => {
+      if (mode === "edit" && initialData) {
+        setItemDetails({
+          ...initialData,
+          imagePreview: initialData.imageUrl || "",
+        });
+      } else {
+        setItemDetails(DEFAULT_FORM);
+      }
+    };
+
+    initializeForm();
+  }, [mode, initialData]);
 
   if (!open) return null;
 
@@ -43,7 +54,7 @@ export default function AddEditTextileItemModal({
   ) => {
     const { name, value, type } = e.target;
 
-    setForm((prev) => ({
+    setItemDetails((prev) => ({
       ...prev,
       [name]:
         type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
@@ -53,21 +64,21 @@ export default function AddEditTextileItemModal({
   const validate = (): boolean => {
     const errors: Errors = {};
 
-    if (!form.name.trim()) errors.name = "Item name is required";
-    if (!form.category) errors.category = "Category is required";
-    if (!form.unit.trim()) errors.unit = "Unit is required";
+    if (!itemDetails.name.trim()) errors.name = "Item name is required";
+    if (!itemDetails.category) errors.category = "Category is required";
+    if (!itemDetails.unit.trim()) errors.unit = "Unit is required";
 
-    if (!form.basePrice || Number(form.basePrice) < 0)
+    if (!itemDetails.basePrice || Number(itemDetails.basePrice) < 0)
       errors.basePrice = "Base price must be 0 or more";
 
     if (
-      !form.gstPercentage ||
-      Number(form.gstPercentage) < 0 ||
-      Number(form.gstPercentage) > 100
+      !itemDetails.gstPercentage ||
+      Number(itemDetails.gstPercentage) < 0 ||
+      Number(itemDetails.gstPercentage) > 100
     )
       errors.gstPercentage = "GST must be between 0-100";
 
-    if (!form.hsnCode) errors.hsnCode = "HSN code is required";
+    if (!itemDetails.hsnCode) errors.hsnCode = "HSN code is required";
 
     const firstError = Object.values(errors)[0];
     if (firstError) {
@@ -78,20 +89,50 @@ export default function AddEditTextileItemModal({
     return true;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
 
-    const payload = {
-      ...form,
-      basePrice: Number(form.basePrice),
-      gstPercentage: Number(form.gstPercentage),
-      hsnCode: Number(form.hsnCode),
-    };
+    try {
+      setSubmitting(true);
 
-    console.log(mode === "add" ? " ADD ITEM" : "UPDATE ITEM", payload);
+      const uploadedImageUrl = itemDetails.image
+        ? await ItemsService.uploadToCloudinary(itemDetails.image)
+        : itemDetails.imageUrl;
 
-    onClose();
+      const payload = {
+        ...itemDetails,
+        imageUrl: uploadedImageUrl || "",
+        basePrice: Number(itemDetails.basePrice),
+        gstPercentage: Number(itemDetails.gstPercentage),
+        hsnCode: Number(itemDetails.hsnCode),
+        ownerId: (user?._id as string) || itemDetails.ownerId,
+      };
+
+      delete payload.image;
+      delete payload.imagePreview;
+
+      if (mode === "add") {
+        await ItemsService.createInventoryItem(payload);
+        toast.success("Item created successfully");
+      } else {
+        if (!itemDetails._id) {
+          toast.error("Item id is missing");
+          return;
+        }
+        await ItemsService.updateInventoryItem(itemDetails._id, payload);
+        toast.success("Item updated successfully");
+      }
+
+      onSuccess();
+      onClose();
+    } catch (error) {
+      toast.error(
+        getErrorMessage(error) || "An error occurred while saving the item",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -132,9 +173,9 @@ export default function AddEditTextileItemModal({
 
             <div className="p-5">
               <ImageUploader
-                preview={form.imagePreview}
+                preview={itemDetails.imagePreview}
                 onChange={(file, preview) =>
-                  setForm((prev) => ({
+                  setItemDetails((prev) => ({
                     ...prev,
                     image: file,
                     imagePreview: preview,
@@ -149,7 +190,7 @@ export default function AddEditTextileItemModal({
                   name="name"
                   label="Item Name"
                   placeholder="Item Name"
-                  value={form.name}
+                  value={itemDetails.name}
                   onChange={handleChange}
                 />
               </div>
@@ -157,9 +198,12 @@ export default function AddEditTextileItemModal({
               <Dropdown
                 options={itemCategoryOptions}
                 label="Item Category"
-                value={form.category}
+                value={itemDetails.category}
                 onChange={(e) =>
-                  setForm((prev) => ({ ...prev, category: e.target.value }))
+                  setItemDetails((prev) => ({
+                    ...prev,
+                    category: e.target.value,
+                  }))
                 }
               />
             </div>
@@ -171,7 +215,7 @@ export default function AddEditTextileItemModal({
 
               <textarea
                 name="description"
-                value={form.description}
+                value={itemDetails.description}
                 onChange={handleChange}
                 placeholder="Description"
                 rows={3}
@@ -192,21 +236,23 @@ export default function AddEditTextileItemModal({
                 name="materialType"
                 label="Material Type"
                 placeholder="Material Type"
-                value={form.materialType}
+                value={itemDetails.materialType}
                 onChange={handleChange}
               />
 
               <ColorPickerField
                 label="Color"
-                value={form.color}
-                onChange={(color) => setForm((p) => ({ ...p, color }))}
+                value={itemDetails.color}
+                onChange={(color) =>
+                  setItemDetails((prev) => ({ ...prev, color }))
+                }
               />
 
               <Input
                 name="designPattern"
                 label="Design Pattern"
                 placeholder="Design Pattern"
-                value={form.designPattern}
+                value={itemDetails.designPattern}
                 onChange={handleChange}
               />
             </div>
@@ -224,7 +270,7 @@ export default function AddEditTextileItemModal({
                 name="unit"
                 label="Unit"
                 placeholder="Unit"
-                value={form.unit}
+                value={itemDetails.unit}
                 onChange={handleChange}
               />
               <Input
@@ -232,7 +278,7 @@ export default function AddEditTextileItemModal({
                 label="GST %"
                 placeholder="GST %"
                 type="number"
-                value={form.gstPercentage}
+                value={itemDetails.gstPercentage}
                 onChange={handleChange}
               />
 
@@ -241,7 +287,7 @@ export default function AddEditTextileItemModal({
                 label="HSN Code"
                 placeholder="HSN Code"
                 type="number"
-                value={form.hsnCode}
+                value={itemDetails.hsnCode}
                 onChange={handleChange}
               />
             </div>
@@ -259,7 +305,7 @@ export default function AddEditTextileItemModal({
                   label="Base Price"
                   placeholder="Base Price"
                   type="number"
-                  value={form.basePrice}
+                  value={itemDetails.basePrice}
                   onChange={handleChange}
                 />
               </div>
@@ -275,7 +321,7 @@ export default function AddEditTextileItemModal({
                     type="checkbox"
                     name="isActive"
                     className="sr-only peer"
-                    checked={form.isActive}
+                    checked={itemDetails.isActive}
                     onChange={handleChange}
                   />
                   <div
@@ -292,7 +338,7 @@ export default function AddEditTextileItemModal({
             <Button type="button" size="sm" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" size="sm">
+            <Button type="submit" size="sm" loading={submitting}>
               {mode === "add" ? "Save Item" : "Update Item"}
             </Button>
           </div>

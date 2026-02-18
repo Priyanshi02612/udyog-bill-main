@@ -5,7 +5,7 @@ import AddEditTextileItemModal from "../../../../../components/admin/modal/add-i
 import { Badge } from "../../../../../components/ui/badge";
 import { Button } from "../../../../../components/ui/button";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   MdArchitecture,
   MdArrowBack,
@@ -14,10 +14,12 @@ import {
   MdEdit,
   MdPayments,
 } from "react-icons/md";
+import noImage from "../../../../../assets/imageplaceholder.png";
 import toast from "react-hot-toast";
 import ConfirmModal from "../../../../../components/ui/modal";
 import { ItemsService } from "../../../../../lib/api/items";
 import { Item } from "../../../../../utils/types";
+import { getErrorMessage } from "../../../../../utils/helpers";
 
 function SpecificationField({
   label,
@@ -63,35 +65,46 @@ export default function ItemSpecificationDetail() {
   const router = useRouter();
 
   const [item, setItem] = useState<Item>();
+  const [loading, setLoading] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchItem = async () => {
-      try {
-        const response = await ItemsService.getInventoryItemById(id as string);
-        setItem(response.data);
-      } catch (error) {
-        console.log(error);
-        toast.error("Failed to fetch item details. Please try again.");
-      }
-    };
-
-    fetchItem();
+  const fetchItem = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await ItemsService.getInventoryItemById(id as string);
+      setItem(response.data);
+    } catch (error) {
+      toast.error(getErrorMessage(error) || "Failed to load item details");
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
 
-  const handleDelete = () => {
-    console.log("DELETE ITEM:", item?._id);
+  useEffect(() => {
+    fetchItem();
+  }, [fetchItem]);
 
-    // later: API call
-    toast.success("Item deleted successfully");
-
-    setDeleteOpen(false);
-    // optional: redirect after delete
+  const handleDelete = async () => {
+    try {
+      await ItemsService.deleteInventoryItem(id as string);
+      toast.success("Item deleted successfully");
+      router.push("/manufacturer/inventory");
+    } catch (error) {
+      toast.error(getErrorMessage(error) || "Failed to delete item");
+    }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-128px)]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-background-light font-display text-slate-900 flex flex-col px-4 py-2 xl:px-40">
+    <div className="bg-background-light font-display min-h-[calc(100vh-128px)] text-slate-900 flex flex-col px-4 py-2 xl:px-40">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-2">
           <div className="flex-col md:flex-row flex md:items-center gap-3">
@@ -190,28 +203,27 @@ export default function ItemSpecificationDetail() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="mb-4 flex items-center gap-2">
-              <MdDescription className="w-8 h-8 text-primary" />
-              <h2 className="text-lg font-bold">Description</h2>
-            </div>
+          {item?.description && (
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="mb-4 flex items-center gap-2">
+                <MdDescription className="w-8 h-8 text-primary" />
+                <h2 className="text-lg font-bold">Description</h2>
+              </div>
 
-            <div className="text-sm leading-relaxed text-slate-600">
-              <p className="mb-4">{item?.description}</p>
+              <div className="text-sm leading-relaxed text-slate-600">
+                <p className="mb-4">{item.description}</p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-6 lg:col-span-4">
           <div className="bg-white border-slate-200 rounded-2xl overflow-hidden shadow-sm">
             <Image
-              src={
-                item?.imageUrl ||
-                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkfqPDkJIb-RIrB6SxyZlVO9fpc5hTfSy5hw&s"
-              }
+              src={item?.imageUrl || noImage}
               alt="item-image"
-              width={200}
-              height={200}
+              width={900}
+              height={900}
               className="w-200 lg:w-125 h-75 object-cover"
             />
           </div>
@@ -238,6 +250,7 @@ export default function ItemSpecificationDetail() {
         mode="edit"
         initialData={item}
         onClose={() => setOpen(false)}
+        onSuccess={fetchItem}
       />
 
       <ConfirmModal

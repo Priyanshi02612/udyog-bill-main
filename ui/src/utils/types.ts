@@ -91,6 +91,8 @@ export interface Item {
   _id?: string;
   name: string;
   imageUrl?: string;
+  image?: File | null;
+  imagePreview?: string;
   category: ItemCategory | string;
   description: string;
   basePrice: number;
@@ -106,31 +108,15 @@ export interface Item {
   updatedAt?: string;
 }
 
-export type AddItemFormState = {
-  name: string;
-  imageUrl?: string;
-  image?: File | null;
-  imagePreview?: string;
-  category: ItemCategory | string;
-  description?: string;
-  basePrice: string | number;
-  unit: string;
-  gstPercentage: string | number;
-  hsnCode: string | number;
-  color?: string;
-  materialType?: string;
-  designPattern?: string;
-  isActive: boolean;
-};
-
 export type AddEditTextileItemModalProps = {
   open: boolean;
   onClose: () => void;
   mode: "add" | "edit";
-  initialData?: Partial<AddItemFormState>;
+  initialData?: Item;
+  onSuccess: () => void;
 };
 
-export type Errors = Partial<Record<keyof AddItemFormState, string>>;
+export type Errors = Partial<Record<keyof Item, string>>;
 
 export type Party = {
   id: number;

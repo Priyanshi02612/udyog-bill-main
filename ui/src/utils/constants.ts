@@ -1,4 +1,4 @@
-import { AddItemFormState, InvoiceStatus } from "./types";
+import { InvoiceStatus, Item } from "./types";
 
 export enum UserRole {
   MANUFACTURER = "manufacturer",
@@ -33,17 +33,17 @@ export const itemCategoryOptions = [
   { label: "Thread", value: "Thread" },
 ];
 
-export const DEFAULT_FORM: AddItemFormState = {
+export const DEFAULT_FORM: Item = {
   name: "",
   imageUrl: "",
   image: null,
   imagePreview: "",
   category: "",
   description: "",
-  basePrice: "",
+  basePrice: 0,
   unit: "",
-  gstPercentage: "",
-  hsnCode: "",
+  gstPercentage: 0,
+  hsnCode: 0,
   color: "",
   materialType: "",
   designPattern: "",

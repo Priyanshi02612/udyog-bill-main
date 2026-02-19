@@ -120,7 +120,6 @@ export const DEFAULT_CGST_RATE = 2.5;
 export const DEFAULT_SGST_RATE = 2.5;
 export const DEFAULT_IGST_RATE = 5;
 export const MAX_INVOICE_NOTES_LENGTH = 500;
-export const DEFAULT_INVOICE_ITEM_UNIT = "Meters";
 export const DEFAULT_INVOICE_ITEM_DISCOUNT = 0;
 
 export const MAX_NEW_FINANCIAL_YEARS = 2;

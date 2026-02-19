@@ -1,5 +1,11 @@
 import { INDIAN_NUMBER_TENS, INDIAN_NUMBER_UNITS } from "./constants";
-import { FinancialYear, GstType, InvoiceItem, InvoiceStatus, TaxMode } from "./types";
+import {
+  FinancialYear,
+  GstType,
+  InvoiceItem,
+  InvoiceStatus,
+  TaxMode,
+} from "./types";
 import { GstType as GstTypeEnum, TaxMode as TaxModeEnum } from "./constants";
 
 export const formatCurrency = (amount: number) =>
@@ -59,10 +65,10 @@ export const getDefaultFinancialYear = () => {
   const month = today.getMonth() + 1;
 
   if (month >= 4) {
-    return `${year}-${year + 1}`;
+    return `FY${year}-${year + 1}`;
   }
 
-  return `${year - 1}-${year}`;
+  return `FY${year - 1}-${year}`;
 };
 
 export const parseNumericInput = (value: string) => {
@@ -71,7 +77,7 @@ export const parseNumericInput = (value: string) => {
 };
 
 export const isDateInFinancialYear = (date: string, fy: string) => {
-  const [startYear, endYear] = fy.split("-").map(Number);
+  const [startYear, endYear] = fy.replace("FY", "").split("-").map(Number);
   const dateObj = new Date(date);
 
   if (
@@ -147,7 +153,7 @@ export const getInvoicePreviewMetrics = (
   taxMode?: TaxMode,
 ) => {
   const taxableSubtotal = invoiceItems.reduce(
-    (sum, item) => sum + item.basePrice * item.quantity,
+    (sum, item) => sum + Number(item.basePrice) * Number(item.quantity),
     0,
   );
 

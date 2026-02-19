@@ -170,10 +170,10 @@ export type InvoiceItem = {
   invoiceId: string;
   itemName: string;
   itemId: string;
-  hsnCode: number;
-  quantity: number;
+  hsnCode: number | string;
+  quantity: number | string;
   unit: string;
-  basePrice: number;
+  basePrice: number | string;
   gstPercentage: number;
 };
 
@@ -200,6 +200,7 @@ export type CreateInvoiceLineItemPayload = {
 };
 
 export type CreateManufacturerInvoicePayload = {
+  invoiceNumber?: string;
   sellerId: string;
   buyerId: string;
   invoiceDate: string;
@@ -233,6 +234,7 @@ export type ValidationErrors = {
 export type InvoiceSubmitAction = "DRAFT" | "SENT";
 
 export type InvoiceCreateState = {
+  invoiceNumber: string;
   wholesalerId: string;
   invoiceDate: string;
   financialYear: string;

@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { UsersModule } from './users/users.module';
 import { ItemsModule } from './items/items.module';
+import { InventoryModule } from './inventory/inventory.module';
 import { ManufacturerModule } from './manufacturer/manufacturer.module';
 
 @Module({
@@ -52,6 +53,7 @@ import { ManufacturerModule } from './manufacturer/manufacturer.module';
     }),
     UsersModule,
     ItemsModule,
+    InventoryModule,
     ManufacturerModule,
   ],
   controllers: [AppController],

@@ -282,3 +282,18 @@ export type UserProfile = {
   financialYears: FinancialYear[];
   activeFinancialYearId: string;
 };
+
+export type CreateInventoryPayload = {
+  userId: string;
+  collection: string;
+  lotNumber: string;
+  dateReceived: string;
+  itemsCount: number;
+  totalStock: number;
+  totalValue: number;
+  inventoryItems: Array<{
+    itemId: string;
+    totalStock: number;
+    currentStock: number;
+  }>;
+};

@@ -24,6 +24,8 @@ import {
 import { AuthContextType, Item } from "../../../../../utils/types";
 import { GENERAL_PREFIX, LOT_PREFIX } from "../../../../../utils/constants";
 import { ItemsService } from "../../../../../lib/api/items";
+import { InventoryService } from "../../../../../lib/api/inventory";
+import { useRouter } from "next/navigation";
 
 type LotItemRow = {
   id: string;
@@ -53,6 +55,8 @@ export default function CreateInventoryLotPage() {
   ]);
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const router = useRouter();
 
   const fetchItems = useCallback(async () => {
     if (!user) {
@@ -191,7 +195,7 @@ export default function CreateInventoryLotPage() {
     setInventoryItemRows((prev) => [...prev, createEmptyRow()]);
   };
 
-  const confirmLot = () => {
+  const confirmLot = async () => {
     if (!dateReceived) {
       toast.error("Please select date of arrival");
       return;
@@ -211,6 +215,7 @@ export default function CreateInventoryLotPage() {
     });
 
     const payload = {
+      userId: user._id,
       lotNumber,
       collection: selectedCollection,
       dateReceived,
@@ -220,13 +225,16 @@ export default function CreateInventoryLotPage() {
       inventoryItems,
     };
 
-    console.log(payload);
-
-    setDateReceived("");
-    setSelectedCollection("");
-    setInventoryItemRows([createEmptyRow()]);
-
-    toast.success("Inventory lot confirmed");
+    try {
+      await InventoryService.createInventory(payload);
+      setDateReceived("");
+      setSelectedCollection("");
+      setInventoryItemRows([createEmptyRow()]);
+      toast.success("Inventory lot confirmed");
+      router.replace("/manufacturer/inventory");
+    } catch (error) {
+      toast.error(getErrorMessage(error) || "Failed to create inventory lot");
+    }
   };
 
   if (authLoading || isLoading) {

@@ -11,6 +11,7 @@ import {
   MdReceiptLong,
   MdSettings,
   MdClose,
+  MdWysiwyg,
 } from "react-icons/md";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
@@ -25,6 +26,11 @@ const navbarOptions = {
       title: "Dashboard",
       to: "/manufacturer/dashboard",
       icon: <MdDashboard className="w-6 h-6 text-primary" />,
+    },
+    {
+      title: "Items",
+      to: "/manufacturer/items",
+      icon: <MdWysiwyg className="w-6 h-6 text-primary" />,
     },
     {
       title: "Inventory",
@@ -93,7 +99,13 @@ export const Sidebar = ({
           href="/manufacturer/dashboard"
           className="flex items-center gap-3"
         >
-          <Image src={logo} alt="logo" width={40} height={40} className="w-10 h-10" />
+          <Image
+            src={logo}
+            alt="logo"
+            width={40}
+            height={40}
+            className="w-10 h-10"
+          />
           <h1 className="text-xl font-bold text-slate-900">UdyogBill</h1>
         </Link>
 

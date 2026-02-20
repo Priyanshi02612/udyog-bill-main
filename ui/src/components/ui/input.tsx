@@ -48,7 +48,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             {...props}
             className={clsx(
-              "w-full h-12 rounded-lg border p-4 text-sm transition-all",
+              "w-full h-9 rounded-lg border p-4 text-sm transition-all",
               "bg-slate-50 text-[#0d161b] border-[#cfdde7]",
               "focus:outline-0 focus:ring-2 focus:ring-primary/20 focus:border-primary",
               hasLeadingIcon && "pl-11",

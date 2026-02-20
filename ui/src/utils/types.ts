@@ -118,6 +118,25 @@ export type AddEditTextileItemModalProps = {
 
 export type Errors = Partial<Record<keyof Item, string>>;
 
+export type InventoryItem = {
+  id: string;
+  inventoryId: string;
+  itemId: string;
+  totalStock: number;
+  currentStock: number;
+};
+
+export type Inventory = {
+  id: string;
+  collection: string;
+  lotNumber: string;
+  itemsCount: number;
+  totalStock: number;
+  dateReceived: string;
+  totalValue: number;
+  inventoryItems: InventoryItem[];
+};
+
 export type Party = {
   userId?: string;
   id: number;

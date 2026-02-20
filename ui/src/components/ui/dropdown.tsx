@@ -27,7 +27,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
       <div className="relative">
         <select
           className={clsx(
-            "form-input flex w-full h-12 rounded-lg px-4 pr-10 text-sm transition-all",
+            "form-input flex w-full h-9 rounded-lg px-4 pr-10 text-sm transition-all",
             "bg-slate-50 border border-[#cfdde7] text-[#0d161b]",
             "focus:outline-0 focus:ring-2 focus:ring-primary/20 focus:border-primary",
             "appearance-none cursor-pointer",

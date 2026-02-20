@@ -1,96 +1,74 @@
 "use client";
 
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { MdAdd, MdTexture } from "react-icons/md";
-import { GiRolledCloth } from "react-icons/gi";
-import { RiShapesFill } from "react-icons/ri";
-import Link from "next/link";
-import { Badge } from "../../../../components/ui/badge";
-import { Button } from "../../../../components/ui/button";
-import Pagination from "../../../../components/pagination";
-import AddEditTextileItemModal from "../../../../components/admin/modal/add-item-modal";
-import { initialItems } from "../../../../utils/data";
-import { AuthContextType, Item, ItemCategory } from "../../../../utils/types";
-import { getErrorMessage } from "../../../../utils/helpers";
-import { ItemsService } from "../../../../lib/api/items";
-import toast from "react-hot-toast";
+import { useContext, useMemo, useState } from "react";
+import {
+  MdAdd,
+  MdInventory2,
+  MdOutlineSearch,
+  MdWarningAmber,
+} from "react-icons/md";
+
 import { AuthContext } from "../../../../context/auth.context";
+import { Button } from "../../../../components/ui/button";
+import { Input } from "../../../../components/ui/input";
+import { KpiCard } from "../../../../components/admin/kpi-card";
+import { formatCurrency, formatDate } from "../../../../utils/helpers";
+import { mockInventories } from "../../../../utils/data";
+import { AuthContextType } from "../../../../utils/types";
+import { BsBoxSeamFill } from "react-icons/bs";
+import { useRouter } from "next/navigation";
 
-const filters = [
-  {
-    label: "FABRIC",
-    value: "Fabric",
-    icon: <GiRolledCloth className="w-4 h-4" />,
-  },
-  {
-    label: "THREAD",
-    value: "Thread",
-    icon: <MdTexture className="w-4 h-4" />,
-  },
-  {
-    label: "MATERIAL",
-    value: "Material",
-    icon: <RiShapesFill className="w-4 h-4" />,
-  },
-];
+export default function InventoryPage() {
+  const { authLoading } = useContext(AuthContext) as AuthContextType;
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
 
-export default function ManufacturerInventoryPage() {
-  const { user, authLoading } = useContext(AuthContext) as AuthContextType;
-  const [items, setItems] = useState<Item[]>(initialItems);
-  const [isLoading, setIsLoading] = useState(false);
-  const [activeItemCategory, setActiveItemCategory] = useState<
-    ItemCategory | "All"
-  >("All");
-  const [open, setOpen] = useState(false);
+  const filteredLots = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
 
-  const [page, setPage] = useState(1);
-  const pageSize = 7;
+    return mockInventories.filter((lot) => {
+      const matchesSearch =
+        !query ||
+        lot.id.toLowerCase().includes(query) ||
+        lot.lotNumber.toLowerCase().includes(query) ||
+        lot.collection.toLowerCase().includes(query);
 
-  const handleAddItem = () => {
-    setOpen(true);
-  };
-
-  const fetchItems = useCallback(async () => {
-    if (!user) {
-      setItems([]);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const response = await ItemsService.getUsersInventory(user._id);
-      setItems((response.data as Item[]) || []);
-    } catch (error) {
-      toast.error(getErrorMessage(error) || "Failed to load inventory items");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user]);
-
-  useEffect(() => {
-    fetchItems();
-  }, [fetchItems]);
-
-  const filteredItems = useMemo(() => {
-    return items.filter((item) => {
-      const categoryMatch =
-        activeItemCategory === "All" || item.category === activeItemCategory;
-
-      return categoryMatch;
+      return matchesSearch;
     });
-  }, [items, activeItemCategory]);
+  }, [searchQuery]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
+  const kpiMetrics = useMemo(() => {
+    const totalLots = mockInventories.length;
+    const totalItems = mockInventories.reduce(
+      (sum, lot) => sum + lot.itemsCount,
+      0,
+    );
+    const totalStock = mockInventories.reduce(
+      (sum, lot) => sum + lot.totalStock,
+      0,
+    );
+    const totalValue = mockInventories.reduce(
+      (sum, lot) => sum + lot.totalValue,
+      0,
+    );
+    const lowStockLots = mockInventories.filter((lot) =>
+      lot.inventoryItems.some(
+        (inventoryItem) =>
+          inventoryItem.totalStock > 0 &&
+          inventoryItem.currentStock / inventoryItem.totalStock <= 0.2,
+      ),
+    ).length;
 
-  const safePage = Math.min(page, totalPages);
+    return {
+      totalLots,
+      totalItems,
+      totalStock,
+      totalValue,
+      lowStockLots,
+    };
+  }, []);
 
-  const paginatedItems = useMemo(() => {
-    const start = (safePage - 1) * pageSize;
-    const end = start + pageSize;
-    return filteredItems.slice(start, end);
-  }, [filteredItems, safePage, pageSize]);
-
-  if (authLoading || isLoading) {
+  if (authLoading) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-64px)]">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
@@ -100,128 +78,124 @@ export default function ManufacturerInventoryPage() {
 
   return (
     <div className="p-8 pb-0 min-h-[calc(100vh-124px)] relative">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-8 gap-2">
+      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-3xl font-black">Items Inventory</h1>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+            Inventory Management
+          </h2>
           <p className="text-primary text-xs md:text-base">
-            Manage and track your textile stocks
+            List of inventory lots.
           </p>
         </div>
 
-        <Button
-          size="sm"
-          leadingIcon={<MdAdd className="w-6 h-6" />}
-          onClick={handleAddItem}
-          className="self-end w-[50%] md:w-max"
-        >
-          Add New Item
-        </Button>
-      </div>
-      <div className="flex gap-2 mb-6 flex-wrap items-center text-xs md:text-base">
-        <button
-          onClick={() => setActiveItemCategory("All")}
-          className={`inline-flex items-center rounded-full px-4 py-2 text-sm ${
-            activeItemCategory === "All"
-              ? "bg-primary text-white"
-              : "bg-white text-primary"
-          }`}
-        >
-          All Items
-        </button>
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+          <Input
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search Lot ID or collection..."
+            leadingIcon={<MdOutlineSearch className="h-5 w-5" />}
+          />
 
-        {filters.map((filter) => (
-          <button
-            key={filter.label}
-            onClick={() => setActiveItemCategory(filter.value as ItemCategory)}
-            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm ${
-              activeItemCategory === filter.value
-                ? "bg-primary text-white"
-                : "bg-white text-primary"
-            }`}
+          <Button
+            size="sm"
+            leadingIcon={<MdAdd className="h-5 w-5" />}
+            onClick={() => router.replace("/manufacturer/inventory/create")}
           >
-            {filter.icon}
-            <span className="font-medium">{filter.label}</span>
-          </button>
-        ))}
-      </div>
-
-      <div className="min-h-132.5 md:min-h-125 xl:min-h-118.5">
-        <div
-          className="overflow-hidden overflow-x-scroll xl:overflow-auto rounded-xl border border-gray-300 bg-white"
-          style={{ scrollbarWidth: "thin" }}
-        >
-          <table className="w-full text-left text-xs xl:text-base">
-            <thead className="bg-gray-100 text-primary">
-              <tr>
-                {[
-                  "Item Name",
-                  "Item Category",
-                  "HSN",
-                  "Price",
-                  "GST",
-                  "Status",
-                ].map((h) => (
-                  <th key={h} className="px-6 py-4 text-sm font-bold uppercase">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-
-            <tbody className="divide-y">
-              {filteredItems.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={8}
-                    className="px-6 py-10 text-center text-gray-400"
-                  >
-                    No items found
-                  </td>
-                </tr>
-              )}
-
-              {paginatedItems.map((item, index) => (
-                <tr
-                  key={index}
-                  className="hover:bg-gray-50 border-t border-gray-200"
-                >
-                  <td className="px-6 py-4 xl:min-w-79 max-w-30 truncate">
-                    <Link href={`/manufacturer/inventory/${item._id}`}>
-                      {item.name}
-                    </Link>
-                  </td>
-                  <td className="px-6 py-4">{item.category}</td>
-                  <td className="px-6 py-4">{item.hsnCode}</td>
-                  <td className="px-6 py-4">
-                    ₹{item.basePrice} /{item.unit}
-                  </td>
-                  <td className="px-6 py-4">{item.gstPercentage}%</td>
-                  <td className="px-6 py-4">
-                    <Badge
-                      label={item.isActive ? "Active" : "inactive"}
-                      variant={item.isActive ? "success" : "danger"}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            Add New Lot
+          </Button>
         </div>
       </div>
 
-      <Pagination
-        totalItems={filteredItems.length}
-        currentPage={safePage}
-        pageSize={pageSize}
-        onPageChange={setPage}
-      />
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <KpiCard
+          icon={<BsBoxSeamFill className="w-6 h-6 text-primary" />}
+          label="Total Lots"
+          value={kpiMetrics.totalLots}
+          color="primary"
+        />
 
-      <AddEditTextileItemModal
-        open={open}
-        mode="add"
-        onClose={() => setOpen(false)}
-        onSuccess={fetchItems}
-      />
+        <KpiCard
+          icon={<MdInventory2 className="w-6 h-6 text-emerald-500" />}
+          label="Total Items"
+          value={kpiMetrics.totalItems}
+          color="emerald"
+        />
+
+        <KpiCard
+          icon={<MdInventory2 className="w-6 h-6 text-blue-500" />}
+          label="Total Stock Units"
+          value={kpiMetrics.totalStock}
+          color="blue"
+        />
+
+        <KpiCard
+          icon={<MdInventory2 className="w-6 h-6 text-primary" />}
+          label="Inventory Value"
+          value={formatCurrency(kpiMetrics.totalValue)}
+          color="primary"
+        />
+
+        <KpiCard
+          icon={<MdWarningAmber className="w-6 h-6 text-amber-500" />}
+          label="Low Stock Lots"
+          value={kpiMetrics.lowStockLots}
+          color="amber"
+        />
+      </div>
+
+      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+        <table className="min-w-245 w-full text-left">
+          <thead className="border-b border-slate-200 bg-slate-50">
+            <tr className="text-xs uppercase tracking-wide text-slate-500">
+              <th className="px-6 py-4">Lot ID / Collection</th>
+              <th className="px-6 py-4">Item Count</th>
+              <th className="px-6 py-4">Total Stock</th>
+              <th className="px-6 py-4">Valuation</th>
+              <th className="px-6 py-4">Date Received</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredLots.length === 0 && (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="px-6 py-16 text-center text-slate-500"
+                >
+                  No lots matched this view.
+                </td>
+              </tr>
+            )}
+
+            {filteredLots.map((lot) => (
+              <tr
+                key={lot.id}
+                className="border-b border-slate-200 transition-colors hover:bg-slate-50 cursor-pointer"
+                onClick={() => router.push(`/manufacturer/inventory/${lot.id}`)}
+              >
+                <td className="px-6 py-5">
+                  <p className="font-semibold text-slate-900">
+                    {lot.lotNumber}
+                  </p>
+                  <p className="text-xs text-slate-500">{lot.collection}</p>
+                </td>
+
+                <td className="px-6 py-5 font-semibold text-slate-900">
+                  {lot.itemsCount} items
+                </td>
+                <td className="px-6 py-5 font-semibold text-slate-900">
+                  {lot.totalStock}
+                </td>
+                <td className="px-6 py-5 font-semibold text-slate-900">
+                  {formatCurrency(lot.totalValue)}
+                </td>
+                <td className="px-6 py-5 text-slate-600">
+                  {formatDate(lot.dateReceived)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

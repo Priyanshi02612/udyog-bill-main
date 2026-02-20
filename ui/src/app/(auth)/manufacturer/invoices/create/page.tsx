@@ -13,12 +13,14 @@ import { InvoiceItemsTable } from "../../../../../components/admin/invoice-items
 import { AuthContext } from "../../../../../context/auth.context";
 import {
   GstType,
+  INVOICE_PREFIX,
   MAX_INVOICE_NOTES_LENGTH,
   TaxMode,
 } from "../../../../../utils/constants";
 import { mockInvoices } from "../../../../../utils/data";
 import {
   getDefaultFinancialYear,
+  getNextDocumentNumber,
   getErrorMessage,
   getGstRateFromType,
   getInvoicePreviewMetrics,
@@ -28,7 +30,6 @@ import {
   AuthContextType,
   CreateManufacturerInvoicePayload,
   FinancialYear,
-  Invoice,
   InvoiceCreateState,
   InvoiceItem,
   InvoiceSubmitAction,
@@ -47,21 +48,6 @@ const createInvoiceItem = (gstPercentage: number): InvoiceItem => ({
   itemId: "",
   itemName: "",
 });
-
-const getNextInvoiceNumber = (invoices: Invoice[], year: number) => {
-  const prefix = `INV-${year}-`;
-
-  const maxSequence = invoices.reduce((max, invoice) => {
-    if (!invoice.invoiceNumber.startsWith(prefix)) {
-      return max;
-    }
-
-    const sequence = Number(invoice.invoiceNumber.slice(prefix.length));
-    return Number.isFinite(sequence) ? Math.max(max, sequence) : max;
-  }, 0);
-
-  return `${prefix}${String(maxSequence + 1).padStart(3, "0")}`;
-};
 
 export default function CreateInvoicePage() {
   const router = useRouter();
@@ -202,9 +188,13 @@ export default function CreateInvoicePage() {
       return;
     }
 
-    const nextInvoiceNumber = getNextInvoiceNumber(
-      userInvoices,
-      new Date().getFullYear(),
+    const currentInvoiceNumbers = userInvoices.map(
+      (invoice) => invoice.invoiceNumber,
+    );
+
+    const nextInvoiceNumber = getNextDocumentNumber(
+      currentInvoiceNumbers,
+      INVOICE_PREFIX,
     );
 
     setInvoiceDetails((prev) =>
@@ -411,7 +401,7 @@ export default function CreateInvoicePage() {
               Invoice Number
             </label>
 
-            <div className="w-full  rounded-lg border p-3.25 text-sm bg-slate-50 text-[#0d161b] border-[#cfdde7]">
+            <div className="w-full  rounded-lg border p-1.75 text-sm bg-slate-50 text-[#0d161b] border-[#cfdde7]">
               {invoiceNumber}
             </div>
           </div>

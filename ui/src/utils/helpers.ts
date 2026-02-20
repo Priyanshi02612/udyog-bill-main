@@ -76,6 +76,25 @@ export const parseNumericInput = (value: string) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
+export const getNextDocumentNumber = (
+  existingNumbers: string[],
+  typePrefix: string,
+) => {
+  const year = new Date().getFullYear();
+  const prefix = `${typePrefix}-${year}-`;
+
+  const maxSequence = existingNumbers.reduce((max, currentNumber) => {
+    if (!currentNumber.startsWith(prefix)) {
+      return max;
+    }
+
+    const sequence = Number(currentNumber.slice(prefix.length));
+    return Number.isFinite(sequence) ? Math.max(max, sequence) : max;
+  }, 0);
+
+  return `${prefix}${String(maxSequence + 1).padStart(3, "0")}`;
+};
+
 export const isDateInFinancialYear = (date: string, fy: string) => {
   const [startYear, endYear] = fy.replace("FY", "").split("-").map(Number);
   const dateObj = new Date(date);

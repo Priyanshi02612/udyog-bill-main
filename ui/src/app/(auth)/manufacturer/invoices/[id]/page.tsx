@@ -214,7 +214,8 @@ const InvoicePreviewPage = () => {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {invoice.items.map((item, index) => {
-                  const itemTaxableAmount = item.basePrice * item.quantity;
+                  const itemTaxableAmount =
+                    Number(item.basePrice) * Number(item.quantity);
                   const itemGstAmount =
                     (itemTaxableAmount * effectiveGstRate) / 100;
                   const itemTotalWithGst = itemTaxableAmount + itemGstAmount;
@@ -241,7 +242,7 @@ const InvoicePreviewPage = () => {
                         {formatCurrency(itemGstAmount)}
                       </td>
                       <td className="px-3 py-4 text-sm text-slate-600">
-                        {formatCurrency(item.basePrice)}
+                        {formatCurrency(Number(item.basePrice))}
                       </td>
                       <td className="px-3 py-4 text-right text-sm font-bold text-slate-900">
                         {formatCurrency(itemTotalWithGst)}

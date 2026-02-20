@@ -135,3 +135,7 @@ export const taxModeOptions = [
   { label: "CGST + SGST", value: TaxMode.CGST_SGST },
   { label: "IGST", value: TaxMode.IGST },
 ];
+
+export const GENERAL_PREFIX = "GEN";
+export const LOT_PREFIX = "LOT";
+export const INVOICE_PREFIX = "INV";

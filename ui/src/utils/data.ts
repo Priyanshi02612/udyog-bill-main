@@ -1,5 +1,13 @@
 import { GstType, ItemCategory, TaxMode } from "./constants";
-import { Invoice, InvoiceItem, InvoicePartyInfo, Item, Party } from "./types";
+import {
+  Inventory,
+  InventoryItem as InventoryItemType,
+  Invoice,
+  InvoiceItem,
+  InvoicePartyInfo,
+  Item,
+  Party,
+} from "./types";
 
 export const initialItems: Item[] = [
   {
@@ -115,6 +123,7 @@ export const initialItems: Item[] = [
     gstPercentage: 12,
     hsnCode: 5401,
 
+    materialType: "Linen",
     color: "#000000", // Black
 
     ownerId: "65f1c9a1b4e5a12c9dOWNER3",
@@ -192,6 +201,90 @@ export const initialItems: Item[] = [
 
     createdAt: "2022-11-10T09:00:00.000Z",
     updatedAt: "2023-01-02T12:00:00.000Z",
+  },
+];
+
+export const mockInventoryItems: InventoryItemType[] = [
+  {
+    id: "inv-item-1",
+    inventoryId: "inventory-1",
+    itemId: "65f1c9a1b4e5a12c9d000001",
+    totalStock: 520,
+    currentStock: 470,
+  },
+  {
+    id: "inv-item-2",
+    inventoryId: "inventory-1",
+    itemId: "65f1c9a1b4e5a12c9d000003",
+    totalStock: 320,
+    currentStock: 280,
+  },
+  {
+    id: "inv-item-3",
+    inventoryId: "inventory-2",
+    itemId: "65f1c9a1b4e5a12c9d000002",
+    totalStock: 740,
+    currentStock: 610,
+  },
+  {
+    id: "inv-item-4",
+    inventoryId: "inventory-2",
+    itemId: "65f1c9a1b4e5a12c9d000004",
+    totalStock: 260,
+    currentStock: 200,
+  },
+  {
+    id: "inv-item-5",
+    inventoryId: "inventory-3",
+    itemId: "65f1c9a1b4e5a12c9d000005",
+    totalStock: 900,
+    currentStock: 760,
+  },
+  {
+    id: "inv-item-6",
+    inventoryId: "inventory-3",
+    itemId: "65f1c9a1b4e5a12c9d000006",
+    totalStock: 180,
+    currentStock: 0,
+  },
+];
+
+export const mockInventories: Inventory[] = [
+  {
+    id: "inventory-1",
+    collection: "Silk Collection",
+    lotNumber: "LOT-2026-001",
+    itemsCount: 2,
+    totalStock: 750,
+    dateReceived: "2026-01-08",
+    totalValue: 516100,
+    inventoryItems: mockInventoryItems.filter(
+      (inventoryItem) => inventoryItem.inventoryId === "inventory-1",
+    ),
+  },
+  {
+    id: "inventory-2",
+    collection: "Cotton & Rayon Collection",
+    lotNumber: "LOT-2026-002",
+    itemsCount: 2,
+    totalStock: 810,
+    dateReceived: "2026-01-14",
+    totalValue: 174850,
+    inventoryItems: mockInventoryItems.filter(
+      (inventoryItem) => inventoryItem.inventoryId === "inventory-2",
+    ),
+  },
+  {
+    id: "inventory-3",
+    collection: "Thread & Linen Collection",
+    lotNumber: "LOT-2026-003",
+    itemsCount: 2,
+    totalStock: 760,
+    dateReceived: "2026-01-19",
+    totalValue: 49400,
+    inventoryItems: mockInventoryItems.filter(
+      (inventoryItem) => inventoryItem.inventoryId === "inventory-3",
+    ),
   },
 ];
 

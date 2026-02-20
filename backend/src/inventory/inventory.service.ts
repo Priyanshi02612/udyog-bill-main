@@ -80,4 +80,22 @@ export class InventoryService {
 
     return { ...inventory.toObject(), inventoryItems: createdInventoryItems };
   }
+
+  async getUsersInventoryLots(userId: string, page = 1, limit = 10) {
+    const skip = (page - 1) * limit;
+
+    const inventory = await this.inventoryModel
+      .find({ userId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const totalInventory = await this.inventoryModel.countDocuments({ userId });
+
+    return {
+      inventory,
+      totalInventory,
+    };
+  }
 }

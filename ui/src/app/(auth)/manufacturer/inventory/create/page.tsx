@@ -4,6 +4,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import {
   MdAdd,
+  MdArrowBack,
   MdDeleteOutline,
   MdInfo,
   MdOutlineCheckCircle,
@@ -14,14 +15,13 @@ import { Dropdown } from "../../../../../components/ui/dropdown";
 import { Input } from "../../../../../components/ui/input";
 import { Button } from "../../../../../components/ui/button";
 import { AuthContext } from "../../../../../context/auth.context";
-import { mockInventories } from "../../../../../utils/data";
 import {
   formatCurrency,
   getNextDocumentNumber,
   getErrorMessage,
   parseNumericInput,
 } from "../../../../../utils/helpers";
-import { AuthContextType, Item } from "../../../../../utils/types";
+import { AuthContextType, Inventory, Item } from "../../../../../utils/types";
 import { GENERAL_PREFIX, LOT_PREFIX } from "../../../../../utils/constants";
 import { ItemsService } from "../../../../../lib/api/items";
 import { InventoryService } from "../../../../../lib/api/inventory";
@@ -66,8 +66,22 @@ export default function CreateInventoryLotPage() {
 
     try {
       setIsLoading(true);
-      const response = await ItemsService.getUsersMasterItems(user._id);
-      setItems((response.data as Item[]) || []);
+      const [itemsResponse, inventoryResponse] = await Promise.all([
+        ItemsService.getUsersMasterItems(user._id),
+        InventoryService.getUsersInventory(user._id, 1, 50),
+      ]);
+
+      setItems((itemsResponse.data as Item[]) || []);
+
+      const currentLotNumbers = inventoryResponse.inventory.map(
+        (lot: Inventory) => lot.lotNumber,
+      );
+      const nextLotNumber = getNextDocumentNumber(
+        currentLotNumbers,
+        LOT_PREFIX,
+      );
+
+      setLotNumber((prev) => (prev === nextLotNumber ? prev : nextLotNumber));
     } catch (error) {
       toast.error(getErrorMessage(error) || "Failed to load inventory items");
     } finally {
@@ -78,13 +92,6 @@ export default function CreateInventoryLotPage() {
   useEffect(() => {
     fetchItems();
   }, [fetchItems]);
-
-  useEffect(() => {
-    const currentLotNumbers = mockInventories.map((lot) => lot.lotNumber);
-    const nextLotNumber = getNextDocumentNumber(currentLotNumbers, LOT_PREFIX);
-
-    setLotNumber((prev) => (prev === nextLotNumber ? prev : nextLotNumber));
-  }, []);
 
   const inventoryCatalog = useMemo(() => {
     return items
@@ -247,13 +254,24 @@ export default function CreateInventoryLotPage() {
 
   return (
     <div className="p-8 pb-0 min-h-[calc(100vh-124px)] relative">
-      <div className="mb-8">
-        <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-          Create New Inventory Lot
-        </h2>
-        <p className="text-primary text-xs md:text-base">
-          Register a new incoming shipment of raw materials or finished fabrics.
-        </p>
+      <div className="flex items-start gap-3">
+        <button
+          type="button"
+          className="text-primary hover:text-primary/80"
+          onClick={() => router.push("/manufacturer/inventory")}
+        >
+          <MdArrowBack className="h-5 w-5" />
+        </button>
+
+        <div className="mb-8 flex flex-col gap-2">
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+            Create New Inventory Lot
+          </h2>
+          <p className="text-primary text-xs md:text-base">
+            Register a new incoming shipment of raw materials or finished
+            fabrics.
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">

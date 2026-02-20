@@ -1,72 +1,96 @@
 "use client";
 
-import { useContext, useMemo, useState } from "react";
-import {
-  MdAdd,
-  MdInventory2,
-  MdOutlineSearch,
-  MdWarningAmber,
-} from "react-icons/md";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { MdAdd, MdInventory2, MdOutlineSearch } from "react-icons/md";
 
 import { AuthContext } from "../../../../context/auth.context";
 import { Button } from "../../../../components/ui/button";
 import { Input } from "../../../../components/ui/input";
 import { KpiCard } from "../../../../components/admin/kpi-card";
-import { formatCurrency, formatDate } from "../../../../utils/helpers";
-import { mockInventories } from "../../../../utils/data";
-import { AuthContextType } from "../../../../utils/types";
+import Pagination from "../../../../components/pagination";
+import {
+  formatCurrency,
+  formatDate,
+  getErrorMessage,
+} from "../../../../utils/helpers";
+import { AuthContextType, Inventory } from "../../../../utils/types";
+import { InventoryService } from "../../../../lib/api/inventory";
 import { BsBoxSeamFill } from "react-icons/bs";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+
+const PAGE_SIZE = 5;
 
 export default function InventoryPage() {
-  const { authLoading } = useContext(AuthContext) as AuthContextType;
+  const { user, authLoading } = useContext(AuthContext) as AuthContextType;
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [inventories, setInventories] = useState<Inventory[]>([]);
+  const [totalLots, setTotalLots] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
+
+  const totalPages = useMemo(
+    () => Math.ceil(totalLots / PAGE_SIZE),
+    [totalLots],
+  );
+  const safePage = Math.min(page, totalPages);
+
+  useEffect(() => {
+    const fetchInventoryLots = async () => {
+      try {
+        setIsLoading(true);
+        const response = await InventoryService.getUsersInventory(
+          user._id,
+          page,
+          PAGE_SIZE,
+        );
+        setInventories(response.inventory);
+        setTotalLots(response.totalInventory);
+      } catch (error) {
+        toast.error(getErrorMessage(error) || "Error while fetching inventory");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchInventoryLots();
+  }, [user, page]);
 
   const filteredLots = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    return mockInventories.filter((lot) => {
+    return inventories.filter((lot: Inventory) => {
       const matchesSearch =
         !query ||
-        lot.id.toLowerCase().includes(query) ||
         lot.lotNumber.toLowerCase().includes(query) ||
         lot.collection.toLowerCase().includes(query);
 
       return matchesSearch;
     });
-  }, [searchQuery]);
+  }, [searchQuery, inventories]);
 
   const kpiMetrics = useMemo(() => {
-    const totalLots = mockInventories.length;
-    const totalItems = mockInventories.reduce(
+    const totalItems = inventories.reduce(
       (sum, lot) => sum + lot.itemsCount,
       0,
     );
-    const totalStock = mockInventories.reduce(
+    const totalStock = inventories.reduce(
       (sum, lot) => sum + lot.totalStock,
       0,
     );
-    const totalValue = mockInventories.reduce(
+    const totalValue = inventories.reduce(
       (sum, lot) => sum + lot.totalValue,
       0,
     );
-    const lowStockLots = mockInventories.filter((lot) =>
-      lot.inventoryItems.some(
-        (inventoryItem) =>
-          inventoryItem.totalStock > 0 &&
-          inventoryItem.currentStock / inventoryItem.totalStock <= 0.2,
-      ),
-    ).length;
 
     return {
       totalLots,
       totalItems,
       totalStock,
       totalValue,
-      lowStockLots,
     };
-  }, []);
+  }, [totalLots, inventories]);
 
   if (authLoading) {
     return (
@@ -106,7 +130,7 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           icon={<BsBoxSeamFill className="w-6 h-6 text-primary" />}
           label="Total Lots"
@@ -134,13 +158,6 @@ export default function InventoryPage() {
           value={formatCurrency(kpiMetrics.totalValue)}
           color="primary"
         />
-
-        <KpiCard
-          icon={<MdWarningAmber className="w-6 h-6 text-amber-500" />}
-          label="Low Stock Lots"
-          value={kpiMetrics.lowStockLots}
-          color="amber"
-        />
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
@@ -155,7 +172,48 @@ export default function InventoryPage() {
             </tr>
           </thead>
           <tbody>
-            {filteredLots.length === 0 && (
+            {isLoading ? (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="px-6 py-16 text-center text-slate-500"
+                >
+                  <div className="flex items-center justify-center">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
+                  </div>
+                </td>
+              </tr>
+            ) : filteredLots.length > 0 ? (
+              filteredLots.map((lot: Inventory, index) => (
+                <tr
+                  key={index}
+                  className="border-b border-slate-200 transition-colors hover:bg-slate-50 cursor-pointer"
+                  onClick={() =>
+                    router.push(`/manufacturer/inventory/${lot.id}`)
+                  }
+                >
+                  <td className="px-6 py-5">
+                    <p className="font-semibold text-slate-900">
+                      {lot.lotNumber}
+                    </p>
+                    <p className="text-xs text-slate-500">{lot.collection}</p>
+                  </td>
+
+                  <td className="px-6 py-5 font-semibold text-slate-900">
+                    {lot.itemsCount} items
+                  </td>
+                  <td className="px-6 py-5 font-semibold text-slate-900">
+                    {lot.totalStock}
+                  </td>
+                  <td className="px-6 py-5 font-semibold text-slate-900">
+                    {formatCurrency(lot.totalValue)}
+                  </td>
+                  <td className="px-6 py-5 text-slate-600">
+                    {formatDate(lot.dateReceived)}
+                  </td>
+                </tr>
+              ))
+            ) : (
               <tr>
                 <td
                   colSpan={5}
@@ -165,37 +223,16 @@ export default function InventoryPage() {
                 </td>
               </tr>
             )}
-
-            {filteredLots.map((lot) => (
-              <tr
-                key={lot.id}
-                className="border-b border-slate-200 transition-colors hover:bg-slate-50 cursor-pointer"
-                onClick={() => router.push(`/manufacturer/inventory/${lot.id}`)}
-              >
-                <td className="px-6 py-5">
-                  <p className="font-semibold text-slate-900">
-                    {lot.lotNumber}
-                  </p>
-                  <p className="text-xs text-slate-500">{lot.collection}</p>
-                </td>
-
-                <td className="px-6 py-5 font-semibold text-slate-900">
-                  {lot.itemsCount} items
-                </td>
-                <td className="px-6 py-5 font-semibold text-slate-900">
-                  {lot.totalStock}
-                </td>
-                <td className="px-6 py-5 font-semibold text-slate-900">
-                  {formatCurrency(lot.totalValue)}
-                </td>
-                <td className="px-6 py-5 text-slate-600">
-                  {formatDate(lot.dateReceived)}
-                </td>
-              </tr>
-            ))}
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        totalItems={totalLots}
+        currentPage={safePage}
+        pageSize={PAGE_SIZE}
+        onPageChange={setPage}
+      />
     </div>
   );
 }

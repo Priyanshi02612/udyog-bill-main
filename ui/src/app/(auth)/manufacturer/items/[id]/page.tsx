@@ -72,7 +72,7 @@ export default function ItemSpecificationDetail() {
   const fetchItem = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await ItemsService.getInventoryItemById(id as string);
+      const response = await ItemsService.getMasterItemById(id as string);
       setItem(response.data);
     } catch (error) {
       toast.error(getErrorMessage(error) || "Failed to load item details");
@@ -87,7 +87,7 @@ export default function ItemSpecificationDetail() {
 
   const handleDelete = async () => {
     try {
-      await ItemsService.deleteInventoryItem(id as string);
+      await ItemsService.deleteMasterItem(id as string);
       toast.success("Item deleted successfully");
       router.push("/manufacturer/items");
     } catch (error) {

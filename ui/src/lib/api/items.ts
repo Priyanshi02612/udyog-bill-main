@@ -3,7 +3,7 @@ import { API_URL } from "./auth";
 import { Item } from "../../utils/types";
 
 export class ItemsService {
-  static async getUsersInventory(ownerId: string | undefined) {
+  static async getUsersMasterItems(ownerId: string | undefined) {
     if (!ownerId) {
       return [];
     }
@@ -24,7 +24,7 @@ export class ItemsService {
     }
   }
 
-  static async getInventoryItemById(itemId: string | undefined) {
+  static async getMasterItemById(itemId: string | undefined) {
     if (!itemId) {
       return [];
     }
@@ -45,7 +45,7 @@ export class ItemsService {
     }
   }
 
-  static async createInventoryItem(data: Item) {
+  static async createMasterItem(data: Item) {
     try {
       const response = await axios.post(`${API_URL}/items`, data);
 
@@ -62,7 +62,7 @@ export class ItemsService {
     }
   }
 
-  static async updateInventoryItem(itemId: string, data: Item) {
+  static async updateMasterItem(itemId: string, data: Item) {
     try {
       const response = await axios.patch(`${API_URL}/items/${itemId}`, data);
 
@@ -101,7 +101,7 @@ export class ItemsService {
     return response.data?.secure_url as string;
   }
 
-  static async deleteInventoryItem(itemId: string) {
+  static async deleteMasterItem(itemId: string) {
     try {
       const response = await axios.delete(`${API_URL}/items/${itemId}`);
 

@@ -36,7 +36,7 @@ const filters = [
 
 export default function ManufacturerInventoryPage() {
   const { user, authLoading } = useContext(AuthContext) as AuthContextType;
-  const [items, setItems] = useState<Item[]>(initialItems);
+  const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [activeItemCategory, setActiveItemCategory] = useState<
     ItemCategory | "All"
@@ -58,7 +58,7 @@ export default function ManufacturerInventoryPage() {
 
     try {
       setIsLoading(true);
-      const response = await ItemsService.getUsersInventory(user._id);
+      const response = await ItemsService.getUsersMasterItems(user._id);
       setItems((response.data as Item[]) || []);
     } catch (error) {
       toast.error(getErrorMessage(error) || "Failed to load inventory items");

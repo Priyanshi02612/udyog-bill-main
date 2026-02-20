@@ -113,14 +113,14 @@ export default function AddEditTextileItemModal({
       delete payload.imagePreview;
 
       if (mode === "add") {
-        await ItemsService.createInventoryItem(payload);
+        await ItemsService.createMasterItem(payload);
         toast.success("Item created successfully");
       } else {
         if (!itemDetails._id) {
           toast.error("Item id is missing");
           return;
         }
-        await ItemsService.updateInventoryItem(itemDetails._id, payload);
+        await ItemsService.updateMasterItem(itemDetails._id, payload);
         toast.success("Item updated successfully");
       }
 

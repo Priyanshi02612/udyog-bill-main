@@ -37,4 +37,15 @@ export class InventoryController {
       return ResponseHandler.handle(null, true, error.message, 400);
     }
   }
+
+  @Get('/details/:inventoryId')
+  async getInventoryDetails(@Param('inventoryId') inventoryId: string) {
+    try {
+      const response =
+        await this.inventoryService.getInventoryDetails(inventoryId);
+      return ResponseHandler.handle(response);
+    } catch (error: any) {
+      return ResponseHandler.handle(null, true, error.message, 400);
+    }
+  }
 }

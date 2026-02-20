@@ -189,7 +189,7 @@ export default function InventoryPage() {
                   key={index}
                   className="border-b border-slate-200 transition-colors hover:bg-slate-50 cursor-pointer"
                   onClick={() =>
-                    router.push(`/manufacturer/inventory/${lot.id}`)
+                    router.push(`/manufacturer/inventory/${lot._id}`)
                   }
                 >
                   <td className="px-6 py-5">

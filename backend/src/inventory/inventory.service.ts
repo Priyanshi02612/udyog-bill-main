@@ -1,8 +1,13 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { InventoryItem } from '../db/schema/inventory-item.schema';
 import { Inventory } from '../db/schema/inventory.schema';
+import { Item } from '../db/schema/item.schema';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { isEqual } from 'lodash';
 
@@ -13,6 +18,8 @@ export class InventoryService {
     private readonly inventoryModel: Model<Inventory>,
     @InjectModel(InventoryItem.name)
     private readonly inventoryItemModel: Model<InventoryItem>,
+    @InjectModel(Item.name)
+    private readonly itemModel: Model<Item>,
   ) {}
 
   async createInventoryLot(createInventoryDto: CreateInventoryDto) {
@@ -96,6 +103,67 @@ export class InventoryService {
     return {
       inventory,
       totalInventory,
+    };
+  }
+
+  async getInventoryDetails(inventoryId: string) {
+    const inventory = await this.inventoryModel.findById(inventoryId).lean();
+
+    if (!inventory) {
+      throw new NotFoundException('Inventory lot not found');
+    }
+
+    const inventoryItems = await this.inventoryItemModel
+      .find({ inventoryId })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const itemIds = inventoryItems.map((item) => item.itemId);
+
+    if (!itemIds.length) {
+      return { ...inventory, inventoryItems: [] };
+    }
+
+    const masterItems = await this.itemModel
+      .find(
+        { _id: { $in: itemIds } },
+        {
+          name: 1,
+          unit: 1,
+          hsnCode: 1,
+          basePrice: 1,
+          category: 1,
+          materialType: 1,
+        },
+      )
+      .lean();
+
+    const mappedInventoryItems = inventoryItems.map((invItem) => {
+      const masterItem = masterItems.find(
+        (m) => String(m._id) === String(invItem.itemId),
+      );
+
+      const consumedStock = invItem.totalStock - invItem.currentStock;
+      const stockRatio =
+        invItem.totalStock > 0 ? invItem.currentStock / invItem.totalStock : 0;
+
+      return {
+        ...invItem,
+        itemName: masterItem?.name,
+        unit: masterItem?.unit,
+        hsnCode: masterItem?.hsnCode,
+        basePrice: masterItem?.basePrice,
+        itemCategory: masterItem?.category,
+        materialType: masterItem?.materialType,
+        consumedStock,
+        stockRatio,
+        currentValue: invItem.currentStock * (masterItem?.basePrice || 0),
+      };
+    });
+
+    return {
+      ...inventory,
+      inventoryItems: mappedInventoryItems,
     };
   }
 }

@@ -5,6 +5,7 @@ import {
   InventoryItem,
   InventoryItemSchema,
 } from '../db/schema/inventory-item.schema';
+import { Item, ItemSchema } from '../db/schema/item.schema';
 import { InventoryController } from './inventory.controller';
 import { InventoryService } from './inventory.service';
 
@@ -18,6 +19,10 @@ import { InventoryService } from './inventory.service';
       {
         name: InventoryItem.name,
         schema: InventoryItemSchema,
+      },
+      {
+        name: Item.name,
+        schema: ItemSchema,
       },
     ]),
   ],

@@ -124,10 +124,19 @@ export type InventoryItem = {
   itemId: string;
   totalStock: number;
   currentStock: number;
+  itemName?: string;
+  unit?: string;
+  hsnCode?: number;
+  basePrice?: number;
+  itemCategory?: string;
+  materialType?: string;
+  consumedStock?: number;
+  stockRatio?: number;
+  currentValue?: number;
 };
 
 export type Inventory = {
-  id: string;
+  _id: string;
   collection: string;
   lotNumber: string;
   itemsCount: number;

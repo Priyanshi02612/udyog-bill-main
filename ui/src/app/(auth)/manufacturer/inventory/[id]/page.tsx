@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useMemo } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   MdArrowBack,
@@ -12,69 +12,65 @@ import { BsBoxSeamFill } from "react-icons/bs";
 
 import { AuthContext } from "../../../../../context/auth.context";
 import { KpiCard } from "../../../../../components/admin/kpi-card";
-import { AuthContextType } from "../../../../../utils/types";
-import { formatCurrency, formatDate } from "../../../../../utils/helpers";
-import { initialItems, mockInventories } from "../../../../../utils/data";
+import {
+  AuthContextType,
+  Inventory,
+  InventoryItem,
+} from "../../../../../utils/types";
+import {
+  formatCurrency,
+  formatDate,
+  getErrorMessage,
+} from "../../../../../utils/helpers";
+import { InventoryService } from "../../../../../lib/api/inventory";
+import toast from "react-hot-toast";
 
 export default function InventoryLotDetailsPage() {
   const { authLoading } = useContext(AuthContext) as AuthContextType;
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const [inventoryLot, setInventoryLot] = useState<Inventory>();
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const lot = useMemo(
-    () => mockInventories.find((inventory) => inventory.id === id),
-    [id],
-  );
+  useEffect(() => {
+    const fetchInventoryDetails = async () => {
+      try {
+        setIsLoading(true);
 
-  const rowData = useMemo(() => {
-    if (!lot) {
-      return [];
-    }
+        const response = await InventoryService.getInventoryDetails(id);
+        setInventoryLot(response);
+        setInventoryItems(response.inventoryItems);
+      } catch (error) {
+        toast.error(
+          getErrorMessage(error) || "Error while fetching lot details",
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    return lot.inventoryItems.map((inventoryItem) => {
-      const item = initialItems.find((catalogItem) => {
-        return catalogItem._id === inventoryItem.itemId;
-      });
-
-      const consumedStock =
-        inventoryItem.totalStock - inventoryItem.currentStock;
-      const stockRatio =
-        inventoryItem.totalStock > 0
-          ? inventoryItem.currentStock / inventoryItem.totalStock
-          : 0;
-
-      return {
-        ...inventoryItem,
-        itemName: item?.name || "Unknown Item",
-        itemCategory: item?.category || "N/A",
-        hsnCode: item?.hsnCode || "N/A",
-        unit: item?.unit || "unit",
-        basePrice: item?.basePrice || 0,
-        consumedStock,
-        stockRatio,
-        currentValue: inventoryItem.currentStock * (item?.basePrice || 0),
-      };
-    });
-  }, [lot]);
+    fetchInventoryDetails();
+  }, [id]);
 
   const metrics = useMemo(() => {
-    const totalReceivedStock = rowData.reduce(
+    const totalReceivedStock = inventoryItems.reduce(
       (sum, row) => sum + row.totalStock,
       0,
     );
-    const currentStock = rowData.reduce(
+    const currentStock = inventoryItems.reduce(
       (sum, row) => sum + row.currentStock,
       0,
     );
     const consumedStock = totalReceivedStock - currentStock;
-    const totalCurrentValue = rowData.reduce(
-      (sum, row) => sum + row.currentValue,
+    const totalCurrentValue = inventoryItems.reduce(
+      (sum, row) => sum + (row.currentValue ?? 0),
       0,
     );
-    const lowStockItems = rowData.filter(
+    const lowStockItems = inventoryItems.filter(
       (row) => row.totalStock > 0 && row.currentStock / row.totalStock <= 0.2,
     ).length;
-    const outOfStockItems = rowData.filter(
+    const outOfStockItems = inventoryItems.filter(
       (row) => row.currentStock === 0,
     ).length;
 
@@ -86,9 +82,9 @@ export default function InventoryLotDetailsPage() {
       lowStockItems,
       outOfStockItems,
     };
-  }, [rowData]);
+  }, [inventoryItems]);
 
-  if (authLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="flex h-[calc(100vh-64px)] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
@@ -108,7 +104,7 @@ export default function InventoryLotDetailsPage() {
     );
   }
 
-  if (!lot) {
+  if (!inventoryLot) {
     return (
       <div className="min-h-[calc(100vh-124px)] p-8">
         <div className="flex items-start gap-3 mt-4 rounded-2xl border border-slate-200 bg-white p-8">
@@ -134,19 +130,20 @@ export default function InventoryLotDetailsPage() {
 
         <div className="mb-8 flex flex-col gap-2">
           <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-            {lot.lotNumber}
+            {inventoryLot.lotNumber}
           </h2>
           <p className="text-primary text-xs md:text-base">
-            {lot.collection} | Received on {formatDate(lot.dateReceived)}
+            {inventoryLot.collection} | Received on{" "}
+            {formatDate(inventoryLot.dateReceived)}
           </p>
         </div>
       </div>
 
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6">
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
         <KpiCard
           icon={<BsBoxSeamFill className="w-6 h-6 text-primary" />}
           label="Items in Lot"
-          value={lot.itemsCount}
+          value={inventoryLot.itemsCount}
           color="primary"
         />
         <KpiCard
@@ -195,34 +192,43 @@ export default function InventoryLotDetailsPage() {
             </tr>
           </thead>
           <tbody>
-            {rowData.map((row) => {
+            {inventoryItems.map((inventoryItem, index) => {
               const healthPercent = Math.max(
                 0,
-                Math.min(Math.round(row.stockRatio * 100), 100),
+                Math.min(
+                  Math.round((inventoryItem.stockRatio ?? 0) * 100),
+                  100,
+                ),
               );
-              const lowStock = row.totalStock > 0 && row.stockRatio <= 0.2;
-              const outOfStock = row.currentStock === 0;
+              const lowStock =
+                inventoryItem.totalStock > 0 &&
+                (inventoryItem.stockRatio ?? 0) <= 0.2;
+              const outOfStock = inventoryItem.currentStock === 0;
 
               return (
-                <tr key={row.id} className="border-b border-slate-200">
+                <tr key={index} className="border-b border-slate-200">
                   <td className="px-6 py-5">
                     <p className="font-semibold text-slate-900">
-                      {row.itemName}
+                      {inventoryItem.itemName}
                     </p>
-                    <p className="text-xs text-slate-500">{row.itemCategory}</p>
+                    <p className="text-xs text-slate-500">
+                      {inventoryItem.itemCategory}
+                    </p>
                   </td>
                   <td className="px-6 py-5 text-slate-600">
-                    <p>HSN: {row.hsnCode}</p>
-                    <p className="text-xs text-slate-500">{row.unit}</p>
+                    <p>HSN: {inventoryItem.hsnCode}</p>
+                    <p className="text-xs text-slate-500">
+                      {inventoryItem.unit}
+                    </p>
                   </td>
                   <td className="px-6 py-5 font-semibold text-slate-900">
-                    {row.totalStock}
+                    {inventoryItem.totalStock}
                   </td>
                   <td className="px-6 py-5 font-semibold text-slate-900">
-                    {row.currentStock}
+                    {inventoryItem.currentStock}
                   </td>
                   <td className="px-6 py-5 font-semibold text-slate-900">
-                    {row.consumedStock}
+                    {inventoryItem.consumedStock}
                   </td>
                   <td className="px-6 py-5">
                     <div className="mb-2 h-2.5 w-full rounded-full bg-slate-100">
@@ -255,7 +261,7 @@ export default function InventoryLotDetailsPage() {
                     </p>
                   </td>
                   <td className="px-6 py-5 font-semibold text-slate-900">
-                    {formatCurrency(row.currentValue)}
+                    {formatCurrency(inventoryItem.currentValue ?? 0)}
                   </td>
                 </tr>
               );

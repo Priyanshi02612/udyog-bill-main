@@ -246,6 +246,7 @@ export default function Invoices() {
             size="sm"
             leadingIcon={<MdBolt className="w-5 h-5" />}
             className="w-full sm:w-auto"
+            onClick={() => router.push("/manufacturer/invoices/create-ai")}
           >
             Create With AI
           </Button>

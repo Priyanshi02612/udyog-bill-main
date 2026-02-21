@@ -167,10 +167,8 @@ export type InvoicePartyInfo = {
   contactPerson: string;
   phone: string;
   email: string;
-  addressLine1: string;
-  city: string;
+  registeredAddress: string;
   state: string;
-  pincode: string;
 };
 
 export type Invoice = {

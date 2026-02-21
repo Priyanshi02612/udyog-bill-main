@@ -111,10 +111,8 @@ export const MOCK_BUYERS: InvoicePartyInfo[] = [
     contactPerson: "Amit Shah",
     phone: "+91 98765 43210",
     email: "accounts@radhekrishnasilks.in",
-    addressLine1: "Shop 17, Ring Road Textile Market",
-    city: "Surat",
+    registeredAddress: "Shop 17, Ring Road Textile Market",
     state: "Gujarat",
-    pincode: "395002",
   },
   {
     id: "party-2",
@@ -123,10 +121,8 @@ export const MOCK_BUYERS: InvoicePartyInfo[] = [
     contactPerson: "Vikram Malhotra",
     phone: "+91 98111 22446",
     email: "finance@bharattextiles.in",
-    addressLine1: "C-204, Cloth Merchants Complex",
-    city: "Ahmedabad",
+    registeredAddress: "C-204, Cloth Merchants Complex",
     state: "Gujarat",
-    pincode: "380015",
   },
   {
     id: "party-3",
@@ -135,10 +131,8 @@ export const MOCK_BUYERS: InvoicePartyInfo[] = [
     contactPerson: "Sunita Rao",
     phone: "+91 98205 11335",
     email: "billing@newfashionhub.in",
-    addressLine1: "12, Fashion Street, Kalbadevi",
-    city: "Mumbai",
+    registeredAddress: "12, Fashion Street, Kalbadevi",
     state: "Maharashtra",
-    pincode: "400002",
   },
   {
     id: "party-4",
@@ -147,10 +141,8 @@ export const MOCK_BUYERS: InvoicePartyInfo[] = [
     contactPerson: "Deepak Joshi",
     phone: "+91 98300 88442",
     email: "accounts@omsaicreations.in",
-    addressLine1: "45, Burrabazar Textile Lane",
-    city: "Kolkata",
+    registeredAddress: "45, Burrabazar Textile Lane",
     state: "West Bengal",
-    pincode: "700007",
   },
   {
     id: "party-5",
@@ -159,10 +151,8 @@ export const MOCK_BUYERS: InvoicePartyInfo[] = [
     contactPerson: "Rohit Mehta",
     phone: "+91 98450 66022",
     email: "payables@shreeganeshfabrics.in",
-    addressLine1: "No. 6, Textile Hub, Chickpet",
-    city: "Bengaluru",
+    registeredAddress: "No. 6, Textile Hub, Chickpet",
     state: "Karnataka",
-    pincode: "560053",
   },
 ];
 
@@ -174,10 +164,8 @@ export const MOCK_SELLERS: InvoicePartyInfo[] = [
     contactPerson: "Priyansh Patel",
     phone: "+91 99099 44002",
     email: "billing@vastrafabrik.com",
-    addressLine1: "Unit 42, Textile Industrial Estate",
-    city: "Surat",
+    registeredAddress: "Unit 42, Textile Industrial Estate",
     state: "Gujarat",
-    pincode: "395003",
   },
 ];
 

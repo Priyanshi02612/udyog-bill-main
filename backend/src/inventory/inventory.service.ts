@@ -251,4 +251,21 @@ export class InventoryService {
       inventoryItems: mappedInventoryItems,
     };
   }
+
+  async deleteInventory(inventoryId: string) {
+    const existingInventory = await this.inventoryModel
+      .findById(inventoryId)
+      .lean();
+
+    if (!existingInventory) {
+      throw new NotFoundException('Inventory lot not found');
+    }
+
+    await Promise.all([
+      this.inventoryItemModel.deleteMany({ inventoryId }),
+      this.inventoryModel.findByIdAndDelete(inventoryId),
+    ]);
+
+    return { message: 'Inventory lot deleted successfully' };
+  }
 }

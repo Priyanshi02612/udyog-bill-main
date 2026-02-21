@@ -1,6 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { ResponseHandler } from '../common/response.handler';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { InventoryService } from './inventory.service';
@@ -60,6 +69,16 @@ export class InventoryController {
     try {
       const response =
         await this.inventoryService.getInventoryDetails(inventoryId);
+      return ResponseHandler.handle(response);
+    } catch (error: any) {
+      return ResponseHandler.handle(null, true, error.message, 400);
+    }
+  }
+
+  @Delete('/:inventoryId')
+  async deleteInventory(@Param('inventoryId') inventoryId: string) {
+    try {
+      const response = await this.inventoryService.deleteInventory(inventoryId);
       return ResponseHandler.handle(response);
     } catch (error: any) {
       return ResponseHandler.handle(null, true, error.message, 400);

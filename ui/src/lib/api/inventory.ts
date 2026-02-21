@@ -80,4 +80,23 @@ export class InventoryService {
       throw error;
     }
   }
+
+  static async deleteInventory(inventoryId: string) {
+    try {
+      const response = await axios.delete(
+        `${API_URL}/inventory/${inventoryId}`,
+      );
+
+      if (!response.status) {
+        throw new Error(
+          response.data.message || `HTTP error! status: ${response.status}`,
+        );
+      }
+
+      return response.data.data;
+    } catch (error) {
+      console.error("Error while deleting inventory lot:", error);
+      throw error;
+    }
+  }
 }

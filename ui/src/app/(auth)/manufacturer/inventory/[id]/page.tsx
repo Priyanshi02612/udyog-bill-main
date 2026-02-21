@@ -4,6 +4,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   MdArrowBack,
+  MdDelete,
   MdEdit,
   MdInventory2,
   MdOutlineCheckCircle,
@@ -14,6 +15,7 @@ import { BsBoxSeamFill } from "react-icons/bs";
 import { AuthContext } from "../../../../../context/auth.context";
 import { KpiCard } from "../../../../../components/admin/kpi-card";
 import { Button } from "../../../../../components/ui/button";
+import ConfirmModal from "../../../../../components/ui/modal";
 import {
   AuthContextType,
   Inventory,
@@ -34,6 +36,8 @@ export default function InventoryLotDetailsPage() {
   const [inventoryLot, setInventoryLot] = useState<Inventory>();
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   useEffect(() => {
     const fetchInventoryDetails = async () => {
@@ -85,6 +89,23 @@ export default function InventoryLotDetailsPage() {
       outOfStockItems,
     };
   }, [inventoryItems]);
+
+  const handleDeleteInventory = async () => {
+    if (!inventoryLot) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      await InventoryService.deleteInventory(inventoryLot._id);
+      toast.success("Inventory lot deleted successfully");
+      router.push("/manufacturer/inventory");
+    } catch (error) {
+      toast.error(getErrorMessage(error) || "Error while deleting lot");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   if (authLoading || isLoading) {
     return (
@@ -142,17 +163,29 @@ export default function InventoryLotDetailsPage() {
           </div>
         </div>
 
-        <Button
-          type="button"
-          size="sm"
-          variant="outline-primary"
-          leadingIcon={<MdEdit className="h-4 w-4" />}
-          onClick={() =>
-            router.push(`/manufacturer/inventory/create?id=${inventoryLot._id}`)
-          }
-        >
-          Edit Lot
-        </Button>
+        <div className="flex gap-2 items-center">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline-primary"
+            leadingIcon={<MdEdit className="h-4 w-4" />}
+            onClick={() =>
+              router.push(
+                `/manufacturer/inventory/create?id=${inventoryLot._id}`,
+              )
+            }
+          >
+            Edit Lot
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline-secondary"
+            onClick={() => setDeleteOpen(true)}
+          >
+            Delete Lot
+          </Button>
+        </div>
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
@@ -292,6 +325,16 @@ export default function InventoryLotDetailsPage() {
           stock.
         </div>
       ) : null}
+
+      <ConfirmModal
+        open={deleteOpen}
+        title="Delete Inventory"
+        description={`Are you sure you want to delete this inventory? This action cannot be undone.`}
+        confirmText="Yes, Delete"
+        icon={<MdDelete className="h-6 w-6 text-red-400" />}
+        onCancel={() => setDeleteOpen(false)}
+        onConfirm={handleDeleteInventory}
+      />
     </div>
   );
 }

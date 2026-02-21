@@ -20,6 +20,29 @@ export class InventoryService {
     }
   }
 
+  static async updateInventory(
+    inventoryId: string,
+    data: CreateInventoryPayload,
+  ) {
+    try {
+      const response = await axios.put(
+        `${API_URL}/inventory/${inventoryId}`,
+        data,
+      );
+
+      if (!response.status) {
+        throw new Error(
+          response.data.message || `HTTP error! status: ${response.status}`,
+        );
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error("Error while updating inventory lot:", error);
+      throw error;
+    }
+  }
+
   static async getUsersInventory(userId: string, page: number, limit: number) {
     try {
       const response = await axios.get(

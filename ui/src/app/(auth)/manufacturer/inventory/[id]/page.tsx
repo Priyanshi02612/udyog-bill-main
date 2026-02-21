@@ -4,6 +4,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   MdArrowBack,
+  MdEdit,
   MdInventory2,
   MdOutlineCheckCircle,
   MdWarningAmber,
@@ -12,6 +13,7 @@ import { BsBoxSeamFill } from "react-icons/bs";
 
 import { AuthContext } from "../../../../../context/auth.context";
 import { KpiCard } from "../../../../../components/admin/kpi-card";
+import { Button } from "../../../../../components/ui/button";
 import {
   AuthContextType,
   Inventory,
@@ -125,18 +127,32 @@ export default function InventoryLotDetailsPage() {
 
   return (
     <div className="p-8 pb-0 min-h-[calc(100vh-124px)] relative">
-      <div className="flex items-start gap-3">
-        {renderButtonBack()}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-8">
+        <div className="flex items-start gap-3">
+          {renderButtonBack()}
 
-        <div className="mb-8 flex flex-col gap-2">
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-            {inventoryLot.lotNumber}
-          </h2>
-          <p className="text-primary text-xs md:text-base">
-            {inventoryLot.collection} | Received on{" "}
-            {formatDate(inventoryLot.dateReceived)}
-          </p>
+          <div className="flex flex-col gap-2">
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+              {inventoryLot.lotNumber}
+            </h2>
+            <p className="text-primary text-xs md:text-base">
+              {inventoryLot.collection} | Received on{" "}
+              {formatDate(inventoryLot.dateReceived)}
+            </p>
+          </div>
         </div>
+
+        <Button
+          type="button"
+          size="sm"
+          variant="outline-primary"
+          leadingIcon={<MdEdit className="h-4 w-4" />}
+          onClick={() =>
+            router.push(`/manufacturer/inventory/create?id=${inventoryLot._id}`)
+          }
+        >
+          Edit Lot
+        </Button>
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">

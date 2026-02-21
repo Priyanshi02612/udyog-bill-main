@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { ResponseHandler } from '../common/response.handler';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { InventoryService } from './inventory.service';
+import { UpdateInventoryDto } from './dto/update-inventory.dto';
 
 @Controller('inventory')
 export class InventoryController {
@@ -14,6 +15,22 @@ export class InventoryController {
     try {
       const response =
         await this.inventoryService.createInventoryLot(createInventoryDto);
+      return ResponseHandler.handle(response);
+    } catch (error: any) {
+      return ResponseHandler.handle(null, true, error.message, 400);
+    }
+  }
+
+  @Put('/:inventoryId')
+  async updateInventory(
+    @Param('inventoryId') inventoryId: string,
+    @Body() updateInventoryDto: UpdateInventoryDto,
+  ) {
+    try {
+      const response = await this.inventoryService.updateInventoryLot(
+        inventoryId,
+        updateInventoryDto,
+      );
       return ResponseHandler.handle(response);
     } catch (error: any) {
       return ResponseHandler.handle(null, true, error.message, 400);

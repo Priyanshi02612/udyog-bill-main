@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import {
   MdAdd,
@@ -21,17 +22,22 @@ import {
   getErrorMessage,
   parseNumericInput,
 } from "../../../../../utils/helpers";
-import { AuthContextType, Inventory, Item } from "../../../../../utils/types";
+import {
+  AuthContextType,
+  Inventory,
+  InventoryItem,
+  Item,
+} from "../../../../../utils/types";
 import { GENERAL_PREFIX, LOT_PREFIX } from "../../../../../utils/constants";
 import { ItemsService } from "../../../../../lib/api/items";
 import { InventoryService } from "../../../../../lib/api/inventory";
-import { useRouter } from "next/navigation";
 
 type LotItemRow = {
   id: string;
   itemId: string;
   quantity: string;
-  basePrice: string;
+  basePrice: number;
+  currentStock?: number;
 };
 
 const rowInputClass =
@@ -41,11 +47,16 @@ const createEmptyRow = (): LotItemRow => ({
   id: crypto.randomUUID(),
   itemId: "",
   quantity: "",
-  basePrice: "",
+  basePrice: 0,
 });
 
-export default function CreateInventoryLotPage() {
+export default function InventoryLotFormPage() {
   const { user, authLoading } = useContext(AuthContext) as AuthContextType;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const inventoryId = searchParams.get("id") || "";
+  const isEditMode = Boolean(inventoryId);
 
   const [lotNumber, setLotNumber] = useState("");
   const [dateReceived, setDateReceived] = useState("");
@@ -55,11 +66,10 @@ export default function CreateInventoryLotPage() {
   ]);
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const router = useRouter();
-
-  const fetchItems = useCallback(async () => {
-    if (!user) {
+  const loadData = useCallback(async () => {
+    if (!user?._id) {
       setItems([]);
       return;
     }
@@ -72,6 +82,31 @@ export default function CreateInventoryLotPage() {
       ]);
 
       setItems((itemsResponse.data as Item[]) || []);
+
+      if (isEditMode) {
+        const inventoryLot =
+          await InventoryService.getInventoryDetails(inventoryId);
+
+        setLotNumber(inventoryLot.lotNumber || "");
+        setSelectedCollection(inventoryLot.collection || "");
+        setDateReceived(
+          inventoryLot.dateReceived
+            ? new Date(inventoryLot.dateReceived).toISOString().split("T")[0]
+            : "",
+        );
+
+        const items =
+          inventoryLot.inventoryItems?.map((lineItem: InventoryItem) => ({
+            id: crypto.randomUUID(),
+            itemId: lineItem.itemId,
+            quantity: String(lineItem.totalStock),
+            basePrice: String(lineItem.basePrice ?? 0),
+            currentStock: lineItem.currentStock,
+          })) || [];
+
+        setInventoryItemRows(items.length ? items : [createEmptyRow()]);
+        return;
+      }
 
       const currentLotNumbers = inventoryResponse.inventory.map(
         (lot: Inventory) => lot.lotNumber,
@@ -87,11 +122,11 @@ export default function CreateInventoryLotPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user, isEditMode, inventoryId]);
 
   useEffect(() => {
-    fetchItems();
-  }, [fetchItems]);
+    loadData();
+  }, [loadData]);
 
   const inventoryCatalog = useMemo(() => {
     return items
@@ -139,7 +174,6 @@ export default function CreateInventoryLotPage() {
 
   const summary = useMemo(() => {
     const filledRows = inventoryItemRows.filter((row) => row.itemId);
-
     const uniqueItems = new Set(filledRows.map((row) => row.itemId)).size;
 
     const totalQuantity = filledRows.reduce(
@@ -148,18 +182,14 @@ export default function CreateInventoryLotPage() {
     );
 
     const totalValue = filledRows.reduce(
-      (sum, row) =>
-        sum +
-        parseNumericInput(row.quantity) * parseNumericInput(row.basePrice),
+      (sum, row) => sum + parseNumericInput(row.quantity) * row.basePrice,
       0,
     );
-
-    const averageCost = totalQuantity > 0 ? totalValue / totalQuantity : 0;
 
     return {
       uniqueItems,
       totalQuantity,
-      averageCost,
+      averageCost: totalQuantity > 0 ? totalValue / totalQuantity : 0,
       totalValue,
     };
   }, [inventoryItemRows]);
@@ -171,19 +201,18 @@ export default function CreateInventoryLotPage() {
           return row;
         }
 
-        const updatedRow = { ...row, [key]: value };
+        const nextRow = { ...row, [key]: value };
 
         if (key === "itemId") {
           const selectedItem = inventoryCatalog.find(
             (item) => item.id === value,
           );
-
           if (selectedItem && !row.basePrice) {
-            updatedRow.basePrice = String(selectedItem.defaultCost);
+            nextRow.basePrice = selectedItem.defaultCost;
           }
         }
 
-        return updatedRow;
+        return nextRow;
       }),
     );
   };
@@ -203,44 +232,83 @@ export default function CreateInventoryLotPage() {
   };
 
   const confirmLot = async () => {
+    if (!user?._id) {
+      toast.error("User not found");
+      return;
+    }
+
+    if (!selectedCollection) {
+      toast.error("Please select collection");
+      return;
+    }
+
     if (!dateReceived) {
       toast.error("Please select date of arrival");
       return;
     }
 
-    if (!summary.uniqueItems || !summary.totalQuantity) {
+    const validInventoryItems = inventoryItemRows.filter(
+      (row) => row.itemId && parseNumericInput(row.quantity) > 0,
+    );
+
+    if (!validInventoryItems.length) {
       toast.error("Add at least one valid line item");
       return;
     }
 
-    const inventoryItems = inventoryItemRows.map((item) => {
-      return {
-        itemId: item.itemId,
-        totalStock: Number(item.quantity),
-        currentStock: Number(item.quantity),
-      };
-    });
+    if (
+      new Set(validInventoryItems.map((row) => row.itemId)).size !==
+      validInventoryItems.length
+    ) {
+      toast.error("Same item cannot be added multiple times");
+      return;
+    }
 
     const payload = {
       userId: user._id,
       lotNumber,
       collection: selectedCollection,
       dateReceived,
-      itemsCount: summary.uniqueItems,
-      totalStock: summary.totalQuantity,
-      totalValue: summary.totalValue,
-      inventoryItems,
+      itemsCount: validInventoryItems.length,
+      totalStock: validInventoryItems.reduce(
+        (sum, row) => sum + parseNumericInput(row.quantity),
+        0,
+      ),
+      totalValue: validInventoryItems.reduce(
+        (sum, row) => sum + parseNumericInput(row.quantity) * row.basePrice,
+        0,
+      ),
+      inventoryItems: validInventoryItems.map((item) => ({
+        itemId: item.itemId,
+        totalStock: parseNumericInput(item.quantity),
+        currentStock: isEditMode
+          ? Math.min(
+              item.currentStock ?? parseNumericInput(item.quantity),
+              parseNumericInput(item.quantity),
+            )
+          : parseNumericInput(item.quantity),
+      })),
     };
 
     try {
-      await InventoryService.createInventory(payload);
-      setDateReceived("");
-      setSelectedCollection("");
-      setInventoryItemRows([createEmptyRow()]);
-      toast.success("Inventory lot confirmed");
-      router.replace("/manufacturer/inventory");
+      setIsSaving(true);
+
+      if (isEditMode) {
+        await InventoryService.updateInventory(inventoryId, payload);
+        toast.success("Inventory lot updated");
+        router.replace(`/manufacturer/inventory/${inventoryId}`);
+      } else {
+        await InventoryService.createInventory(payload);
+        toast.success("Inventory lot confirmed");
+        router.replace("/manufacturer/inventory");
+      }
     } catch (error) {
-      toast.error(getErrorMessage(error) || "Failed to create inventory lot");
+      toast.error(
+        getErrorMessage(error) ||
+          `Failed to ${isEditMode ? "update" : "create"} inventory lot`,
+      );
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -265,11 +333,12 @@ export default function CreateInventoryLotPage() {
 
         <div className="mb-8 flex flex-col gap-2">
           <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-            Create New Inventory Lot
+            {isEditMode ? "Update Inventory Lot" : "Create New Inventory Lot"}
           </h2>
           <p className="text-primary text-xs md:text-base">
-            Register a new incoming shipment of raw materials or finished
-            fabrics.
+            {isEditMode
+              ? "Update lot details and line items."
+              : "Register a new incoming shipment of raw materials or finished fabrics."}
           </p>
         </div>
       </div>
@@ -373,24 +442,8 @@ export default function CreateInventoryLotPage() {
                             className={rowInputClass}
                           />
                         </td>
-                        <td className="px-6 py-2">
-                          <div className="flex items-center rounded-lg border border-slate-200 bg-white">
-                            <span className="pl-3 text-sm text-slate-400">
-                              ₹
-                            </span>
-                            <input
-                              value={row.basePrice}
-                              onChange={(event) =>
-                                updateRow(
-                                  row.id,
-                                  "basePrice",
-                                  event.target.value.replace(/[^0-9.]/g, ""),
-                                )
-                              }
-                              placeholder="0.00"
-                              className={rowInputClass}
-                            />
-                          </div>
+                        <td className="px-6 py-2 text-sm text-slate-500">
+                          ₹ {selectedItem?.defaultCost || 0}
                         </td>
                         <td className="px-4 py-2 text-center">
                           <button
@@ -458,8 +511,9 @@ export default function CreateInventoryLotPage() {
               onClick={confirmLot}
               className="w-full"
               leadingIcon={<MdOutlineCheckCircle className="h-5 w-5" />}
+              loading={isSaving}
             >
-              Save Lot
+              {isEditMode ? "Update Lot" : "Save Lot"}
             </Button>
           </div>
         </div>

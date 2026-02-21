@@ -7,6 +7,7 @@ import {
   TaxMode,
 } from "./types";
 import { GstType as GstTypeEnum, TaxMode as TaxModeEnum } from "./constants";
+import axios from "axios";
 
 export const formatCurrency = (amount: number) =>
   new Intl.NumberFormat("en-IN", {
@@ -218,8 +219,12 @@ export const getInvoicePreviewMetrics = (
 };
 
 export const getErrorMessage = (error: unknown) => {
-  if (error instanceof Error) {
-    return error.message;
+  if (axios.isAxiosError(error)) {
+    if (error.response?.data?.message) {
+      return Array.isArray(error.response.data.message)
+        ? error.response.data.message.join(", ")
+        : error.response.data.message;
+    }
   }
 
   return "Internal server error";

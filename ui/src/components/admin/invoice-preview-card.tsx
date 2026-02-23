@@ -6,12 +6,12 @@ import {
   formatDate,
   getInvoicePreviewMetrics,
 } from "../../utils/helpers";
-import { Invoice, InvoicePartyInfo } from "../../utils/types";
+import { Invoice, UserProfile } from "../../utils/types";
 
 type InvoicePreviewCardProps = {
   invoice: Invoice;
-  buyerInfo?: InvoicePartyInfo;
-  sellerInfo?: InvoicePartyInfo;
+  buyerInfo?: UserProfile;
+  sellerInfo?: UserProfile;
   className?: string;
 };
 
@@ -36,7 +36,11 @@ export function InvoicePreviewCard({
     effectiveGstRate,
     roundOff,
     totalAmountDue,
-  } = getInvoicePreviewMetrics(invoice.items, invoice.gstType, taxMode);
+  } = getInvoicePreviewMetrics(
+    invoice.items,
+    invoice.gstType as GstType,
+    taxMode as TaxMode,
+  );
 
   return (
     <div
@@ -147,7 +151,7 @@ export function InvoicePreviewCard({
               const itemTotalWithGst = itemTaxableAmount + itemGstAmount;
 
               return (
-                <tr key={item.id}>
+                <tr key={index}>
                   <td className="px-3 py-4 text-sm text-slate-500">
                     {`0${index + 1}`.slice(-2)}
                   </td>

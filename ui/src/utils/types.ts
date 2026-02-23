@@ -179,16 +179,15 @@ export type Invoice = {
   invoiceDate: string;
   items: InvoiceItem[];
   subtotal: number;
-  gstType: GstType;
-  taxMode?: TaxMode;
+  gstType: GstType | string;
+  taxMode?: TaxMode | string;
   sgst: number;
   cgst: number;
   igst: number;
   total: number;
-  status: InvoiceStatus;
+  status: InvoiceStatus | string;
   dueDate: string;
-  notes?: string;
-  paymentTerms?: string;
+  buyerInfo?: UserProfile;
 };
 
 export type InvoiceItem = {
@@ -288,6 +287,7 @@ export type UserProfile = {
   gstTaxMode: TaxMode;
   financialYears: FinancialYear[];
   activeFinancialYearId: string;
+  email?: string;
 };
 
 export type CreateInventoryPayload = {

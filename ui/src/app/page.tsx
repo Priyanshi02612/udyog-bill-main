@@ -1,16 +1,17 @@
 "use client";
 
 import { useContext, useEffect } from "react";
-import { AuthContext } from "@/src/context/auth.context";
-import { AuthContextType } from "@/src/utils/types";
 import { useRouter } from "next/navigation";
+import { AuthContext } from "@/src/context/auth.context";
+import { CTASection } from "../components/cta-section";
+import { FeatureSection } from "../components/feature-section";
+import { Footer } from "../components/footer";
+import { Header } from "../components/header";
+import { HeroSection } from "../components/hero-section";
 import { UserRole } from "@/src/utils/constants";
+import { AuthContextType } from "@/src/utils/types";
 
-export default function HomeLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function Home() {
   const { user, authLoading } = useContext(AuthContext) as AuthContextType;
   const router = useRouter();
 
@@ -23,7 +24,7 @@ export default function HomeLayout({
         return;
       }
       if (user.role === UserRole.WHOLESALER) {
-        router.push("/wholesaler/dashboard");
+        router.push("/wholesaler");
         return;
       }
     } else {
@@ -41,7 +42,15 @@ export default function HomeLayout({
 
   return (
     <div className="bg-background-light textile-pattern hero-gradient min-h-screen flex flex-col">
-      {children}
+      <Header />
+
+      <div className="grow">
+        <HeroSection />
+        <FeatureSection />
+        <CTASection />
+      </div>
+
+      <Footer />
     </div>
   );
 }

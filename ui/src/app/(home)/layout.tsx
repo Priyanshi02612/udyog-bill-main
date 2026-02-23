@@ -26,10 +26,6 @@ export default function HomeLayout({
         router.push("/wholesaler/dashboard");
         return;
       }
-      if (user.role === UserRole.RETAILER) {
-        router.push("/retailer");
-        return;
-      }
     } else {
       router.push("/login");
     }

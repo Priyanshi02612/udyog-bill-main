@@ -27,7 +27,7 @@ const roleOptions: {
   {
     title: "Wholesaler",
     description:
-      "Connect manufacturers with retailers, manage regional distribution hubs and large B2B orders",
+      "Connect manufacturers with buyers, manage regional distribution hubs and large B2B orders",
     role: "wholesaler",
     icon: <MdInventory className="w-6 h-6 text-primary" />,
   },

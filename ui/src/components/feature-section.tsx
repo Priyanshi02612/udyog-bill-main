@@ -2,7 +2,6 @@ import {
   MdFactory,
   MdCheckCircle,
   MdInventory,
-  MdStorefront,
 } from "react-icons/md";
 
 const featureOptions = [
@@ -40,23 +39,6 @@ const featureOptions = [
       },
     ],
   },
-  {
-    id: 3,
-    title: "Retailers",
-    description:
-      "Integrate Point of Sale data with financial planning. Analyze margins per SKU and optimize your seasonal inventory turnover.",
-    icon: <MdStorefront className="w-6 h-6 text-primary" />,
-    notes: [
-      {
-        id: 1,
-        title: "SKU Margin Analysis",
-      },
-      {
-        id: 2,
-        title: "Automated Restocking",
-      },
-    ],
-  },
 ];
 
 export const FeatureSection = () => {
@@ -73,7 +55,7 @@ export const FeatureSection = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 gap-8">
           {featureOptions.map((feature, index) => {
             return (
               <div

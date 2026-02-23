@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { HttpException, HttpStatus } from '@nestjs/common';
 
@@ -24,7 +25,22 @@ export class ResponseHandler {
    *
    * @throws HttpException with the standardized error response.
    */
-  static error(message: string, status: number = HttpStatus.BAD_REQUEST) {
+  static error(
+    message: string,
+    status: number = HttpStatus.BAD_REQUEST,
+    errorFields: any = [],
+  ) {
+    if (errorFields.length > 0) {
+      throw new HttpException(
+        {
+          success: false,
+          message,
+          errorFields,
+        },
+        status,
+      );
+    }
+
     throw new HttpException(
       {
         success: false,
@@ -49,9 +65,10 @@ export class ResponseHandler {
     isError: boolean = false,
     message: string = 'Error occurred',
     status: number = HttpStatus.BAD_REQUEST,
+    errorFields: any = [],
   ) {
     if (isError) {
-      return this.error(message, status);
+      return this.error(message, status, errorFields);
     }
     return this.success(data);
   }

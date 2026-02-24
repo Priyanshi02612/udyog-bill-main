@@ -256,9 +256,9 @@ const InvoicePdfPage = ({ invoice }: { invoice: Invoice }) => {
         <View style={styles.topBlock}>
           <View>
             <Text style={styles.companyName}>{sellerInfo?.businessName}</Text>
-            <Text style={styles.subtleText}>{sellerInfo?.registeredAddress}</Text>
+            <Text style={styles.subtleText}>{sellerInfo?.addressLine1}</Text>
             <Text style={styles.subtleText}>
-              {sellerInfo?.state}
+              {`${sellerInfo?.city}, ${sellerInfo?.state} - ${sellerInfo?.pincode}`}
             </Text>
             <Text style={styles.subtleText}>GSTIN: {sellerInfo?.gstin}</Text>
             <Text style={styles.subtleText}>Email: {sellerInfo?.email}</Text>
@@ -291,9 +291,9 @@ const InvoicePdfPage = ({ invoice }: { invoice: Invoice }) => {
             <Text style={styles.sectionValue}>
               {buyerInfo?.businessName || invoice.buyerId}
             </Text>
-            <Text style={styles.subtleText}>{buyerInfo?.registeredAddress}</Text>
+            <Text style={styles.subtleText}>{buyerInfo?.addressLine1}</Text>
             <Text style={styles.subtleText}>
-             {buyerInfo?.state}
+              {`${buyerInfo?.city}, ${buyerInfo?.state} - ${buyerInfo?.pincode}`}
             </Text>
             <Text style={styles.subtleText}>GSTIN: {buyerInfo?.gstin}</Text>
             <Text style={styles.subtleText}>Contact: {buyerInfo?.phone}</Text>
@@ -302,9 +302,9 @@ const InvoicePdfPage = ({ invoice }: { invoice: Invoice }) => {
           <View style={styles.billShipBox}>
             <Text style={styles.sectionLabel}>SHIP FROM</Text>
             <Text style={styles.sectionValue}>{sellerInfo?.businessName}</Text>
-            <Text style={styles.subtleText}>{sellerInfo?.registeredAddress}</Text>
+            <Text style={styles.subtleText}>{sellerInfo?.addressLine1}</Text>
             <Text style={styles.subtleText}>
-              {sellerInfo?.state}
+              {`${sellerInfo?.city}, ${sellerInfo?.state} - ${sellerInfo?.pincode}`}
             </Text>
             <Text style={styles.subtleText}>Contact: {sellerInfo?.phone}</Text>
           </View>
@@ -324,7 +324,7 @@ const InvoicePdfPage = ({ invoice }: { invoice: Invoice }) => {
           </View>
 
           {invoice.items.map((item, index) => {
-            const itemTaxableAmount = Number(item.basePrice) * Number(item.quantity);
+            const itemTaxableAmount = item.basePrice * item.quantity;
             const itemGstAmount = (itemTaxableAmount * effectiveGstRate) / 100;
             const itemTotalWithGst = itemTaxableAmount + itemGstAmount;
 
@@ -346,7 +346,7 @@ const InvoicePdfPage = ({ invoice }: { invoice: Invoice }) => {
                   {formatCurrency(itemGstAmount)}
                 </Text>
                 <Text style={[styles.td, styles.colRate]}>
-                  {formatCurrency(Number(item.basePrice))}
+                  {formatCurrency(item.basePrice)}
                 </Text>
                 <Text style={[styles.tdBold, styles.colTotal]}>
                   {formatCurrency(itemTotalWithGst)}

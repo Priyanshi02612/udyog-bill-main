@@ -5,17 +5,7 @@ import toast from "react-hot-toast";
 import { OnboardingContextType, OnboardingData } from "../utils/types";
 import { EMAIL_REGEX, GSTIN_REGEX, PHONE_REGEX } from "../utils/constants";
 
-type RequiredOnboardingField =
-  | "contactPerson"
-  | "email"
-  | "password"
-  | "phone"
-  | "businessName"
-  | "gstin"
-  | "registeredAddress"
-  | "state";
-
-const labels: Record<RequiredOnboardingField, string> = {
+const labels: Record<keyof OnboardingData, string> = {
   contactPerson: "Contact person",
   email: "Email",
   password: "Password",
@@ -63,7 +53,7 @@ export function OnboardingProvider({
   };
 
   const validateForm = () => {
-    const fields = Object.keys(labels) as RequiredOnboardingField[];
+    const fields = Object.keys(labels) as (keyof OnboardingData)[];
 
     if (fields.every((key) => !onBoardingData[key])) {
       toast.error("Please fill the form to continue");

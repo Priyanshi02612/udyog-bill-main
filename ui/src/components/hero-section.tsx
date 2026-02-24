@@ -24,9 +24,9 @@ export const HeroSection = () => {
             </h1>
 
             <p className="text-lg text-slate-600 leading-relaxed">
-              From raw materials to distribution networks. Optimize your cash flow and
+              From raw materials to retail shelves. Optimize your cash flow and
               supply chain with the only all-in-one financial platform built for
-              Manufacturers and Wholesalers.
+              Manufacturers, Wholesalers, and Retailers.
             </p>
 
             <Button

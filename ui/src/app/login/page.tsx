@@ -1,6 +1,5 @@
 "use client";
 
-import { Suspense } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import loginCoverImage from "../../assets/login-cover.png";
@@ -20,7 +19,7 @@ import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { OnboardingContext } from "@/src/context/onboarding.context";
 
-const LoginContent = () => {
+const Login = () => {
   const { user } = useContext(AuthContext) as AuthContextType;
   const { resetOnBoardingState } = useContext(
     OnboardingContext,
@@ -63,6 +62,10 @@ const LoginContent = () => {
 
         case "wholesaler":
           router.replace("/wholesaler");
+          break;
+
+        case "retailer":
+          router.replace("/retailer");
           break;
 
         default:
@@ -212,20 +215,6 @@ const LoginContent = () => {
         </div>
       </div>
     </div>
-  );
-};
-
-const LoadingState = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
-  </div>
-);
-
-const Login = () => {
-  return (
-    <Suspense fallback={<LoadingState />}>
-      <LoginContent />
-    </Suspense>
   );
 };
 

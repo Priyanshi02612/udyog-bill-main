@@ -17,7 +17,6 @@ import {
   INVOICE_PREFIX,
   TaxMode,
 } from "../../../../../utils/constants";
-import { mockInvoices } from "../../../../../utils/data";
 import {
   getDefaultFinancialYear,
   getNextDocumentNumber,
@@ -49,7 +48,7 @@ const createInvoiceItem = (gstPercentage: number): InvoiceItem => ({
   gstPercentage,
   invoiceId: "",
   itemId: "",
-  itemName: "",
+  name: "",
 });
 
 type StockErrorField = {
@@ -67,6 +66,8 @@ export default function CreateInvoicePage() {
 
   const [wholesalers, setWholesalers] = useState<UserProfile[]>([]);
   const [masterItems, setMasterItems] = useState<Item[]>([]);
+  const [existingInvoices, setExistingInvoices] = useState<any[]>([]);
+  const [editableInvoice, setEditableInvoice] = useState<any | null>(null);
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceDetails, setInvoiceDetails] = useState<InvoiceCreateState>({
     wholesalerId: "",
@@ -117,13 +118,16 @@ export default function CreateInvoicePage() {
 
     const fetchInitialInvoiceData = async () => {
       try {
-        const [wholesalersResponse, itemsResponse] = await Promise.all([
+        const [wholesalersResponse, itemsResponse, invoicesResponse] =
+          await Promise.all([
           ManufacturerService.getWholesalers(user._id),
           ItemsService.getUsersMasterItems(user._id),
+          InvoiceService.getManufacturerInvoices(user._id),
         ]);
 
         setWholesalers(wholesalersResponse.data || []);
         setMasterItems((itemsResponse.data as Item[]) || []);
+        setExistingInvoices(invoicesResponse || []);
       } catch (error) {
         toast.error(
           getErrorMessage(error) || "Failed to fetch invoice form data",
@@ -149,34 +153,35 @@ export default function CreateInvoicePage() {
     [wholesalerId, wholesalers],
   );
 
-  const editableInvoice = useMemo(() => {
-    if (!invoiceId) {
-      return null;
-    }
+  useEffect(() => {
+    const fetchEditableInvoice = async () => {
+      if (!invoiceId) {
+        setEditableInvoice(null);
+        return;
+      }
 
-    return (
-      mockInvoices.find((invoice) => String(invoice.id) === invoiceId) ?? null
-    );
+      try {
+        const invoice = await InvoiceService.getInvoiceDetails(invoiceId);
+        setEditableInvoice(invoice);
+      } catch (error) {
+        toast.error(getErrorMessage(error) || "Failed to fetch invoice");
+        setEditableInvoice(null);
+      }
+    };
+
+    fetchEditableInvoice();
   }, [invoiceId]);
-
-  const userInvoices = useMemo(
-    () =>
-      mockInvoices.filter(
-        (invoice) => String(invoice.sellerId) === String(user?._id),
-      ),
-    [user],
-  );
 
   useEffect(() => {
     if (!editableInvoice) {
       return;
     }
 
-    const formWholesalerId = editableInvoice.buyerId.startsWith("party-")
-      ? editableInvoice.buyerId.replace("party-", "")
-      : editableInvoice.buyerId;
+    const formWholesalerId = String(editableInvoice.buyerId || "");
 
-    const [year, month] = editableInvoice.invoiceDate.split("-").map(Number);
+    const invoiceDateObj = new Date(editableInvoice.invoiceDate);
+    const year = invoiceDateObj.getFullYear();
+    const month = invoiceDateObj.getMonth() + 1;
 
     const computedFinancialYear =
       month >= 4 ? `FY${year}-${year + 1}` : `FY${year - 1}-${year}`;
@@ -184,7 +189,7 @@ export default function CreateInvoicePage() {
     setInvoiceDetails((prev) => ({
       ...prev,
       wholesalerId: formWholesalerId,
-      invoiceDate: editableInvoice.invoiceDate,
+      invoiceDate: invoiceDateObj.toISOString().split("T")[0],
       financialYear: computedFinancialYear,
       gstType: editableInvoice.gstType as GstType,
       taxMode: (editableInvoice.taxMode || TaxMode.CGST_SGST) as TaxMode,
@@ -192,9 +197,13 @@ export default function CreateInvoicePage() {
     setInvoiceNumber(editableInvoice.invoiceNumber);
 
     setInvoiceItems(
-      editableInvoice.items.map((item) => ({
+      editableInvoice.items.map((item: any) => ({
         ...item,
-        id: item.id || crypto.randomUUID(),
+        id: String(item.id ?? item._id ?? crypto.randomUUID()),
+        name: item.name ?? "",
+        hsnCode: item.hsnCode ?? "",
+        unit: item.unit ?? "",
+        basePrice: item.basePrice ?? "",
       })),
     );
   }, [editableInvoice]);
@@ -204,7 +213,7 @@ export default function CreateInvoicePage() {
       return;
     }
 
-    const currentInvoiceNumbers = userInvoices.map(
+    const currentInvoiceNumbers = existingInvoices.map(
       (invoice) => invoice.invoiceNumber,
     );
 
@@ -216,7 +225,7 @@ export default function CreateInvoicePage() {
     setInvoiceNumber((prev) =>
       prev === nextInvoiceNumber ? prev : nextInvoiceNumber,
     );
-  }, [editableInvoice, userInvoices]);
+  }, [editableInvoice, existingInvoices]);
 
   useEffect(() => {
     setInvoiceItems((prev) =>
@@ -268,7 +277,7 @@ export default function CreateInvoicePage() {
           return {
             ...item,
             itemId: "",
-            itemName: "",
+            name: "",
             hsnCode: "",
             unit: "",
             basePrice: "",
@@ -278,7 +287,7 @@ export default function CreateInvoicePage() {
         return {
           ...item,
           itemId: selectedItem._id ?? "",
-          itemName: selectedItem.name,
+          name: selectedItem.name,
           hsnCode: String(selectedItem.hsnCode ?? ""),
           unit: selectedItem.unit ?? "",
           basePrice: String(selectedItem.basePrice ?? ""),

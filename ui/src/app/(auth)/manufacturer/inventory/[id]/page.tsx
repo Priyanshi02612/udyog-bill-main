@@ -258,7 +258,7 @@ export default function InventoryLotDetailsPage() {
                 <tr key={index} className="border-b border-slate-200">
                   <td className="px-6 py-5">
                     <p className="font-semibold text-slate-900">
-                      {inventoryItem.itemName}
+                      {inventoryItem.name}
                     </p>
                     <p className="text-xs text-slate-500">
                       {inventoryItem.itemCategory}

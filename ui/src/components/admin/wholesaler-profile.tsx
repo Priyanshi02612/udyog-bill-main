@@ -4,13 +4,13 @@ import { Fragment } from "react";
 import { MdCall, MdClose, MdEmail, MdVerified } from "react-icons/md";
 import { Button } from "../ui/button";
 import Avatar from "react-avatar";
-import { Party } from "@/src/utils/types";
+import { UserProfile } from "@/src/utils/types";
 import { formatCurrency } from "@/src/utils/helpers";
 
 interface PartyDrawerProps {
   open: boolean;
   onClose: () => void;
-  party: Party | null;
+  party: UserProfile | null;
 }
 
 const PartyDrawer = ({ open, onClose, party }: PartyDrawerProps) => {

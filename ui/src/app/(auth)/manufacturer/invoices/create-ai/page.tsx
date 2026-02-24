@@ -93,7 +93,7 @@ export default function CreateAiInvoicePage() {
 
         if (matchingStockError) {
           nextErrors[item.itemId as string] =
-            `Insufficient stock for ${item.itemName}`;
+            `Insufficient stock for ${item.name}`;
         }
       });
 
@@ -289,7 +289,7 @@ export default function CreateAiInvoicePage() {
                   .filter(
                     (item) => item.itemId && stockErrorsByItemId[item.itemId],
                   )
-                  .map((item) => item.itemName || item.itemId)
+                  .map((item) => item.name || item.itemId)
                   .join(", ")}
               </p>
             </div>

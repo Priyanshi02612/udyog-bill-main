@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Connection, Model } from 'mongoose';
 import { Inventory } from '../db/schema/inventory.schema';
@@ -6,7 +10,9 @@ import { InventoryItem } from '../db/schema/inventory-item.schema';
 import { Invoice } from '../db/schema/invoice.schema';
 import { InvoiceItem } from '../db/schema/invoice-item.schema';
 import { InvoiceItemAllocation } from '../db/schema/invoice-item-allocation.schema';
+import { UserBusinessDetails } from '../db/schema/user-business-details.schema';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
+import { Item } from 'src/db/schema/item.schema';
 
 @Injectable()
 export class InvoiceService {
@@ -23,6 +29,10 @@ export class InvoiceService {
     private readonly inventoryModel: Model<Inventory>,
     @InjectModel(InventoryItem.name)
     private readonly inventoryItemModel: Model<InventoryItem>,
+    @InjectModel(UserBusinessDetails.name)
+    private readonly userBusinessDetailsModel: Model<UserBusinessDetails>,
+    @InjectModel(Item.name)
+    private readonly itemModel: Model<Item>,
   ) {}
 
   async createInvoice(createInvoiceDto: CreateInvoiceDto) {
@@ -205,5 +215,88 @@ export class InvoiceService {
     } finally {
       await session.endSession();
     }
+  }
+
+  async getManufacturerInvoices(userId: string) {
+    const invoices = await this.invoiceModel
+      .find({ sellerId: userId })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    if (!invoices.length) {
+      return [];
+    }
+
+    const invoiceIds = invoices.map((invoice) => String(invoice._id));
+    const invoiceItems = await this.invoiceItemModel
+      .find({ invoiceId: { $in: invoiceIds } })
+      .lean();
+
+    const itemsByInvoiceId = new Map<string, typeof invoiceItems>();
+    for (const item of invoiceItems) {
+      if (!itemsByInvoiceId.has(item.invoiceId)) {
+        itemsByInvoiceId.set(item.invoiceId, []);
+      }
+      itemsByInvoiceId.get(item.invoiceId)!.push(item);
+    }
+
+    return invoices.map((invoice) => ({
+      ...invoice,
+      items: itemsByInvoiceId.get(String(invoice._id)) ?? [],
+    }));
+  }
+
+  async getInvoiceDetails(invoiceId: string) {
+    const [invoice, invoiceItems] = await Promise.all([
+      this.invoiceModel.findById(invoiceId).lean(),
+      this.invoiceItemModel.find({ invoiceId }).lean(),
+    ]);
+
+    if (!invoice) {
+      throw new NotFoundException('Invoice not found');
+    }
+
+    const [buyerInfo, masterItems] = await Promise.all([
+      this.userBusinessDetailsModel
+        .findOne(
+          { userId: invoice.buyerId },
+          {
+            businessName: 1,
+            registeredAddress: 1,
+            state: 1,
+            phone: 1,
+            gstin: 1,
+            userId: 1,
+          },
+        )
+        .lean(),
+      this.itemModel
+        .find(
+          { _id: { $in: invoiceItems.map((item) => item.itemId) } },
+          {
+            name: 1,
+            basePrice: 1,
+            hsnCode: 1,
+            unit: 1,
+          },
+        )
+        .lean(),
+    ]);
+
+    const items = invoiceItems.map((item) => {
+      const masterItem =
+        masterItems.find((mItem) => String(mItem._id) === item.itemId) || {};
+
+      return {
+        ...item,
+        ...masterItem,
+      };
+    });
+
+    return {
+      ...invoice,
+      buyerInfo,
+      items,
+    };
   }
 }

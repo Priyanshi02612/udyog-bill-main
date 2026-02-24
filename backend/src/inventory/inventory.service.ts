@@ -234,7 +234,7 @@ export class InventoryService {
 
       return {
         ...invItem,
-        itemName: masterItem?.name,
+        name: masterItem?.name,
         unit: masterItem?.unit,
         hsnCode: masterItem?.hsnCode,
         basePrice: masterItem?.basePrice,

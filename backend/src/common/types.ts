@@ -3,7 +3,7 @@ import { GstType, TaxMode } from './enums';
 export type ItemCategory = 'FABRIC' | 'MATERIAL' | 'THREAD';
 
 export interface AIGeneratedInvoiceItem {
-  itemName: string;
+  name: string;
   hsnCode: number;
   quantity: number;
   unit: string;

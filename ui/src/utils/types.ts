@@ -192,13 +192,13 @@ export type Invoice = {
 
 export type InvoiceItem = {
   id: string;
-  invoiceId: string;
-  itemName: string;
-  itemId: string;
-  hsnCode: number | string;
-  quantity: number | string;
-  unit: string;
-  basePrice: number | string;
+  invoiceId?: string;
+  itemName?: string;
+  itemId?: string;
+  hsnCode?: number | string;
+  quantity?: number | string;
+  unit?: string;
+  basePrice?: number | string;
   gstPercentage: number;
 };
 
@@ -230,7 +230,6 @@ export type CreateManufacturerInvoicePayload = {
   buyerId: string;
   invoiceDate: string;
   financialYear: string;
-  notes?: string;
   status: "DRAFT" | "SENT";
   gstType: GstType;
   taxMode?: TaxMode;
@@ -248,7 +247,6 @@ export type ValidationErrors = {
   wholesalerId?: string;
   invoiceDate?: string;
   financialYear?: string;
-  notes?: string;
   items?: string;
   itemErrors: Record<
     string,
@@ -259,11 +257,9 @@ export type ValidationErrors = {
 export type InvoiceSubmitAction = "DRAFT" | "SENT";
 
 export type InvoiceCreateState = {
-  invoiceNumber: string;
   wholesalerId: string;
   invoiceDate: string;
   financialYear: string;
-  notes: string;
   gstType: GstType;
   taxMode: TaxMode;
 };

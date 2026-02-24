@@ -1,6 +1,10 @@
-import { ChangeEvent } from "react";
+import { ChangeEvent, useMemo, useState } from "react";
 import { MdAdd, MdDeleteOutline, MdInventory2 } from "react-icons/md";
 
+import {
+  SearchableDropdown,
+  SearchableDropdownOption,
+} from "../ui/searchable-dropdown";
 import { Input } from "../ui/input";
 import { formatCurrency } from "../../utils/helpers";
 import { InvoiceItem } from "../../utils/types";
@@ -11,19 +15,33 @@ type InvoiceItemRow = InvoiceItem & {
 
 type InvoiceItemsTableProps = {
   items: InvoiceItemRow[];
-  onItemChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onQuantityChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onSelectItem: (itemRowId: string, selectedItemId: string) => void;
   onAddRow: () => void;
   onRemoveRow: (id: string) => void;
+  itemOptions: SearchableDropdownOption[];
 };
 
 export function InvoiceItemsTable({
   items,
-  onItemChange,
+  onQuantityChange,
+  onSelectItem,
   onAddRow,
   onRemoveRow,
+  itemOptions,
 }: InvoiceItemsTableProps) {
+  const [itemSearchByRow, setItemSearchByRow] = useState<
+    Record<string, string>
+  >({});
+
+  const selectedItemIds = useMemo(
+    () =>
+      new Set(items.map((invoiceItem) => invoiceItem.itemId).filter(Boolean)),
+    [items],
+  );
+
   return (
-    <div className="mb-6 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div className="mb-6 overflow-visible rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="flex items-center gap-3 border-b border-slate-200 px-6 py-4">
         <MdInventory2 className="h-5 w-5 text-primary" />
         <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
@@ -48,71 +66,65 @@ export function InvoiceItemsTable({
           </thead>
           <tbody>
             {items.map((item, index) => {
+              const searchTerm = (itemSearchByRow[item.id] ?? item.itemName)
+                .trim()
+                .toLowerCase();
+
+              const filteredOptions = itemOptions.filter((option) => {
+                const matchesSearch = option.label
+                  .toLowerCase()
+                  .includes(searchTerm);
+
+                const isCurrentSelection = option.value === item.itemId;
+                const isSelectedElsewhere =
+                  selectedItemIds.has(option.value) && !isCurrentSelection;
+
+                return matchesSearch && !isSelectedElsewhere;
+              });
+
               return (
                 <tr key={item.id} className="border-t border-slate-100">
                   <td className="px-4 py-3 text-sm text-slate-500">
                     {`0${index + 1}`.slice(-2)}
                   </td>
                   <td className="px-4 py-3">
-                    <Input
-                      name="itemName"
-                      data-id={item.id}
-                      value={item.itemName}
-                      onChange={onItemChange}
-                      className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm focus:border-primary focus:outline-none"
-                      placeholder="Enter product name"
+                    <SearchableDropdown
+                      value={itemSearchByRow[item.id] ?? item.itemName}
+                      options={filteredOptions}
+                      placeholder="Type item name"
+                      onInputChange={(typedValue) => {
+                        setItemSearchByRow((prev) => ({
+                          ...prev,
+                          [item.id]: typedValue,
+                        }));
+
+                        if (item.itemId) {
+                          onSelectItem(item.id, "");
+                        }
+                      }}
+                      onSelect={(option) => {
+                        onSelectItem(item.id, option.value);
+                        setItemSearchByRow((prev) => ({
+                          ...prev,
+                          [item.id]: option.label,
+                        }));
+                      }}
                     />
                   </td>
-                  <td className="px-4 py-3">
-                    <Input
-                      value={item.hsnCode}
-                      name="hsnCode"
-                      data-id={item.id}
-                      onChange={onItemChange}
-                      className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm focus:border-primary focus:outline-none"
-                      placeholder="5007"
-                    />
-                  </td>
+                  <td className="px-4 py-3">{item.hsnCode || "-"}</td>
                   <td className="px-4 py-3">
                     <Input
                       value={item.quantity}
                       name="quantity"
                       data-id={item.id}
-                      onChange={onItemChange}
+                      onChange={onQuantityChange}
                       className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm focus:border-primary focus:outline-none"
                       placeholder="0"
                     />
                   </td>
-                  <td className="px-4 py-3">
-                    <Input
-                      value={item.unit}
-                      name="unit"
-                      data-id={item.id}
-                      onChange={onItemChange}
-                      className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm focus:border-primary focus:outline-none"
-                      placeholder="Meters"
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    <Input
-                      value={item.basePrice}
-                      name="basePrice"
-                      data-id={item.id}
-                      onChange={onItemChange}
-                      className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm focus:border-primary focus:outline-none"
-                      placeholder="0.00"
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    <Input
-                      value={item.gstPercentage}
-                      name="gstPercentage"
-                      data-id={item.id}
-                      readOnly
-                      className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm focus:border-primary focus:outline-none"
-                      placeholder="0"
-                    />
-                  </td>
+                  <td className="px-4 py-3">{item.unit || "-"}</td>
+                  <td className="px-4 py-3">{item.basePrice || "₹0.00"}</td>
+                  <td className="px-4 py-3">{item.gstPercentage}</td>
                   <td className="px-4 py-3 text-right text-sm font-bold text-slate-900">
                     {formatCurrency(item.taxableAmount)}
                   </td>

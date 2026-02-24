@@ -12,6 +12,7 @@ import { ItemsModule } from './items/items.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ManufacturerModule } from './manufacturer/manufacturer.module';
 import { AiModule } from './ai/ai.module';
+import { InvoiceModule } from './invoice/invoice.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { AiModule } from './ai/ai.module';
     InventoryModule,
     ManufacturerModule,
     AiModule,
+    InvoiceModule,
   ],
   controllers: [AppController],
   providers: [AppService, MongooseConnectionLogger],

@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useMemo, useState } from "react";
+import { Suspense, useContext, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { AuthContext } from "../../context/auth.context";
@@ -10,7 +10,7 @@ import { getErrorMessage } from "../../utils/helpers";
 import { UserRole } from "../../utils/constants";
 import { Button } from "../../components/ui/button";
 
-const AcceptPartyInvitationPage = () => {
+const AcceptPartyInvitationContent = () => {
   const { user, authLoading } = useContext(AuthContext) as AuthContextType;
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -125,6 +125,20 @@ const AcceptPartyInvitationPage = () => {
         </Button>
       </div>
     </div>
+  );
+};
+
+const LoadingState = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
+  </div>
+);
+
+const AcceptPartyInvitationPage = () => {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <AcceptPartyInvitationContent />
+    </Suspense>
   );
 };
 

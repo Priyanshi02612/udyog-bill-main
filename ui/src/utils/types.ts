@@ -179,8 +179,8 @@ export type Invoice = {
   invoiceDate: string;
   items: InvoiceItem[];
   subtotal: number;
-  gstType: GstType | string;
-  taxMode?: TaxMode | string;
+  gstType: GstType;
+  taxMode?: TaxMode;
   sgst: number;
   cgst: number;
   igst: number;
@@ -200,6 +200,7 @@ export type InvoiceItem = {
   unit?: string;
   basePrice?: number | string;
   gstPercentage: number;
+  taxableAmount?: number;
 };
 
 export interface Insight {
@@ -230,7 +231,7 @@ export type CreateManufacturerInvoicePayload = {
   buyerId: string;
   invoiceDate: string;
   financialYear: string;
-  status: "DRAFT" | "SENT";
+  status: InvoiceStatus;
   gstType: GstType;
   taxMode?: TaxMode;
   cgstRate: number;
@@ -284,6 +285,7 @@ export type UserProfile = {
   financialYears: FinancialYear[];
   activeFinancialYearId: string;
   email?: string;
+  userId?: string;
 };
 
 export type CreateInventoryPayload = {

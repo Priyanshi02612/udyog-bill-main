@@ -8,9 +8,11 @@ import { GoogleGenAI } from '@google/genai';
 import { AIGeneratedInvoice } from 'src/common/types';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Item } from 'src/db/schema/item.schema';
-import { User } from 'src/db/schema/user.schema';
-import { UserBusinessDetails } from 'src/db/schema/user-business-details.schema';
+import { Item } from '../db/schema/item.schema';
+import { User } from '../db/schema/user.schema';
+import { UserBusinessDetails } from '../db/schema/user-business-details.schema';
+import { Invoice } from '../db/schema/invoice.schema';
+import { getNextDocumentNumber } from '../common/helper';
 
 type GeminiClient = {
   models: {
@@ -34,6 +36,9 @@ export class AiService {
   constructor(
     @InjectModel(Item.name)
     private readonly itemModel: Model<Item>,
+
+    @InjectModel(Invoice.name)
+    private readonly invoiceModel: Model<Invoice>,
 
     @InjectModel(User.name)
     private readonly userModel: Model<User>,
@@ -170,8 +175,22 @@ export class AiService {
       ),
     );
 
+    const existingSellersInvoices = await this.invoiceModel.find({
+      sellerId: manufacturerId,
+    });
+
+    const currentInvoiceNumbers = existingSellersInvoices.map(
+      (invoice) => invoice.invoiceNumber,
+    );
+
+    const nextInvoiceNumber = getNextDocumentNumber(
+      currentInvoiceNumbers,
+      'INV',
+    );
+
     return {
-      invoiceNumber: 'INV-AI-001',
+      invoiceNumber: nextInvoiceNumber,
+      buyerId: existingWholesaler.userId,
       buyerInfo: existingWholesaler,
       sellerId: manufacturerId,
       invoiceDate,

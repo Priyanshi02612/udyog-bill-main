@@ -64,10 +64,6 @@ const Login = () => {
           router.replace("/wholesaler");
           break;
 
-        case "retailer":
-          router.replace("/retailer");
-          break;
-
         default:
           toast.error("Invalid user role");
           await signOut(auth);

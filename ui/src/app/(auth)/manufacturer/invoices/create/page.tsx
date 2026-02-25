@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useContext, useEffect, useMemo, useState } from "react";
@@ -33,10 +34,11 @@ import {
   InvoiceCreateState,
   InvoiceItem,
   InvoiceSubmitAction,
-  Party,
+  UserProfile,
 } from "../../../../../utils/types";
 import { ManufacturerService } from "../../../../../lib/api/manufacturer";
 import { ItemsService } from "../../../../../lib/api/items";
+import { InvoiceService } from "../../../../../lib/api/invoice";
 
 const createInvoiceItem = (gstPercentage: number): InvoiceItem => ({
   id: crypto.randomUUID(),
@@ -50,13 +52,20 @@ const createInvoiceItem = (gstPercentage: number): InvoiceItem => ({
   itemName: "",
 });
 
+type StockErrorField = {
+  code: string;
+  itemId: string;
+  requestedQuantity: number;
+  availableQuantity: number;
+};
+
 export default function CreateInvoicePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const invoiceId = searchParams.get("invoiceId");
   const { user } = useContext(AuthContext) as AuthContextType;
 
-  const [wholesalers, setWholesalers] = useState<Party[]>([]);
+  const [wholesalers, setWholesalers] = useState<UserProfile[]>([]);
   const [masterItems, setMasterItems] = useState<Item[]>([]);
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceDetails, setInvoiceDetails] = useState<InvoiceCreateState>({
@@ -73,6 +82,9 @@ export default function CreateInvoicePage() {
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([
     createInvoiceItem(selectedGstRate),
   ]);
+  const [stockErrorsByRowId, setStockErrorsByRowId] = useState<
+    Record<string, string>
+  >({});
 
   const applyGst = gstType !== GstType.NO_GST;
   const effectiveTaxMode = applyGst ? taxMode : undefined;
@@ -133,7 +145,7 @@ export default function CreateInvoicePage() {
   } = getInvoicePreviewMetrics(computedRows, gstType, effectiveTaxMode);
 
   const selectedWholesaler = useMemo(
-    () => wholesalers.find((party) => String(party.id) === wholesalerId),
+    () => wholesalers.find((party) => String(party.userId) === wholesalerId),
     [wholesalerId, wholesalers],
   );
 
@@ -216,9 +228,23 @@ export default function CreateInvoicePage() {
     );
   }, [selectedGstRate]);
 
+  const handleStockErrors = (id: string) => {
+    setStockErrorsByRowId((prev) => {
+      if (!prev[id]) {
+        return prev;
+      }
+
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
   const handleQuantityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, dataset } = event.target;
     const id = dataset.id as string;
+
+    handleStockErrors(id);
 
     setInvoiceItems((prev) =>
       prev.map((item) => (item.id === id ? { ...item, [name]: value } : item)),
@@ -229,6 +255,8 @@ export default function CreateInvoicePage() {
     const selectedItem = masterItems.find(
       (item) => item._id === selectedItemId,
     );
+
+    handleStockErrors(itemRowId);
 
     setInvoiceItems((prev) =>
       prev.map((item) => {
@@ -264,6 +292,8 @@ export default function CreateInvoicePage() {
   };
 
   const removeRow = (id: string) => {
+    handleStockErrors(id);
+
     setInvoiceItems((prev) => {
       if (prev.length === 1) {
         return prev;
@@ -313,6 +343,30 @@ export default function CreateInvoicePage() {
     return true;
   };
 
+  const handleStockErrorFields = (error: any) => {
+    const stockErrors = (error?.response?.data?.errorFields ?? []).filter(
+      (f: StockErrorField) => f.code === "INSUFFICIENT_STOCK",
+    );
+
+    if (stockErrors.length > 0) {
+      const nextErrors: Record<string, string> = {};
+
+      computedRows.forEach((row) => {
+        const matchingStockError = stockErrors.find(
+          (stockError: StockErrorField) =>
+            stockError.code === "INSUFFICIENT_STOCK" &&
+            stockError.itemId === row.itemId,
+        );
+
+        if (matchingStockError) {
+          nextErrors[row.id] = "Insufficient stock for this item.";
+        }
+      });
+
+      setStockErrorsByRowId(nextErrors);
+    }
+  };
+
   const handleSubmit = async (action: InvoiceSubmitAction) => {
     if (!validateForm()) {
       return;
@@ -337,7 +391,7 @@ export default function CreateInvoicePage() {
       items: computedRows.map((item) => ({
         id: "",
         itemId: item.itemId,
-        quantity: item.quantity,
+        quantity: Number(item.quantity),
         gstPercentage: item.gstPercentage,
         taxableAmount: item.taxableAmount,
       })),
@@ -345,19 +399,22 @@ export default function CreateInvoicePage() {
 
     try {
       setSubmittingAction(action);
-      console.log(payload);
+      setStockErrorsByRowId({});
+      await InvoiceService.createInvoice(payload);
       router.push("/manufacturer/invoices");
       toast.success("Invoice created successfully!");
-    } catch (error) {
-      toast.error(getErrorMessage(error));
+    } catch (error: any) {
+      const message = getErrorMessage(error);
+      handleStockErrorFields(error);
+      toast.error(message);
     } finally {
       setSubmittingAction(null);
     }
   };
 
   const wholesalersList = useMemo(() => {
-    return wholesalers.map((wholesaler: Party) => ({
-      value: wholesaler.businessName,
+    return wholesalers.map((wholesaler: UserProfile) => ({
+      value: wholesaler.userId as string,
       label: wholesaler.businessName,
     }));
   }, [wholesalers]);
@@ -482,6 +539,7 @@ export default function CreateInvoicePage() {
         onAddRow={addNewRow}
         onRemoveRow={removeRow}
         itemOptions={masterItemOptions}
+        rowErrors={stockErrorsByRowId}
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1fr]">

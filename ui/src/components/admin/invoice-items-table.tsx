@@ -20,6 +20,7 @@ type InvoiceItemsTableProps = {
   onAddRow: () => void;
   onRemoveRow: (id: string) => void;
   itemOptions: SearchableDropdownOption[];
+  rowErrors?: Record<string, string>;
 };
 
 export function InvoiceItemsTable({
@@ -29,6 +30,7 @@ export function InvoiceItemsTable({
   onAddRow,
   onRemoveRow,
   itemOptions,
+  rowErrors = {},
 }: InvoiceItemsTableProps) {
   const [itemSearchByRow, setItemSearchByRow] = useState<
     Record<string, string>
@@ -66,6 +68,7 @@ export function InvoiceItemsTable({
           </thead>
           <tbody>
             {items.map((item, index) => {
+              const rowError = rowErrors[item.id];
               const searchTerm = (itemSearchByRow[item.id] ?? item.itemName)
                 .trim()
                 .toLowerCase();
@@ -83,7 +86,12 @@ export function InvoiceItemsTable({
               });
 
               return (
-                <tr key={item.id} className="border-t border-slate-100">
+                <tr
+                  key={item.id}
+                  className={`border-t ${
+                    rowError ? "border-rose-200 bg-rose-50/40" : "border-slate-100"
+                  }`}
+                >
                   <td className="px-4 py-3 text-sm text-slate-500">
                     {`0${index + 1}`.slice(-2)}
                   </td>
@@ -118,9 +126,18 @@ export function InvoiceItemsTable({
                       name="quantity"
                       data-id={item.id}
                       onChange={onQuantityChange}
-                      className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm focus:border-primary focus:outline-none"
+                      className={`h-10 w-full rounded-lg border bg-white px-3 text-sm focus:outline-none ${
+                        rowError
+                          ? "border-rose-400 focus:border-rose-500"
+                          : "border-slate-300 focus:border-primary"
+                      }`}
                       placeholder="0"
                     />
+                    {rowError ? (
+                      <p className="mt-1 text-xs font-medium text-rose-700">
+                        {rowError}
+                      </p>
+                    ) : null}
                   </td>
                   <td className="px-4 py-3">{item.unit || "-"}</td>
                   <td className="px-4 py-3">{item.basePrice || "₹0.00"}</td>

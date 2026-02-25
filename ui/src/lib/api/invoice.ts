@@ -20,6 +20,26 @@ export class InvoiceService {
     }
   }
 
+  static async updateInvoice(
+    invoiceId: string,
+    data: CreateManufacturerInvoicePayload,
+  ) {
+    try {
+      const response = await axios.put(`${API_URL}/invoice/${invoiceId}`, data);
+
+      if (!response.status) {
+        throw new Error(
+          response.data.message || `HTTP error! status: ${response.status}`,
+        );
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error("Error while updating invoice:", error);
+      throw error;
+    }
+  }
+
   static async getManufacturerInvoices(userId: string) {
     try {
       const response = await axios.get(`${API_URL}/invoice/manufacturer/${userId}`);

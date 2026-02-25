@@ -94,7 +94,7 @@ export class AiService {
     }
 
     const aiGeneratedItems = parsedData.items.map((item) => ({
-      name: item.itemName.trim(),
+      name: item.name.trim(),
       basePrice: Number(item.basePrice),
       hsnCode: Number(item.hsnCode),
     }));
@@ -153,7 +153,7 @@ export class AiService {
       }
 
       updatedItems.push({
-        ...parsedData.items.find((i) => i.itemName === aiItem.name),
+        ...parsedData.items.find((i) => i.name === aiItem.name),
         itemId: dbItem._id.toString(),
       });
     }
@@ -214,7 +214,7 @@ export class AiService {
         "buyerName": "string",
         "items": [
           {
-            "itemName": "string",
+            "name": "string",
             "hsnCode": "number",
             "quantity": "number",
             "unit": "string",

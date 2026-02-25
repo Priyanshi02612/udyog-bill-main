@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import {
   MdAccountBalanceWallet,
@@ -16,6 +16,7 @@ import {
   MdVisibility,
 } from "react-icons/md";
 import { useRouter } from "next/navigation";
+import { AuthContext } from "../../../../context/auth.context";
 import { KpiCard } from "../../../../components/admin/kpi-card";
 import { Button } from "../../../../components/ui/button";
 import { Dropdown } from "../../../../components/ui/dropdown";
@@ -30,20 +31,26 @@ import {
   financialYearsOptions,
   invoiceStatusOptions,
 } from "../../../../utils/constants";
-import { mockInvoices, MOCK_WHOLESALERS } from "../../../../utils/data";
 import {
   formatCurrency,
+  formatDate,
   getErrorMessage,
   statusStyles,
 } from "../../../../utils/helpers";
-import { Invoice } from "../../../../utils/types";
+import { AuthContextType, Invoice } from "../../../../utils/types";
 import toast from "react-hot-toast";
+import { InvoiceService } from "../../../../lib/api/invoice";
+import { ManufacturerService } from "../../../../lib/api/manufacturer";
 
 const PAGE_SIZE = 4;
 
 export default function Invoices() {
+  const { user } = useContext(AuthContext) as AuthContextType;
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [wholesalerNameById, setWholesalerNameById] = useState<
+    Record<string, string>
+  >({});
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [page, setPage] = useState(1);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -57,11 +64,33 @@ export default function Invoices() {
 
   useEffect(() => {
     const fetchInvoices = async () => {
+      if (!user?._id) {
+        setInvoices([]);
+        setSelectedIds([]);
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
+        const [data, wholesalersResponse] = await Promise.all([
+          InvoiceService.getManufacturerInvoices(user._id),
+          ManufacturerService.getWholesalers(user._id),
+        ]);
 
-        const data = mockInvoices;
-        setInvoices(data);
+        const wholesalerMap = (wholesalersResponse.data || []).reduce(
+          (
+            acc: Record<string, string>,
+            wholesaler: { userId: string; businessName: string },
+          ) => {
+            acc[String(wholesaler.userId)] = wholesaler.businessName;
+            return acc;
+          },
+          {},
+        );
+
+        setInvoices(data || []);
+        setWholesalerNameById(wholesalerMap);
         setSelectedIds([]);
       } catch (err) {
         toast.error(getErrorMessage(err));
@@ -71,7 +100,7 @@ export default function Invoices() {
     };
 
     fetchInvoices();
-  }, []);
+  }, [user]);
 
   const handleDeleteSelected = async () => {
     const idsToDelete = [...selectedIds];
@@ -81,7 +110,7 @@ export default function Invoices() {
 
     try {
       setInvoices((prev) =>
-        prev.filter((invoice) => !idsToDelete.includes(invoice.id)),
+        prev.filter((invoice) => !idsToDelete.includes(String(invoice._id))),
       );
       setSelectedIds([]);
     } catch {
@@ -91,15 +120,13 @@ export default function Invoices() {
     }
   };
 
-  const resolveWholesalerName = (buyerId: string) => {
-    const partyId = buyerId.split("-")[1];
-
-    return (
-      MOCK_WHOLESALERS.find(
-        (wholesaler) => wholesaler.id.toString() === partyId,
-      )?.businessName || buyerId
-    );
-  };
+  const resolveWholesalerName = useCallback(
+    (invoice: Invoice) =>
+      invoice.buyerInfo?.businessName ||
+      wholesalerNameById[String(invoice.buyerId)] ||
+      invoice.buyerId,
+    [wholesalerNameById],
+  );
 
   const filteredInvoices = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -108,7 +135,7 @@ export default function Invoices() {
       const matchesSearch =
         query.length === 0 ||
         invoice.invoiceNumber.toLowerCase().includes(query) ||
-        resolveWholesalerName(invoice.buyerId).toLowerCase().includes(query);
+        resolveWholesalerName(invoice).toLowerCase().includes(query);
 
       const matchesStatus =
         selectedStatus.length === 0 || invoice.status === selectedStatus;
@@ -119,7 +146,13 @@ export default function Invoices() {
 
       return matchesSearch && matchesStatus && matchesFinancialYear;
     });
-  }, [invoices, searchQuery, selectedStatus, selectedFinancialYear]);
+  }, [
+    invoices,
+    searchQuery,
+    selectedStatus,
+    selectedFinancialYear,
+    resolveWholesalerName,
+  ]);
 
   const totalOutstanding = useMemo(
     () =>
@@ -151,20 +184,24 @@ export default function Invoices() {
 
   const allSelected =
     filteredInvoices.length > 0 &&
-    filteredInvoices.every((invoice) => selectedIds.includes(invoice.id));
+    filteredInvoices.every((invoice) =>
+      selectedIds.includes(String(invoice._id)),
+    );
 
   const selectedInvoice = useMemo(() => {
     if (selectedIds.length !== 1) {
       return null;
     }
 
-    return invoices.find((invoice) => invoice.id === selectedIds[0]) ?? null;
+    return (
+      invoices.find((invoice) => String(invoice._id) === selectedIds[0]) ?? null
+    );
   }, [selectedIds, invoices]);
 
   const selectedInvoices = useMemo(
     () =>
       invoices.filter((invoice) =>
-        selectedIds.some((selectedId) => selectedId === invoice.id),
+        selectedIds.some((selectedId) => selectedId === String(invoice._id)),
       ),
     [invoices, selectedIds],
   );
@@ -177,16 +214,18 @@ export default function Invoices() {
 
   const toggleSelectAll = () => {
     if (allSelected) {
-      const visibleIds = new Set(filteredInvoices.map((invoice) => invoice.id));
+      const visibleIds = new Set(
+        filteredInvoices.map((invoice) => String(invoice._id)),
+      );
       setSelectedIds((prev) => prev.filter((id) => !visibleIds.has(id)));
       return;
     }
 
-    const visibleIds = filteredInvoices.map((invoice) => invoice.id);
+    const visibleIds = filteredInvoices.map((invoice) => String(invoice._id));
     setSelectedIds((prev) => Array.from(new Set([...prev, ...visibleIds])));
   };
 
-  const toggleSelect = (id: number) => {
+  const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
@@ -199,11 +238,14 @@ export default function Invoices() {
     setSelectedIds([]);
   };
 
-  const handleEditInvoice = (invoiceId: number) => {
+  const handleEditInvoice = (invoiceId: string) => {
     router.push(`/manufacturer/invoices/create?invoiceId=${invoiceId}`);
   };
 
-  const totalPages = Math.ceil(mockInvoices.length / PAGE_SIZE);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredInvoices.length / PAGE_SIZE),
+  );
   const safePage = Math.min(page, totalPages);
 
   const paginatedItems = useMemo(() => {
@@ -379,30 +421,31 @@ export default function Invoices() {
           </thead>
 
           <tbody className="divide-y divide-slate-100">
-            {paginatedItems.map((invoice) => {
-              const status = statusStyles[invoice.status];
+            {paginatedItems.map((invoice, index) => {
+              const status =
+                statusStyles[invoice.status as keyof typeof statusStyles];
 
               return (
                 <tr
-                  key={invoice.id}
+                  key={index}
                   className="hover:bg-primary/5 transition-colors"
                 >
                   <td className="p-4 text-center">
                     <input
                       type="checkbox"
-                      checked={selectedIds.includes(invoice.id)}
-                      onChange={() => toggleSelect(invoice.id)}
+                      checked={selectedIds.includes(String(invoice._id))}
+                      onChange={() => toggleSelect(String(invoice._id))}
                       className="cursor-pointer"
                     />
                   </td>
 
                   <td className="p-4 font-bold">{invoice.invoiceNumber}</td>
 
-                  <td className="p-4">
-                    {resolveWholesalerName(invoice.buyerId)}
-                  </td>
+                  <td className="p-4">{resolveWholesalerName(invoice)}</td>
 
-                  <td className="p-4 text-slate-500">{invoice.invoiceDate}</td>
+                  <td className="p-4 text-slate-500">
+                    {formatDate(invoice.invoiceDate)}
+                  </td>
 
                   <td className="p-4 font-bold">
                     {formatCurrency(invoice.total)}
@@ -422,7 +465,7 @@ export default function Invoices() {
                         variant="link"
                         className="w-8 h-8"
                         onClick={() =>
-                          router.push(`/manufacturer/invoices/${invoice.id}`)
+                          router.push(`/manufacturer/invoices/${invoice._id}`)
                         }
                       >
                         <MdVisibility className="w-5 h-5" />
@@ -432,7 +475,7 @@ export default function Invoices() {
                         <Button
                           variant="link"
                           className="w-8 h-8"
-                          onClick={() => handleEditInvoice(invoice.id)}
+                          onClick={() => handleEditInvoice(String(invoice._id))}
                         >
                           <MdEdit className="w-5 h-5" />
                         </Button>

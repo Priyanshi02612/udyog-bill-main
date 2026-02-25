@@ -156,7 +156,7 @@ export function InvoicePreviewCard({
                     {`0${index + 1}`.slice(-2)}
                   </td>
                   <td className="px-3 py-4 text-sm font-bold text-slate-900">
-                    {item.itemName}
+                    {item.name}
                   </td>
                   <td className="px-3 py-4 text-sm text-slate-600">
                     {item.hsnCode}

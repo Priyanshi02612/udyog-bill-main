@@ -1,11 +1,11 @@
 import { GstType, TaxMode } from "./constants";
-import { Invoice, InvoiceItem, InvoicePartyInfo, Party } from "./types";
+import { Invoice, InvoiceItem } from "./types";
 
 export const mockInvoiceItems: InvoiceItem[] = [
   {
     id: "ii-1",
     itemId: "item-101",
-    itemName: "Dyed Silk Fabric - Royal Blue",
+    name: "Dyed Silk Fabric - Royal Blue",
     invoiceId: "inv-1",
     quantity: 120,
     basePrice: 85,
@@ -16,7 +16,7 @@ export const mockInvoiceItems: InvoiceItem[] = [
   {
     id: "ii-2",
     itemId: "item-102",
-    itemName: "Printed Rayon Fabric - Floral",
+    name: "Printed Rayon Fabric - Floral",
     invoiceId: "inv-1",
     quantity: 60,
     basePrice: 140,
@@ -33,7 +33,7 @@ export const mockInvoiceItems: InvoiceItem[] = [
     hsnCode: 0,
     unit: "Kg",
     gstPercentage: 0,
-    itemName: "Cotton Yarn 30s",
+    name: "Cotton Yarn 30s",
   },
   {
     id: "ii-4",
@@ -44,7 +44,7 @@ export const mockInvoiceItems: InvoiceItem[] = [
     hsnCode: 0,
     unit: "Meter",
     gstPercentage: 0,
-    itemName: "Embroidered Silk Fabric - Maroon",
+    name: "Embroidered Silk Fabric - Maroon",
   },
   {
     id: "ii-5",
@@ -55,7 +55,7 @@ export const mockInvoiceItems: InvoiceItem[] = [
     hsnCode: 0,
     unit: "Cones",
     gstPercentage: 0,
-    itemName: "Polyester Sewing Thread - 40s",
+    name: "Polyester Sewing Thread - 40s",
   },
   {
     id: "ii-6",
@@ -66,7 +66,7 @@ export const mockInvoiceItems: InvoiceItem[] = [
     hsnCode: 0,
     unit: "Meter",
     gstPercentage: 0,
-    itemName: "Mulberry Silk Lining Fabric",
+    name: "Mulberry Silk Lining Fabric",
   },
   {
     id: "ii-7",
@@ -77,7 +77,7 @@ export const mockInvoiceItems: InvoiceItem[] = [
     hsnCode: 0,
     unit: "Meter",
     gstPercentage: 0,
-    itemName: "Premium Cotton Blend Fabric",
+    name: "Premium Cotton Blend Fabric",
   },
   {
     id: "ii-8",
@@ -88,7 +88,7 @@ export const mockInvoiceItems: InvoiceItem[] = [
     hsnCode: 0,
     unit: "Pack",
     gstPercentage: 0,
-    itemName: "Thread Cones Assorted Pack",
+    name: "Thread Cones Assorted Pack",
   },
   {
     id: "ii-9",
@@ -99,81 +99,9 @@ export const mockInvoiceItems: InvoiceItem[] = [
     hsnCode: 0,
     unit: "Set",
     gstPercentage: 0,
-    itemName: "Sample Swatch Set",
+    name: "Sample Swatch Set",
   },
 ];
-
-export const MOCK_BUYERS: InvoicePartyInfo[] = [
-  {
-    id: "party-1",
-    businessName: "Radhe Krishna Silks",
-    gstin: "24AAAAA0000A1Z5",
-    contactPerson: "Amit Shah",
-    phone: "+91 98765 43210",
-    email: "accounts@radhekrishnasilks.in",
-    registeredAddress: "Shop 17, Ring Road Textile Market",
-    state: "Gujarat",
-  },
-  {
-    id: "party-2",
-    businessName: "Bharat Textiles",
-    gstin: "09BBBBB1111B2Z3",
-    contactPerson: "Vikram Malhotra",
-    phone: "+91 98111 22446",
-    email: "finance@bharattextiles.in",
-    registeredAddress: "C-204, Cloth Merchants Complex",
-    state: "Gujarat",
-  },
-  {
-    id: "party-3",
-    businessName: "New Fashion Hub",
-    gstin: "27CCCCC2222C3Z1",
-    contactPerson: "Sunita Rao",
-    phone: "+91 98205 11335",
-    email: "billing@newfashionhub.in",
-    registeredAddress: "12, Fashion Street, Kalbadevi",
-    state: "Maharashtra",
-  },
-  {
-    id: "party-4",
-    businessName: "Om Sai Creations",
-    gstin: "19DDDDD3333D4Z9",
-    contactPerson: "Deepak Joshi",
-    phone: "+91 98300 88442",
-    email: "accounts@omsaicreations.in",
-    registeredAddress: "45, Burrabazar Textile Lane",
-    state: "West Bengal",
-  },
-  {
-    id: "party-5",
-    businessName: "Shree Ganesh Fabrics",
-    gstin: "29EEEEE4444E5Z2",
-    contactPerson: "Rohit Mehta",
-    phone: "+91 98450 66022",
-    email: "payables@shreeganeshfabrics.in",
-    registeredAddress: "No. 6, Textile Hub, Chickpet",
-    state: "Karnataka",
-  },
-];
-
-export const MOCK_SELLERS: InvoicePartyInfo[] = [
-  {
-    id: "seller-1",
-    businessName: "Vastra Fabrik Manufacturers",
-    gstin: "24AAACV1234F1Z5",
-    contactPerson: "Priyansh Patel",
-    phone: "+91 99099 44002",
-    email: "billing@vastrafabrik.com",
-    registeredAddress: "Unit 42, Textile Industrial Estate",
-    state: "Gujarat",
-  },
-];
-
-export const getInvoiceBuyerById = (buyerId: string) =>
-  MOCK_BUYERS.find((buyer) => buyer.id === buyerId);
-
-export const getInvoiceSellerById = (sellerId: string) =>
-  MOCK_SELLERS.find((seller) => seller.id === sellerId);
 
 export const mockInvoices: Invoice[] = [
   {
@@ -278,134 +206,3 @@ export const mockInvoices: Invoice[] = [
     status: "REJECTED",
   },
 ];
-
-export const MOCK_WHOLESALERS: Party[] = [
-  {
-    id: 1,
-    businessName: "Radhe Krishna Silks",
-    gstin: "24AAAAA0000A1Z5",
-    contactPerson: "Amit Shah",
-    phone: "9876543210",
-    email: "test@gmail.com",
-    address: "Surat, GJ",
-    outstanding: 1245000,
-    overdueInvoices: 4,
-    invoices: mockInvoices.filter((inv) => inv.buyerId === "party-1"),
-  },
-  {
-    id: 2,
-    businessName: "Bharat Textiles",
-    gstin: "09BBBBB1111B2Z3",
-    contactPerson: "Vikram Malhotra",
-    address: "Ahmedabad, GJ",
-    phone: "9876543210",
-    email: "test@gmail.com",
-    outstanding: 230000,
-    overdueInvoices: 0,
-    invoices: [],
-  },
-  {
-    id: 3,
-    businessName: "New Fashion Hub",
-    gstin: "27CCCCC2222C3Z1",
-    contactPerson: "Sunita Rao",
-    phone: "9876543210",
-    email: "test@gmail.com",
-    address: "Mumbai, MH",
-    outstanding: 815400,
-    overdueInvoices: 1,
-    invoices: mockInvoices.filter((inv) => inv.buyerId === "party-2"),
-  },
-  {
-    id: 4,
-    businessName: "Om Sai Creations",
-    gstin: "19DDDDD3333D4Z9",
-    contactPerson: "Deepak Joshi",
-    phone: "9876543210",
-    email: "test@gmail.com",
-    address: "Kolkata, WB",
-    outstanding: 0,
-    overdueInvoices: 0,
-    invoices: [],
-  },
-  {
-    id: 5,
-    businessName: "Shree Ganesh Fabrics",
-    gstin: "29EEEEE4444E5Z2",
-    contactPerson: "Rohit Mehta",
-    phone: "9876543210",
-    email: "test@gmail.com",
-    address: "Bengaluru, KA",
-    outstanding: 560000,
-    overdueInvoices: 2,
-    invoices: [],
-  },
-  {
-    id: 6,
-    businessName: "Shree Ganesh Fabrics1",
-    gstin: "29EEEEE4444E5Z2",
-    contactPerson: "Rohit Mehta",
-    phone: "9876543210",
-    email: "test@gmail.com",
-    address: "Bengaluru, KA",
-    outstanding: 560000,
-    overdueInvoices: 2,
-    invoices: [],
-  },
-];
-
-export const mockDraftInvoice = {
-  id: 0,
-  invoiceNumber: "INV-AI-001",
-  buyerId: "6992de75762842c155b8fd91",
-  sellerId: "698f0a17e5accb334b8717d9",
-  invoiceDate: "2026-02-24T09:07:07.267Z",
-  dueDate: "2026-03-01T00:00:00.000Z",
-  items: [
-    {
-      id: "0",
-      itemName: "Green Printed Rayon Fabric – Floral",
-      hsnCode: 5588,
-      quantity: 100,
-      unit: "meters",
-      basePrice: 50,
-      gstPercentage: 5,
-      taxableAmount: 5000,
-      itemId: "699306859737add617f1ee29",
-    },
-  ],
-  subtotal: 0,
-  gstType: GstType.GST_5,
-  taxMode: TaxMode.CGST_SGST,
-  sgst: 2.5,
-  cgst: 2.5,
-  igst: 0,
-  total: 5250,
-  status: "",
-  buyerInfo: {
-    _id: "6992de75762842c155b8fd92",
-    userId: "6992de75762842c155b8fd91",
-    __v: 0,
-    activeFinancialYearId: "FY2025-2026",
-    businessName: "Om Sai Wholesale Shop",
-    contactPerson: "Neha Sharma",
-    createdAt: "2026-02-16T09:08:05.761Z",
-    financialYears: [
-      {
-        id: "FY2025-2026",
-        label: "FY 2025 - 2026",
-        range: "April 1, 2025 - March 31, 2026",
-        startYear: 2025,
-        endYear: 2026,
-      },
-    ],
-    gstTaxMode: TaxMode.CGST_SGST,
-    gstType: GstType.GST_5,
-    gstin: "07CVHPK6026N1Z6",
-    phone: "7861987178",
-    registeredAddress: "401, Amora arcade, utran, surat",
-    state: "gujarat",
-    updatedAt: "2026-02-16T09:08:05.761Z",
-  },
-  taxableSubtotal: 5000,
-};

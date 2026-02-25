@@ -69,7 +69,7 @@ export function InvoiceItemsTable({
           <tbody>
             {items.map((item, index) => {
               const rowError = rowErrors[item.id];
-              const searchTerm = (itemSearchByRow[item.id] ?? item.itemName)
+              const searchTerm = (itemSearchByRow[item.id] ?? item.name)
                 .trim()
                 .toLowerCase();
 
@@ -97,7 +97,7 @@ export function InvoiceItemsTable({
                   </td>
                   <td className="px-4 py-3">
                     <SearchableDropdown
-                      value={itemSearchByRow[item.id] ?? item.itemName}
+                      value={itemSearchByRow[item.id] ?? item.name}
                       options={filteredOptions}
                       placeholder="Type item name"
                       onInputChange={(typedValue) => {

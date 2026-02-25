@@ -7,7 +7,6 @@ import {
   View,
 } from "@react-pdf/renderer";
 
-import { getInvoiceBuyerById, getInvoiceSellerById } from "../../utils/data";
 import { Invoice } from "../../utils/types";
 import {
   formatCurrency,
@@ -232,8 +231,8 @@ const styles = StyleSheet.create({
 });
 
 const InvoicePdfPage = ({ invoice }: { invoice: Invoice }) => {
-  const buyerInfo = getInvoiceBuyerById(invoice.buyerId);
-  const sellerInfo = getInvoiceSellerById(invoice.sellerId);
+  const buyerInfo = invoice.buyerInfo;
+  const sellerInfo = invoice.sellerInfo;
   const applyGst = invoice.gstType !== GstType.NO_GST;
   const taxMode = invoice.taxMode;
 
@@ -256,10 +255,10 @@ const InvoicePdfPage = ({ invoice }: { invoice: Invoice }) => {
         <View style={styles.topBlock}>
           <View>
             <Text style={styles.companyName}>{sellerInfo?.businessName}</Text>
-            <Text style={styles.subtleText}>{sellerInfo?.registeredAddress}</Text>
             <Text style={styles.subtleText}>
-              {sellerInfo?.state}
+              {sellerInfo?.registeredAddress}
             </Text>
+            <Text style={styles.subtleText}>{sellerInfo?.state}</Text>
             <Text style={styles.subtleText}>GSTIN: {sellerInfo?.gstin}</Text>
             <Text style={styles.subtleText}>Email: {sellerInfo?.email}</Text>
           </View>
@@ -291,21 +290,23 @@ const InvoicePdfPage = ({ invoice }: { invoice: Invoice }) => {
             <Text style={styles.sectionValue}>
               {buyerInfo?.businessName || invoice.buyerId}
             </Text>
-            <Text style={styles.subtleText}>{buyerInfo?.registeredAddress}</Text>
             <Text style={styles.subtleText}>
-             {buyerInfo?.state}
+              {buyerInfo?.registeredAddress}
             </Text>
+            <Text style={styles.subtleText}>{buyerInfo?.state}</Text>
             <Text style={styles.subtleText}>GSTIN: {buyerInfo?.gstin}</Text>
             <Text style={styles.subtleText}>Contact: {buyerInfo?.phone}</Text>
           </View>
 
           <View style={styles.billShipBox}>
             <Text style={styles.sectionLabel}>SHIP FROM</Text>
-            <Text style={styles.sectionValue}>{sellerInfo?.businessName}</Text>
-            <Text style={styles.subtleText}>{sellerInfo?.registeredAddress}</Text>
-            <Text style={styles.subtleText}>
-              {sellerInfo?.state}
+            <Text style={styles.sectionValue}>
+              {sellerInfo?.businessName || invoice.sellerId}
             </Text>
+            <Text style={styles.subtleText}>
+              {sellerInfo?.registeredAddress}
+            </Text>
+            <Text style={styles.subtleText}>{sellerInfo?.state}</Text>
             <Text style={styles.subtleText}>Contact: {sellerInfo?.phone}</Text>
           </View>
         </View>
@@ -324,21 +325,26 @@ const InvoicePdfPage = ({ invoice }: { invoice: Invoice }) => {
           </View>
 
           {invoice.items.map((item, index) => {
-            const itemTaxableAmount = Number(item.basePrice) * Number(item.quantity);
+            const itemTaxableAmount =
+              Number(item.basePrice) * Number(item.quantity);
             const itemGstAmount = (itemTaxableAmount * effectiveGstRate) / 100;
             const itemTotalWithGst = itemTaxableAmount + itemGstAmount;
 
             return (
-              <View style={styles.tableRow} key={item.id}>
+              <View style={styles.tableRow} key={index}>
                 <Text style={[styles.td, styles.colIndex]}>
                   {`0${index + 1}`.slice(-2)}
                 </Text>
                 <Text style={[styles.tdBold, styles.colItem]}>
-                  {item.itemId}
+                  {item.name || item.itemId}
                 </Text>
-                <Text style={[styles.td, styles.colHsn]}>5577</Text>
+                <Text style={[styles.td, styles.colHsn]}>
+                  {item.hsnCode ?? ""}
+                </Text>
                 <Text style={[styles.td, styles.colQty]}>{item.quantity}</Text>
-                <Text style={[styles.td, styles.colUnit]}>Pcs</Text>
+                <Text style={[styles.td, styles.colUnit]}>
+                  {item.unit ?? ""}
+                </Text>
                 <Text style={[styles.td, styles.colGst]}>
                   {effectiveGstRate.toFixed(2)}%
                 </Text>
@@ -456,8 +462,8 @@ export const InvoicePdf = ({ invoice }: { invoice: Invoice }) => {
 export const InvoicesPdf = ({ invoices }: { invoices: Invoice[] }) => {
   return (
     <Document>
-      {invoices.map((invoice) => (
-        <InvoicePdfPage key={invoice.id} invoice={invoice} />
+      {invoices.map((invoice, index) => (
+        <InvoicePdfPage key={index} invoice={invoice} />
       ))}
     </Document>
   );

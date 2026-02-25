@@ -124,7 +124,7 @@ export type InventoryItem = {
   itemId: string;
   totalStock: number;
   currentStock: number;
-  itemName?: string;
+  name?: string;
   unit?: string;
   hsnCode?: number;
   basePrice?: number;
@@ -146,33 +146,9 @@ export type Inventory = {
   inventoryItems: InventoryItem[];
 };
 
-export type Party = {
-  userId?: string;
-  id: number;
-  businessName: string;
-  gstin: string;
-  contactPerson: string;
-  phone: string;
-  email: string;
-  address: string;
-  outstanding: number;
-  overdueInvoices: number;
-  invoices: Invoice[];
-};
-
-export type InvoicePartyInfo = {
-  id: string;
-  businessName: string;
-  gstin: string;
-  contactPerson: string;
-  phone: string;
-  email: string;
-  registeredAddress: string;
-  state: string;
-};
-
 export type Invoice = {
-  id: number;
+  id: string | number;
+  _id?: string;
   invoiceNumber: string;
   buyerId: string;
   sellerId: string;
@@ -188,12 +164,14 @@ export type Invoice = {
   status: InvoiceStatus | string;
   dueDate: string;
   buyerInfo?: UserProfile;
+  sellerInfo?: UserProfile;
 };
 
 export type InvoiceItem = {
   id: string;
+  _id?: string;
   invoiceId?: string;
-  itemName?: string;
+  name?: string;
   itemId?: string;
   hsnCode?: number | string;
   quantity?: number | string;
@@ -286,6 +264,9 @@ export type UserProfile = {
   activeFinancialYearId: string;
   email?: string;
   userId?: string;
+  outstanding?: number;
+  overdueInvoices?: number;
+  invoices?: Invoice[];
 };
 
 export type CreateInventoryPayload = {

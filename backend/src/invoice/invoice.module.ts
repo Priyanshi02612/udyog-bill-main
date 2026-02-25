@@ -14,8 +14,13 @@ import {
   InvoiceItemAllocation,
   InvoiceItemAllocationSchema,
 } from '../db/schema/invoice-item-allocation.schema';
+import {
+  UserBusinessDetails,
+  UserBusinessDetailsSchema,
+} from '../db/schema/user-business-details.schema';
 import { InvoiceController } from './invoice.controller';
 import { InvoiceService } from './invoice.service';
+import { Item, ItemSchema } from 'src/db/schema/item.schema';
 
 @Module({
   imports: [
@@ -39,6 +44,14 @@ import { InvoiceService } from './invoice.service';
       {
         name: InventoryItem.name,
         schema: InventoryItemSchema,
+      },
+      {
+        name: UserBusinessDetails.name,
+        schema: UserBusinessDetailsSchema,
+      },
+      {
+        name: Item.name,
+        schema: ItemSchema,
       },
     ]),
   ],

@@ -5,7 +5,7 @@ import PartyDrawer from "../../../../components/admin/wholesaler-profile";
 import Pagination from "../../../../components/pagination";
 import { Button } from "../../../../components/ui/button";
 import ConfirmModal from "../../../../components/ui/modal";
-import { AuthContextType, Party } from "../../../../utils/types";
+import { AuthContextType, UserProfile } from "../../../../utils/types";
 import { formatCurrency, getErrorMessage } from "../../../../utils/helpers";
 import { useContext, useEffect, useMemo, useState } from "react";
 import {
@@ -24,11 +24,11 @@ const PAGE_SIZE = 6;
 
 const Wholesalers = () => {
   const [page, setPage] = useState(1);
-  const [selectedParty, setSelectedParty] = useState<Party | null>(null);
+  const [selectedParty, setSelectedParty] = useState<UserProfile | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [wholesalers, setWholesalers] = useState<Party[]>([]);
+  const [wholesalers, setWholesalers] = useState<UserProfile[]>([]);
 
   const { user } = useContext(AuthContext) as AuthContextType;
 
@@ -49,12 +49,12 @@ const Wholesalers = () => {
 
   const stats = useMemo(() => {
     const totalOutstanding = wholesalers.reduce(
-      (sum, w) => sum + w.outstanding,
+      (sum, w) => sum + (w.outstanding || 0),
       0,
     );
 
     const overdueCount = wholesalers.filter(
-      (w) => w.overdueInvoices > 0,
+      (w) => (w.overdueInvoices || 0) > 0,
     ).length;
 
     return {
@@ -76,8 +76,7 @@ const Wholesalers = () => {
     if (!user?._id || !selectedParty) return;
 
     const wholesalerUserId =
-      (selectedParty as Party & { userId?: string }).userId ??
-      String(selectedParty.id);
+      selectedParty.userId ?? String(selectedParty.userId);
 
     try {
       await ManufacturerService.removeParty({
@@ -87,8 +86,7 @@ const Wholesalers = () => {
 
       setWholesalers((prev) =>
         prev.filter((party) => {
-          const partyUserId =
-            (party as Party & { userId?: string }).userId ?? String(party.id);
+          const partyUserId = party.userId ?? String(party.userId);
           return partyUserId !== wholesalerUserId;
         }),
       );
@@ -171,7 +169,7 @@ const Wholesalers = () => {
                           : "text-slate-900"
                       }`}
                     >
-                      {formatCurrency(party.outstanding)}
+                      {formatCurrency(party.outstanding || 0)}
                     </span>
                   </td>
                   <td className="px-6 py-4">

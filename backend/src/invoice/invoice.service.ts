@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   BadRequestException,
   Injectable,
@@ -12,7 +14,7 @@ import { InvoiceItem } from '../db/schema/invoice-item.schema';
 import { InvoiceItemAllocation } from '../db/schema/invoice-item-allocation.schema';
 import { UserBusinessDetails } from '../db/schema/user-business-details.schema';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
-import { Item } from 'src/db/schema/item.schema';
+import { Item } from '../db/schema/item.schema';
 
 @Injectable()
 export class InvoiceService {
@@ -45,6 +47,9 @@ export class InvoiceService {
             {
               ...createInvoiceDto,
               invoiceDate: new Date(createInvoiceDto.invoiceDate),
+              invoiceDueDate: this.getInvoiceDueDate(
+                createInvoiceDto.invoiceDate,
+              ),
             },
           ],
           { session },
@@ -82,6 +87,14 @@ export class InvoiceService {
       .find({ invoiceId: { $in: invoiceIds } })
       .lean();
 
+    const buyerIds = [...new Set(invoices.map((invoice) => invoice.buyerId))];
+    const itemIds = [...new Set(invoiceItems.map((item) => item.itemId))];
+
+    const [buyerInfoByUserId, masterItemById] = await Promise.all([
+      this.getBuyerInfoMapByUserIds(buyerIds),
+      this.getMasterItemMapByIds(itemIds),
+    ]);
+
     const itemsByInvoiceId = new Map<string, typeof invoiceItems>();
     for (const item of invoiceItems) {
       if (!itemsByInvoiceId.has(item.invoiceId)) {
@@ -92,7 +105,11 @@ export class InvoiceService {
 
     return invoices.map((invoice) => ({
       ...invoice,
-      items: itemsByInvoiceId.get(String(invoice._id)) ?? [],
+      buyerInfo: buyerInfoByUserId.get(String(invoice.buyerId)) ?? null,
+      items: (itemsByInvoiceId.get(String(invoice._id)) ?? []).map((item) => ({
+        ...item,
+        ...(masterItemById.get(String(item.itemId)) ?? {}),
+      })),
     }));
   }
 
@@ -106,42 +123,16 @@ export class InvoiceService {
       throw new NotFoundException('Invoice not found');
     }
 
-    const [buyerInfo, masterItems] = await Promise.all([
-      this.userBusinessDetailsModel
-        .findOne(
-          { userId: invoice.buyerId },
-          {
-            businessName: 1,
-            registeredAddress: 1,
-            state: 1,
-            phone: 1,
-            gstin: 1,
-            userId: 1,
-          },
-        )
-        .lean(),
-      this.itemModel
-        .find(
-          { _id: { $in: invoiceItems.map((item) => item.itemId) } },
-          {
-            name: 1,
-            basePrice: 1,
-            hsnCode: 1,
-            unit: 1,
-          },
-        )
-        .lean(),
+    const [buyerInfoByUserId, masterItemById] = await Promise.all([
+      this.getBuyerInfoMapByUserIds([invoice.buyerId]),
+      this.getMasterItemMapByIds(invoiceItems.map((item) => item.itemId)),
     ]);
 
-    const items = invoiceItems.map((item) => {
-      const masterItem =
-        masterItems.find((mItem) => String(mItem._id) === item.itemId) || {};
-
-      return {
-        ...item,
-        ...masterItem,
-      };
-    });
+    const buyerInfo = buyerInfoByUserId.get(String(invoice.buyerId)) ?? null;
+    const items = invoiceItems.map((item) => ({
+      ...item,
+      ...(masterItemById.get(String(item.itemId)) ?? {}),
+    }));
 
     return {
       ...invoice,
@@ -198,6 +189,7 @@ export class InvoiceService {
           {
             ...dto,
             invoiceDate: new Date(dto.invoiceDate),
+            invoiceDueDate: this.getInvoiceDueDate(dto.invoiceDate),
           },
           { session },
         );
@@ -221,6 +213,61 @@ export class InvoiceService {
     } finally {
       await session.endSession();
     }
+  }
+
+  private async getBuyerInfoMapByUserIds(userIds: string[]) {
+    if (!userIds.length) {
+      return new Map<string, any>();
+    }
+
+    const buyers = await this.userBusinessDetailsModel
+      .find(
+        { userId: { $in: userIds } },
+        {
+          businessName: 1,
+          registeredAddress: 1,
+          state: 1,
+          phone: 1,
+          gstin: 1,
+          userId: 1,
+        },
+      )
+      .lean();
+
+    return new Map(buyers.map((buyer) => [String(buyer.userId), buyer]));
+  }
+
+  private async getMasterItemMapByIds(itemIds: string[]) {
+    if (!itemIds.length) {
+      return new Map<string, any>();
+    }
+
+    const masterItems = await this.itemModel
+      .find(
+        { _id: { $in: itemIds } },
+        {
+          name: 1,
+          basePrice: 1,
+          hsnCode: 1,
+          unit: 1,
+        },
+      )
+      .lean();
+
+    return new Map(
+      masterItems.map((masterItem) => [String(masterItem._id), masterItem]),
+    );
+  }
+
+  private getInvoiceDueDate(invoiceDate: string) {
+    const baseDate = new Date(invoiceDate);
+    if (Number.isNaN(baseDate.getTime())) {
+      throw new BadRequestException('Invalid invoice date');
+    }
+
+    const dueDate = new Date(baseDate);
+    dueDate.setUTCDate(dueDate.getUTCDate() + 5);
+    return dueDate;
   }
 
   private buildRequestedMap(items: CreateInvoiceDto['items']) {

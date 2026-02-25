@@ -27,17 +27,18 @@ import {
   InvoicePdf,
   InvoicesPdf,
 } from "../../../../components/admin/invoice-pdf-template";
-import {
-  financialYearsOptions,
-  invoiceStatusOptions,
-} from "../../../../utils/constants";
+import { invoiceStatusOptions } from "../../../../utils/constants";
 import {
   formatCurrency,
   formatDate,
   getErrorMessage,
   statusStyles,
 } from "../../../../utils/helpers";
-import { AuthContextType, Invoice } from "../../../../utils/types";
+import {
+  AuthContextType,
+  FinancialYear,
+  Invoice,
+} from "../../../../utils/types";
 import toast from "react-hot-toast";
 import { InvoiceService } from "../../../../lib/api/invoice";
 import { ManufacturerService } from "../../../../lib/api/manufacturer";
@@ -89,7 +90,12 @@ export default function Invoices() {
           {},
         );
 
-        setInvoices(data || []);
+        const invoicesWithSellerInfo = (data || []).map((invoice: Invoice) => ({
+          ...invoice,
+          sellerInfo: user,
+        }));
+
+        setInvoices(invoicesWithSellerInfo);
         setWholesalerNameById(wholesalerMap);
         setSelectedIds([]);
       } catch (err) {
@@ -142,7 +148,7 @@ export default function Invoices() {
 
       const matchesFinancialYear =
         selectedFinancialYear.length === 0 ||
-        invoice.invoiceDate.startsWith(selectedFinancialYear.split("-")[0]);
+        invoice.financialYear === selectedFinancialYear;
 
       return matchesSearch && matchesStatus && matchesFinancialYear;
     });
@@ -254,6 +260,18 @@ export default function Invoices() {
     return filteredInvoices.slice(start, end);
   }, [filteredInvoices, safePage]);
 
+  const financialYearsOptions = useMemo(() => {
+    const financialYears = user.financialYears || [];
+
+    return [
+      { label: "Select Financial Year", value: "" },
+      ...financialYears.map((financialYear: FinancialYear) => ({
+        label: financialYear.label,
+        value: financialYear.id,
+      })),
+    ];
+  }, [user]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-64px)]">
@@ -326,11 +344,11 @@ export default function Invoices() {
       </div>
 
       <div className="mb-6 flex 2xl:flex-row flex-col justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(280px,1fr)_220px_220px_auto] items-center">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(320px,1fr)_220px_220px_auto] items-center">
           <Input
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Search wholesaler or invoice..."
+            placeholder="Search wholesaler or invoice number..."
             leadingIcon={<MdSearch />}
           />
 

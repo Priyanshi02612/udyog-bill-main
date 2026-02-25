@@ -18,6 +18,9 @@ export class Invoice {
   @Prop({ required: true })
   invoiceDate!: Date;
 
+  @Prop({ required: true })
+  invoiceDueDate!: Date;
+
   @Prop({ required: true, trim: true })
   financialYear!: string;
 

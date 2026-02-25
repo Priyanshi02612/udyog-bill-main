@@ -150,9 +150,11 @@ export type Invoice = {
   id: string | number;
   _id?: string;
   invoiceNumber: string;
+  financialYear: string;
   buyerId: string;
   sellerId: string;
   invoiceDate: string;
+  invoiceDueDate?: string;
   items: InvoiceItem[];
   subtotal: number;
   gstType: GstType;
@@ -162,7 +164,6 @@ export type Invoice = {
   igst: number;
   total: number;
   status: InvoiceStatus | string;
-  dueDate: string;
   buyerInfo?: UserProfile;
   sellerInfo?: UserProfile;
 };

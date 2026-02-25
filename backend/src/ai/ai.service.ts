@@ -167,7 +167,7 @@ export class AiService {
 
     const invoiceDate = new Date();
 
-    const dueDate = new Date(
+    const invoiceDueDate = new Date(
       Date.UTC(
         invoiceDate.getUTCFullYear(),
         invoiceDate.getUTCMonth(),
@@ -194,7 +194,7 @@ export class AiService {
       buyerInfo: existingWholesaler,
       sellerId: manufacturerId,
       invoiceDate,
-      dueDate,
+      invoiceDueDate,
       gstType: parsedData.gstType,
       taxMode: parsedData.taxMode,
       items: updatedItems,

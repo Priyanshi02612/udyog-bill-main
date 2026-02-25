@@ -170,7 +170,6 @@ export default function CreateInvoicePage() {
       wholesalerId: formWholesalerId,
       invoiceDate: editableInvoice.invoiceDate,
       financialYear: computedFinancialYear,
-      notes: editableInvoice.notes || "",
       gstType: editableInvoice.gstType,
       taxMode: editableInvoice.taxMode || TaxMode.CGST_SGST,
     }));

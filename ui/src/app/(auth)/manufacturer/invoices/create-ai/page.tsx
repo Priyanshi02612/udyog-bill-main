@@ -1,99 +1,115 @@
 "use client";
 
 import { useContext, useState } from "react";
-import { MdChevronRight, MdDescription, MdVerified } from "react-icons/md";
+import {
+  MdAutoAwesome,
+  MdChevronRight,
+  MdDescription,
+  MdHelpOutline,
+} from "react-icons/md";
+import toast from "react-hot-toast";
 
+import { AuthContext } from "../../../../../context/auth.context";
 import { InvoicePreviewCard } from "../../../../../components/admin/invoice-preview-card";
 import { Button } from "../../../../../components/ui/button";
+import InvoicePreviewSkeleton from "../../../../../components/admin/invoice-preview-skeleton";
+import PromptHelperModal from "../../../../../components/admin/modal/prompt-helper-modal";
+import { AiService } from "../../../../../lib/api/ai";
 import { GstType, TaxMode } from "../../../../../utils/constants";
 import {
-  AuthContextType,
-  Invoice,
-  InvoicePartyInfo,
-} from "../../../../../utils/types";
-import { AuthContext } from "@/src/context/auth.context";
+  getErrorMessage,
+  getInvoicePreviewMetrics,
+} from "../../../../../utils/helpers";
+import { AuthContextType, Invoice } from "../../../../../utils/types";
 
-const DEFAULT_ORDER_TEXT = `Customer: Vardhman Mills Ltd.
-PO Number: #TX-992
-Items:
-- 1200 meters of Silk Chiffon, HSN 5007, @ ₹375/m
-- 500 meters Linen Blend, HSN 5309, @ ₹1,000/m
-Tax 12% GST
-Ship to Ludhiana Hub by next Tuesday.`;
+const DEFAULT_ORDER_TEXT = `
+  Customer: Om Sai Wholesale Shop.
+  Items:
+  - 1200 meters of Dyed Silk Fabric - Green, HSN 5007, @ ₹850/m
+  Tax 12% GST
+`;
 
-const AI_DRAFT_INVOICE: Invoice = {
-  id: 88392,
-  invoiceNumber: "INV-AI-88392",
-  buyerId: "party-ai-1",
-  sellerId: "seller-ai-1",
-  invoiceDate: "2026-02-21",
-  dueDate: "2026-03-08",
-  items: [
-    {
-      id: "ai-ii-1",
-      invoiceId: "inv-ai-88392",
-      itemName: "Silk Chiffon",
-      itemId: "item-ai-1",
-      hsnCode: 5007,
-      quantity: 1200,
-      unit: "Meter",
-      basePrice: 375,
-      gstPercentage: 12,
-    },
-    {
-      id: "ai-ii-2",
-      invoiceId: "inv-ai-88392",
-      itemName: "Linen Blend",
-      itemId: "item-ai-2",
-      hsnCode: 5309,
-      quantity: 500,
-      unit: "Meter",
-      basePrice: 1000,
-      gstPercentage: 12,
-    },
-  ],
-  subtotal: 950000,
-  gstType: GstType.GST_12,
-  taxMode: TaxMode.CGST_SGST,
-  sgst: 57000,
-  cgst: 57000,
+const DEFAULT_INVOICE: Invoice = {
+  id: 0,
+  invoiceNumber: "",
+  buyerId: "",
+  sellerId: "",
+  invoiceDate: "",
+  dueDate: "",
+  items: [],
+  subtotal: 0,
+  gstType: "",
+  taxMode: "",
+  sgst: 0,
+  cgst: 0,
   igst: 0,
-  total: 1064000,
-  status: "DRAFT",
-  notes:
-    "AI extracted: Delivery expected by next Tuesday. Shipping to Ludhiana Hub.",
-  paymentTerms: "15 Days Credit",
-};
-
-const AI_BUYER: InvoicePartyInfo = {
-  id: "party-ai-1",
-  businessName: "Vardhman Mills Ltd.",
-  gstin: "03AAACV1234A1Z5",
-  contactPerson: "Aman Bedi",
-  phone: "+91 98765 22001",
-  email: "accounts@vardhman.com",
-  registeredAddress: "Ludhiana Industrial Cluster, Plot 22",
-  state: "Punjab",
+  total: 0,
+  status: "",
 };
 
 export default function CreateAiInvoicePage() {
   const { user } = useContext(AuthContext) as AuthContextType;
-  const [rawOrderText, setRawOrderText] = useState(DEFAULT_ORDER_TEXT);
+  const [rawOrderText, setRawOrderText] = useState("");
+  const [draftInvoice, setDraftInvoice] = useState<Invoice>(DEFAULT_INVOICE);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const isDraftEmpty = draftInvoice.items.length === 0;
+
+  const applyDraft = (draft: Invoice) => {
+    const { taxableSubtotal, cgstRate, sgstRate, igstRate, totalAmountDue } =
+      getInvoicePreviewMetrics(
+        draft.items,
+        draft.gstType as GstType,
+        draft.taxMode as TaxMode,
+      );
+
+    setDraftInvoice((prev) => ({
+      ...prev,
+      ...draft,
+      taxableSubtotal,
+      gstType: draft.gstType,
+      taxMode: draft.taxMode,
+      cgst: cgstRate,
+      sgst: sgstRate,
+      igst: igstRate,
+      total: totalAmountDue,
+    }));
+  };
+
+  const handleAnalyze = async () => {
+    if (!rawOrderText.trim()) {
+      toast.error("Please add order details before running AI analysis.");
+      return;
+    }
+
+    setAnalyzing(true);
+    try {
+      const aiDraft = await AiService.generateInvoiceDraft(
+        rawOrderText,
+        user._id,
+      );
+      applyDraft(aiDraft);
+    } catch (error) {
+      toast.error(`${getErrorMessage(error)}`);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
 
   return (
-    <div className="relative min-h-[calc(100vh-124px)] p-4 pb-6 sm:p-6 lg:p-8 lg:pb-0">
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div className="relative min-h-[calc(100vh-124px)] p-3 pb-5 sm:p-6 lg:p-8 lg:pb-0">
+      <div className="mb-5 flex flex-col gap-4 sm:mb-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+          <h1 className="text-xl font-black tracking-tight text-slate-900 sm:text-3xl">
             AI Invoice Creation
           </h1>
-          <p className="text-xs text-primary md:text-base">
+          <p className="text-sm text-primary sm:text-base">
             Convert unstructured messages into professional textile invoices
             instantly.
           </p>
         </div>
 
-        <div className="flex w-full gap-3 sm:w-auto">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:gap-3">
           <Button
             size="sm"
             variant="outline-secondary"
@@ -107,64 +123,92 @@ export default function CreateAiInvoicePage() {
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(300px,1fr)_56px_minmax(470px,1.2fr)]">
-        <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 h-max">
-          <div className="mb-4 flex items-center justify-between">
+      <div className="grid gap-4 sm:gap-6 xl:grid-cols-[minmax(300px,1fr)_56px_minmax(470px,1.2fr)]">
+        <section className="h-max rounded-2xl border border-slate-200 bg-white p-3 sm:p-6">
+          <div className="mb-3 flex flex-col gap-2 sm:mb-4 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
               <MdDescription className="h-5 w-5 text-primary" />
               Raw Invoice Details
             </h2>
-            <button
-              type="button"
-              className="text-sm font-semibold text-primary hover:text-primary/80"
-              onClick={() => setRawOrderText("")}
-            >
-              Clear Canvas
-            </button>
+            <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end sm:gap-3">
+              <Button
+                variant="link"
+                size="sm"
+                leadingIcon={<MdHelpOutline className="h-4 w-4" />}
+                onClick={() => setIsHelpModalOpen(true)}
+              >
+                Format Help
+              </Button>
+              <Button
+                variant="link"
+                size="sm"
+                onClick={() => setRawOrderText("")}
+              >
+                Clear Canvas
+              </Button>
+            </div>
           </div>
 
           <textarea
             value={rawOrderText}
             onChange={(event) => setRawOrderText(event.target.value)}
-            className="h-125 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-4 text-base leading-8 text-slate-700 outline-0 focus:border-primary focus:ring-2 focus:ring-primary/20"
+            placeholder={DEFAULT_ORDER_TEXT.trim()}
+            className="h-56 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm leading-6 text-slate-700 outline-0 focus:border-primary focus:ring-2 focus:ring-primary/20 sm:h-75 sm:p-4 sm:text-base sm:leading-8"
           />
+
+          <Button
+            className="mt-4 w-full"
+            leadingIcon={<MdAutoAwesome className="h-5 w-5" />}
+            onClick={handleAnalyze}
+            loading={analyzing}
+          >
+            Analyze with AI
+          </Button>
         </section>
 
         <div className="hidden items-center justify-center xl:flex">
-          <div className="rounded-full bg-slate-100 p-3 text-slate-400">
-            <MdChevronRight className="h-8 w-8" />
+          <div className="rounded-full bg-slate-200/20 p-3">
+            <div className="rounded-full bg-slate-200/30 p-2">
+              <div className="rounded-full bg-slate-200/70 text-slate-400">
+                <MdChevronRight className="h-8 w-8" />
+              </div>
+            </div>
           </div>
         </div>
 
         <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 p-4 sm:p-6">
-            <div>
-              <h3 className="text-3xl font-black tracking-tight text-slate-900">
-                Invoice Draft Preview
-              </h3>
-              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-                Draft ID: #INV-AI-88392
-              </p>
-            </div>
-            <span className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">
-              <MdVerified className="h-4 w-4" />
-              AI VERIFIED
-            </span>
+          <div className="border-b border-slate-200 p-3 sm:p-6">
+            <h3 className="text-lg font-black tracking-tight text-slate-900 sm:text-xl">
+              Invoice Draft Preview
+            </h3>
           </div>
-
           <div
-            className="max-h-205 overflow-y-auto p-4 sm:p-6"
+            className="max-h-[55vh] overflow-y-auto p-3 sm:max-h-205 sm:p-6"
             style={{ scrollbarWidth: "thin" }}
           >
-            <InvoicePreviewCard
-              invoice={AI_DRAFT_INVOICE}
-              buyerInfo={AI_BUYER}
-              sellerInfo={user}
-              className="mt-0 max-w-none p-4 sm:p-6"
-            />
+            {analyzing || isDraftEmpty ? (
+              <InvoicePreviewSkeleton />
+            ) : (
+              <InvoicePreviewCard
+                invoice={draftInvoice}
+                buyerInfo={draftInvoice.buyerInfo}
+                sellerInfo={user}
+                className="mt-0 max-w-none p-3 sm:p-6"
+              />
+            )}
           </div>
         </section>
       </div>
+
+      <PromptHelperModal
+        open={isHelpModalOpen}
+        exampleText={DEFAULT_ORDER_TEXT.trim()}
+        onClose={() => setIsHelpModalOpen(false)}
+        onUseExample={() => {
+          setRawOrderText(DEFAULT_ORDER_TEXT.trim());
+          setIsHelpModalOpen(false);
+        }}
+      />
     </div>
   );
 }

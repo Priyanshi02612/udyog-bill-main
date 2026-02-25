@@ -10,6 +10,7 @@ import { Input } from "../../components/ui/input";
 import { auth } from "../../lib/firebase/config";
 import { UsersService } from "../../lib/api/users";
 import { AuthContext } from "../../context/auth.context";
+import { OnboardingContext } from "../../context/onboarding.context";
 import { AuthContextType, OnboardingContextType } from "../../utils/types";
 
 import { MdHelp, MdRemoveRedEye } from "react-icons/md";
@@ -18,7 +19,6 @@ import toast from "react-hot-toast";
 
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
-import { OnboardingContext } from "@/src/context/onboarding.context";
 
 const LoginContent = () => {
   const { user } = useContext(AuthContext) as AuthContextType;

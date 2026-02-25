@@ -191,8 +191,7 @@ export const mockInvoices: Invoice[] = [
     cgst: 1674,
     igst: 0,
     total: 21948,
-    status: "SENT",
-    paymentTerms: "15 Days Credit",
+    status: "DRAFT",
   },
   {
     id: 2,
@@ -210,7 +209,6 @@ export const mockInvoices: Invoice[] = [
     igst: 0,
     total: 12320,
     status: "PAID",
-    paymentTerms: "Immediate Payment",
   },
   {
     id: 3,
@@ -228,8 +226,6 @@ export const mockInvoices: Invoice[] = [
     igst: 0,
     total: 22302,
     status: "OVERDUE",
-    notes: "Delayed due to transport issue",
-    paymentTerms: "15 Days Credit",
   },
   {
     id: 4,
@@ -247,7 +243,6 @@ export const mockInvoices: Invoice[] = [
     igst: 1352.5,
     total: 28403,
     status: "ACCEPTED",
-    paymentTerms: "15 Days Credit",
   },
   {
     id: 5,
@@ -265,7 +260,6 @@ export const mockInvoices: Invoice[] = [
     igst: 0,
     total: 32760,
     status: "DRAFT",
-    notes: "Awaiting internal approval before dispatch.",
   },
   {
     id: 6,
@@ -282,8 +276,6 @@ export const mockInvoices: Invoice[] = [
     igst: 0,
     total: 10080,
     status: "REJECTED",
-    notes: "Rejected due to quantity mismatch in purchase order.",
-    paymentTerms: "Against Delivery",
   },
 ];
 

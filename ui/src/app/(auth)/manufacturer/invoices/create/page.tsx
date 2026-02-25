@@ -14,7 +14,6 @@ import { AuthContext } from "../../../../../context/auth.context";
 import {
   GstType,
   INVOICE_PREFIX,
-  MAX_INVOICE_NOTES_LENGTH,
   TaxMode,
 } from "../../../../../utils/constants";
 import { mockInvoices } from "../../../../../utils/data";
@@ -30,12 +29,14 @@ import {
   AuthContextType,
   CreateManufacturerInvoicePayload,
   FinancialYear,
+  Item,
   InvoiceCreateState,
   InvoiceItem,
   InvoiceSubmitAction,
   Party,
 } from "../../../../../utils/types";
 import { ManufacturerService } from "../../../../../lib/api/manufacturer";
+import { ItemsService } from "../../../../../lib/api/items";
 
 const createInvoiceItem = (gstPercentage: number): InvoiceItem => ({
   id: crypto.randomUUID(),
@@ -56,24 +57,17 @@ export default function CreateInvoicePage() {
   const { user } = useContext(AuthContext) as AuthContextType;
 
   const [wholesalers, setWholesalers] = useState<Party[]>([]);
+  const [masterItems, setMasterItems] = useState<Item[]>([]);
+  const [invoiceNumber, setInvoiceNumber] = useState("");
   const [invoiceDetails, setInvoiceDetails] = useState<InvoiceCreateState>({
-    invoiceNumber: "",
     wholesalerId: "",
     invoiceDate: new Date().toISOString().split("T")[0],
     financialYear: getDefaultFinancialYear(),
-    notes: "",
     gstType: GstType.GST_5,
     taxMode: TaxMode.CGST_SGST,
   });
-  const {
-    invoiceNumber,
-    wholesalerId,
-    invoiceDate,
-    financialYear,
-    notes,
-    gstType,
-    taxMode,
-  } = invoiceDetails;
+  const { wholesalerId, invoiceDate, financialYear, gstType, taxMode } =
+    invoiceDetails;
   const selectedGstRate = useMemo(() => getGstRateFromType(gstType), [gstType]);
 
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([
@@ -103,18 +97,29 @@ export default function CreateInvoicePage() {
   );
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setWholesalers([]);
+      setMasterItems([]);
+      return;
+    }
 
-    const fetchWholesalers = async () => {
+    const fetchInitialInvoiceData = async () => {
       try {
-        const response = await ManufacturerService.getWholesalers(user._id);
-        setWholesalers(response.data);
+        const [wholesalersResponse, itemsResponse] = await Promise.all([
+          ManufacturerService.getWholesalers(user._id),
+          ItemsService.getUsersMasterItems(user._id),
+        ]);
+
+        setWholesalers(wholesalersResponse.data || []);
+        setMasterItems((itemsResponse.data as Item[]) || []);
       } catch (error) {
-        toast.error(getErrorMessage(error) || "Failed to fetch wholesalers");
+        toast.error(
+          getErrorMessage(error) || "Failed to fetch invoice form data",
+        );
       }
     };
 
-    fetchWholesalers();
+    fetchInitialInvoiceData();
   }, [user]);
 
   const {
@@ -166,13 +171,13 @@ export default function CreateInvoicePage() {
 
     setInvoiceDetails((prev) => ({
       ...prev,
-      invoiceNumber: editableInvoice.invoiceNumber,
       wholesalerId: formWholesalerId,
       invoiceDate: editableInvoice.invoiceDate,
       financialYear: computedFinancialYear,
-      gstType: editableInvoice.gstType,
-      taxMode: editableInvoice.taxMode || TaxMode.CGST_SGST,
+      gstType: editableInvoice.gstType as GstType,
+      taxMode: (editableInvoice.taxMode || TaxMode.CGST_SGST) as TaxMode,
     }));
+    setInvoiceNumber(editableInvoice.invoiceNumber);
 
     setInvoiceItems(
       editableInvoice.items.map((item) => ({
@@ -196,10 +201,8 @@ export default function CreateInvoicePage() {
       INVOICE_PREFIX,
     );
 
-    setInvoiceDetails((prev) =>
-      prev.invoiceNumber === nextInvoiceNumber
-        ? prev
-        : { ...prev, invoiceNumber: nextInvoiceNumber },
+    setInvoiceNumber((prev) =>
+      prev === nextInvoiceNumber ? prev : nextInvoiceNumber,
     );
   }, [editableInvoice, userInvoices]);
 
@@ -213,22 +216,46 @@ export default function CreateInvoicePage() {
     );
   }, [selectedGstRate]);
 
-  const handleInvoiceItemChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleQuantityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, dataset } = event.target;
     const id = dataset.id as string;
 
-    let updatedValue = value;
+    setInvoiceItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, [name]: value } : item)),
+    );
+  };
 
-    if (name === "hsnCode") {
-      updatedValue = value.replace(/[^0-9]/g, "");
-    }
+  const handleSelectItem = (itemRowId: string, selectedItemId: string) => {
+    const selectedItem = masterItems.find(
+      (item) => item._id === selectedItemId,
+    );
 
     setInvoiceItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, [name]: updatedValue } : item,
-      ),
+      prev.map((item) => {
+        if (item.id !== itemRowId) {
+          return item;
+        }
+
+        if (!selectedItem) {
+          return {
+            ...item,
+            itemId: "",
+            itemName: "",
+            hsnCode: "",
+            unit: "",
+            basePrice: "",
+          };
+        }
+
+        return {
+          ...item,
+          itemId: selectedItem._id ?? "",
+          itemName: selectedItem.name,
+          hsnCode: String(selectedItem.hsnCode ?? ""),
+          unit: selectedItem.unit ?? "",
+          basePrice: String(selectedItem.basePrice ?? ""),
+        };
+      }),
     );
   };
 
@@ -278,13 +305,6 @@ export default function CreateInvoicePage() {
       return false;
     }
 
-    if (notes.length > MAX_INVOICE_NOTES_LENGTH) {
-      toast.error(
-        `Notes should not exceed ${MAX_INVOICE_NOTES_LENGTH} characters.`,
-      );
-      return false;
-    }
-
     if (computedRows.length === 0 || taxableSubtotal <= 0) {
       toast.error("Add at least one valid line item.");
       return false;
@@ -313,17 +333,11 @@ export default function CreateInvoicePage() {
       taxMode: effectiveTaxMode,
       totalTaxAmount: totalGstAmount,
       subtotal: taxableSubtotal,
-      notes: notes.trim() || undefined,
       total: totalAmountDue,
       items: computedRows.map((item) => ({
-        id: item.itemName.trim(),
-        invoiceId: "",
-        itemId: "",
-        itemName: item.itemName.trim(),
-        hsnCode: item.hsnCode,
+        id: "",
+        itemId: item.itemId,
         quantity: item.quantity,
-        unit: item.unit.trim(),
-        basePrice: item.basePrice,
         gstPercentage: item.gstPercentage,
         taxableAmount: item.taxableAmount,
       })),
@@ -354,6 +368,17 @@ export default function CreateInvoicePage() {
       label: financialYear.label,
     }));
   }, [user]);
+
+  const masterItemOptions = useMemo(
+    () =>
+      masterItems
+        .filter((item) => item._id && item.isActive)
+        .map((item) => ({
+          value: item._id as string,
+          label: item.name,
+        })),
+    [masterItems],
+  );
 
   return (
     <div className="relative min-h-[calc(100vh-124px)] p-4 pb-6 sm:p-6 lg:p-8 lg:pb-0">
@@ -452,9 +477,11 @@ export default function CreateInvoicePage() {
 
       <InvoiceItemsTable
         items={computedRows}
-        onItemChange={handleInvoiceItemChange}
+        onQuantityChange={handleQuantityChange}
+        onSelectItem={handleSelectItem}
         onAddRow={addNewRow}
         onRemoveRow={removeRow}
+        itemOptions={masterItemOptions}
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1fr]">
@@ -478,31 +505,6 @@ export default function CreateInvoicePage() {
               }))
             }
           />
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-            <label className="mb-2 block text-sm font-semibold text-slate-700">
-              Additional Notes / Terms
-            </label>
-            <textarea
-              value={notes}
-              onChange={(event) =>
-                setInvoiceDetails((prev) => ({
-                  ...prev,
-                  notes: event.target.value,
-                }))
-              }
-              placeholder="Terms of payment, delivery instructions, etc..."
-              rows={5}
-              className="w-full rounded-lg border border-slate-300 bg-slate-50 p-3 text-sm focus:border-primary focus:outline-none"
-            />
-            <div className="mt-2 flex items-center justify-between">
-              <span className="text-xs text-slate-400">Optional</span>
-
-              <span className="text-xs text-slate-400">
-                {notes.length}/{MAX_INVOICE_NOTES_LENGTH}
-              </span>
-            </div>
-          </div>
         </div>
 
         <InvoiceFinancialSummary

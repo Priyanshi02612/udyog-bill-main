@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  ServiceUnavailableException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { SignupDto } from './dto/sign-up.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../db/schema/user.schema';
@@ -11,6 +15,8 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { generateOtp, hashOtp } from '../common/helper';
 import { GstType, TaxMode } from '../common/enums';
 import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
+import { AppConfig } from '../config';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +25,37 @@ export class AuthService {
     @InjectModel(UserBusinessDetails.name)
     private readonly userBusinessDetailsModel: Model<UserBusinessDetails>,
     private readonly mailerService: MailerService,
+    private readonly configService: ConfigService<AppConfig>,
   ) {}
+
+  private async sendMailWithTimeout(
+    payload: Parameters<MailerService['sendMail']>[0],
+  ) {
+    const mailer = this.configService.get('mailer', { infer: true });
+    const timeoutMs = mailer?.timeoutMs.send ?? 12000;
+
+    let timeoutRef: NodeJS.Timeout | undefined;
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutRef = setTimeout(() => {
+        reject(new Error('Mail send timed out'));
+      }, timeoutMs);
+    });
+
+    try {
+      await Promise.race([
+        this.mailerService.sendMail(payload),
+        timeoutPromise,
+      ]);
+    } catch {
+      throw new ServiceUnavailableException(
+        'Unable to send email right now. Please try again.',
+      );
+    } finally {
+      if (timeoutRef) {
+        clearTimeout(timeoutRef);
+      }
+    }
+  }
 
   async sendOTP(data: { email: string }) {
     const user = await this.userModel.findOne({ email: data.email });
@@ -35,7 +71,7 @@ export class AuthService {
     user.otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 min
     await user.save();
 
-    await this.mailerService.sendMail({
+    await this.sendMailWithTimeout({
       to: data.email,
       subject: 'Your verification code',
       html: `

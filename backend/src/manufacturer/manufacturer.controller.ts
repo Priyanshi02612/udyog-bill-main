@@ -11,6 +11,17 @@ import { RemovePartyDto } from './dto/remove-party.dto';
 export class ManufacturerController {
   constructor(private readonly manufacturerService: ManufacturerService) {}
 
+  @Get('dashboard/:manufacturerUserId')
+  async getDashboard(@Param('manufacturerUserId') manufacturerUserId: string) {
+    try {
+      const response =
+        await this.manufacturerService.getDashboard(manufacturerUserId);
+      return ResponseHandler.handle(response);
+    } catch (error: any) {
+      return ResponseHandler.handle(null, true, error.message, 400);
+    }
+  }
+
   @Get('wholesalers/:manufacturerUserId')
   async getWholesalers(
     @Param('manufacturerUserId') manufacturerUserId: string,

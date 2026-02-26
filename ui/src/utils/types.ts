@@ -193,6 +193,56 @@ export interface DashboardData {
   insights: Insight[];
 }
 
+export type ManufacturerDashboardInsightType = "success" | "warning" | "info";
+
+export interface ManufacturerDashboard {
+  kpis: {
+    totalInvoices: number;
+    pendingPayments: number;
+    monthlyRevenue: number;
+  };
+  invoiceSummary: {
+    totalInvoices: number;
+    pendingPayments: number;
+    monthlyRevenue: number;
+    overdueCount: number;
+  };
+  inventorySummary: {
+    totalReceivedStock: number;
+    currentStock: number;
+    consumedStock: number;
+    inventoryValue: number;
+    outOfStockCount: number;
+    lowStockCount: number;
+  };
+  lowStockItems: Array<{
+    id: string;
+    itemId: string;
+    name: string;
+    unit: string;
+    totalStock: number;
+    currentStock: number;
+  }>;
+  dailyStockData: Array<{
+    label: string;
+    inward: number;
+    outward: number;
+  }>;
+  recentInvoices: Array<{
+    id: string;
+    invoiceNumber: string;
+    buyerName: string;
+    invoiceDate: string;
+    total: number;
+    status: InvoiceStatus | string;
+  }>;
+  insights: Array<{
+    type: ManufacturerDashboardInsightType;
+    title: string;
+    description: string;
+  }>;
+}
+
 export type CreateInvoiceLineItemPayload = {
   itemId: string;
   description: string;

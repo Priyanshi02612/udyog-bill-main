@@ -9,8 +9,9 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { auth } from "../../lib/firebase/config";
 import { UsersService } from "../../lib/api/users";
-import { AuthContext } from "../../context/auth.context";
-import { AuthContextType, OnboardingContextType } from "../../utils/types";
+import { OnboardingContext } from "../../context/onboarding.context";
+import { OnboardingContextType } from "../../utils/types";
+import { usePublicRouteRedirect } from "../../hooks/use-public-route-redirect";
 
 import { MdHelp, MdRemoveRedEye } from "react-icons/md";
 import { useContext, useState } from "react";
@@ -18,10 +19,9 @@ import toast from "react-hot-toast";
 
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
-import { OnboardingContext } from "@/src/context/onboarding.context";
 
 const LoginContent = () => {
-  const { user } = useContext(AuthContext) as AuthContextType;
+  const { user, shouldShowLoading } = usePublicRouteRedirect();
   const { resetOnBoardingState } = useContext(
     OnboardingContext,
   ) as OnboardingContextType;
@@ -31,6 +31,14 @@ const LoginContent = () => {
 
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  if (shouldShowLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
+      </div>
+    );
+  }
 
   const handleLogin = async () => {
     try {

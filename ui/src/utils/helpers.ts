@@ -38,16 +38,6 @@ export const statusStyles: Record<
     text: "text-amber-600",
     label: "Sent",
   },
-  ACCEPTED: {
-    bg: "bg-blue-50",
-    text: "text-blue-600",
-    label: "Accepted",
-  },
-  REJECTED: {
-    bg: "bg-rose-50",
-    text: "text-rose-600",
-    label: "Rejected",
-  },
   PAID: {
     bg: "bg-emerald-50",
     text: "text-emerald-600",

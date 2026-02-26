@@ -54,8 +54,6 @@ export const invoiceStatusOptions = [
   { label: "Select Invoice Status", value: "" },
   { label: "Draft", value: "DRAFT" },
   { label: "Sent", value: "SENT" },
-  { label: "Accepted", value: "ACCEPTED" },
-  { label: "Rejected", value: "REJECTED" },
   { label: "Paid", value: "PAID" },
   { label: "Overdue", value: "OVERDUE" },
 ];
@@ -66,8 +64,6 @@ export const previewStatusVariant: Record<
 > = {
   DRAFT: "info",
   SENT: "warning",
-  ACCEPTED: "primary",
-  REJECTED: "danger",
   PAID: "success",
   OVERDUE: "danger",
 };

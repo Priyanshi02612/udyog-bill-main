@@ -9,8 +9,6 @@ export type ItemCategory = "FABRIC" | "MATERIAL" | "THREAD";
 export type InvoiceStatus =
   | "DRAFT"
   | "SENT"
-  | "ACCEPTED"
-  | "REJECTED"
   | "PAID"
   | "OVERDUE";
 

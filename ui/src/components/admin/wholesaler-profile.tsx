@@ -138,14 +138,11 @@ const PartyDrawer = ({ open, onClose, party }: PartyDrawerProps) => {
                   const statusDotColor =
                     resolvedStatus === "PAID"
                       ? "bg-emerald-500"
-                      : resolvedStatus === "OVERDUE" ||
-                          resolvedStatus === "REJECTED"
+                      : resolvedStatus === "OVERDUE"
                         ? "bg-danger"
-                        : resolvedStatus === "ACCEPTED"
-                          ? "bg-blue-500"
-                          : resolvedStatus === "SENT"
-                            ? "bg-amber-500"
-                            : "bg-slate-400";
+                        : resolvedStatus === "SENT"
+                          ? "bg-amber-500"
+                          : "bg-slate-400";
 
                   return (
                     <div

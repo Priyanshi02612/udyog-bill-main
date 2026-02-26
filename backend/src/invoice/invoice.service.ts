@@ -37,6 +37,26 @@ export class InvoiceService {
     private readonly itemModel: Model<Item>,
   ) {}
 
+  private resolveInvoiceStatus(
+    status: string,
+    invoiceDueDate?: Date | string,
+  ): 'DRAFT' | 'SENT' | 'PAID' | 'OVERDUE' {
+    if (status === 'PAID') {
+      return 'PAID';
+    }
+
+    if (status !== 'SENT') {
+      return 'DRAFT';
+    }
+
+    const dueDate = invoiceDueDate ? new Date(invoiceDueDate) : null;
+    if (!dueDate || Number.isNaN(dueDate.getTime())) {
+      return 'SENT';
+    }
+
+    return dueDate < new Date() ? 'OVERDUE' : 'SENT';
+  }
+
   async createInvoice(createInvoiceDto: CreateInvoiceDto) {
     const session = await this.connection.startSession();
 
@@ -105,6 +125,7 @@ export class InvoiceService {
 
     return invoices.map((invoice) => ({
       ...invoice,
+      status: this.resolveInvoiceStatus(invoice.status, invoice.invoiceDueDate),
       buyerInfo: buyerInfoByUserId.get(String(invoice.buyerId)) ?? null,
       items: (itemsByInvoiceId.get(String(invoice._id)) ?? []).map((item) => ({
         ...item,
@@ -136,6 +157,7 @@ export class InvoiceService {
 
     return {
       ...invoice,
+      status: this.resolveInvoiceStatus(invoice.status, invoice.invoiceDueDate),
       buyerInfo,
       items,
     };

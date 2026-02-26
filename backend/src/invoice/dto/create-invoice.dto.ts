@@ -14,6 +14,7 @@ import { GstType, TaxMode } from '../../common/enums';
 enum InvoiceSubmitStatus {
   DRAFT = 'DRAFT',
   SENT = 'SENT',
+  PAID = 'PAID',
 }
 
 class CreateInvoiceLineItemDto {
@@ -51,7 +52,7 @@ export class CreateInvoiceDto {
   financialYear!: string;
 
   @IsEnum(InvoiceSubmitStatus)
-  status!: 'DRAFT' | 'SENT';
+  status!: 'DRAFT' | 'SENT' | 'PAID';
 
   @IsEnum(GstType)
   gstType!: GstType;

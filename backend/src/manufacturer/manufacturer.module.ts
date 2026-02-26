@@ -10,7 +10,10 @@ import {
   UserBusinessDetailsSchema,
 } from '../db/schema/user-business-details.schema';
 import { Invoice, InvoiceSchema } from '../db/schema/invoice.schema';
-import { InvoiceItem, InvoiceItemSchema } from '../db/schema/invoice-item.schema';
+import {
+  InvoiceItem,
+  InvoiceItemSchema,
+} from '../db/schema/invoice-item.schema';
 import { Inventory, InventorySchema } from '../db/schema/inventory.schema';
 import {
   InventoryItem,

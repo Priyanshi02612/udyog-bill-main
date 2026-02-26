@@ -24,8 +24,8 @@ export class Invoice {
   @Prop({ required: true, trim: true })
   financialYear!: string;
 
-  @Prop({ required: true, enum: ['DRAFT', 'SENT'], index: true })
-  status!: 'DRAFT' | 'SENT';
+  @Prop({ required: true, enum: ['DRAFT', 'SENT', 'PAID'], index: true })
+  status!: 'DRAFT' | 'SENT' | 'PAID';
 
   @Prop({ required: true, enum: GstType })
   gstType!: GstType;

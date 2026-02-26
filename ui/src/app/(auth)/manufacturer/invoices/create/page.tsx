@@ -32,6 +32,7 @@ import {
   Item,
   InvoiceCreateState,
   InvoiceItem,
+  InvoiceStatus,
   InvoiceSubmitAction,
   UserProfile,
 } from "../../../../../utils/types";
@@ -481,16 +482,16 @@ export default function CreateInvoicePage() {
             variant="outline-secondary"
             size="sm"
             className="flex-1 sm:flex-none"
-            loading={submittingAction === "DRAFT"}
-            onClick={() => handleSubmit("DRAFT")}
+            loading={submittingAction === InvoiceStatus.DRAFT}
+            onClick={() => handleSubmit(InvoiceStatus.DRAFT)}
           >
             Save Draft
           </Button>
           <Button
             size="sm"
             className="w-full sm:w-auto"
-            loading={submittingAction === "SENT"}
-            onClick={() => handleSubmit("SENT")}
+            loading={submittingAction === InvoiceStatus.SENT}
+            onClick={() => handleSubmit(InvoiceStatus.SENT)}
           >
             {isEditMode ? "Update Invoice" : "Create Invoice"}
           </Button>

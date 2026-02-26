@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { GstType, TaxMode } from '../../common/enums';
+import { GstType, InvoiceSubmitStatus, TaxMode } from '../../common/enums';
 
 export type InvoiceDocument = Invoice & Document;
 
@@ -24,8 +24,8 @@ export class Invoice {
   @Prop({ required: true, trim: true })
   financialYear!: string;
 
-  @Prop({ required: true, enum: ['DRAFT', 'SENT', 'PAID'], index: true })
-  status!: 'DRAFT' | 'SENT' | 'PAID';
+  @Prop({ required: true, enum: InvoiceSubmitStatus, index: true })
+  status!: InvoiceSubmitStatus;
 
   @Prop({ required: true, enum: GstType })
   gstType!: GstType;

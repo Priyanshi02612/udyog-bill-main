@@ -23,20 +23,22 @@ const PartyDrawer = ({ open, onClose, party }: PartyDrawerProps) => {
   };
 
   const getResolvedStatus = (invoice: {
-    status?: string;
+    status?: InvoiceStatus;
     invoiceDueDate?: string;
-  }) => {
+  }): InvoiceStatus => {
     const now = new Date();
     const dueDate = invoice.invoiceDueDate
       ? new Date(invoice.invoiceDueDate)
       : null;
     const isOverdue =
-      invoice.status === "SENT" &&
+      invoice.status === InvoiceStatus.SENT &&
       dueDate &&
       !Number.isNaN(dueDate.getTime()) &&
       dueDate < now;
 
-    return (isOverdue ? "OVERDUE" : invoice.status || "DRAFT") as InvoiceStatus;
+    return isOverdue
+      ? InvoiceStatus.OVERDUE
+      : (invoice.status ?? InvoiceStatus.DRAFT);
   };
 
   return (
@@ -134,13 +136,14 @@ const PartyDrawer = ({ open, onClose, party }: PartyDrawerProps) => {
                 party.invoices.map((invoice) => {
                   const resolvedStatus = getResolvedStatus(invoice);
                   const statusConfig =
-                    statusStyles[resolvedStatus] || statusStyles.DRAFT;
+                    statusStyles[resolvedStatus] ||
+                    statusStyles[InvoiceStatus.DRAFT];
                   const statusDotColor =
-                    resolvedStatus === "PAID"
+                    resolvedStatus === InvoiceStatus.PAID
                       ? "bg-emerald-500"
-                      : resolvedStatus === "OVERDUE"
+                      : resolvedStatus === InvoiceStatus.OVERDUE
                         ? "bg-danger"
-                        : resolvedStatus === "SENT"
+                        : resolvedStatus === InvoiceStatus.SENT
                           ? "bg-amber-500"
                           : "bg-slate-400";
 

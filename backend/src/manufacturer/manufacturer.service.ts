@@ -21,6 +21,7 @@ import { Item } from '../db/schema/item.schema';
 import { AddPartyDto } from './dto/add-party.dto';
 import { AcceptPartyInvitationDto } from './dto/accept-party-invitation.dto';
 import { RemovePartyDto } from './dto/remove-party.dto';
+import { InvoiceStatus, InvoiceSubmitStatus } from '../common/enums';
 
 @Injectable()
 export class ManufacturerService {
@@ -98,25 +99,27 @@ export class ManufacturerService {
 
     const totalInvoices = invoices.length;
     const pendingPayments = invoices
-      .filter((invoice) => invoice.status === 'SENT')
+      .filter((invoice) => invoice.status === InvoiceSubmitStatus.SENT)
       .reduce((sum, invoice) => sum + Number(invoice.total || 0), 0);
 
     const monthlyRevenue = invoices
       .filter(
         (invoice) =>
-          invoice.status === 'SENT' &&
+          invoice.status === InvoiceSubmitStatus.SENT &&
           new Date(invoice.invoiceDate) >= monthStart,
       )
       .reduce((sum, invoice) => sum + Number(invoice.total || 0), 0);
 
     const overdueCount = invoices.filter(
       (invoice) =>
-        invoice.status === 'SENT' && new Date(invoice.invoiceDueDate) < now,
+        invoice.status === InvoiceSubmitStatus.SENT &&
+        new Date(invoice.invoiceDueDate) < now,
     ).length;
 
     const recentInvoices = invoices.slice(0, 4).map((invoice) => {
       const isOverdue =
-        invoice.status === 'SENT' && new Date(invoice.invoiceDueDate) < now;
+        invoice.status === InvoiceSubmitStatus.SENT &&
+        new Date(invoice.invoiceDueDate) < now;
 
       return {
         id: String(invoice._id),
@@ -125,16 +128,16 @@ export class ManufacturerService {
           buyerNameById.get(String(invoice.buyerId)) ?? String(invoice.buyerId),
         invoiceDate: invoice.invoiceDate,
         total: Number(invoice.total || 0),
-        status: isOverdue ? 'OVERDUE' : invoice.status,
+        status: isOverdue ? InvoiceStatus.OVERDUE : invoice.status,
       };
     });
 
     const sentCount = invoices.filter(
-      (invoice) => invoice.status === 'SENT',
+      (invoice) => invoice.status === InvoiceSubmitStatus.SENT,
     ).length;
 
     const draftCount = invoices.filter(
-      (invoice) => invoice.status === 'DRAFT',
+      (invoice) => invoice.status === InvoiceSubmitStatus.DRAFT,
     ).length;
 
     const inventoryLots = await this.inventoryModel
@@ -250,7 +253,7 @@ export class ManufacturerService {
     });
 
     const validInvoiceIds = invoices
-      .filter((invoice) => invoice.status !== 'DRAFT')
+      .filter((invoice) => invoice.status !== InvoiceSubmitStatus.DRAFT)
       .map((invoice) => String(invoice._id));
 
     const invoiceItems = validInvoiceIds.length
@@ -273,7 +276,7 @@ export class ManufacturerService {
     });
 
     invoices
-      .filter((invoice) => invoice.status !== 'DRAFT')
+      .filter((invoice) => invoice.status !== InvoiceSubmitStatus.DRAFT)
       .forEach((invoice) => {
         const invoiceDate = new Date(invoice.invoiceDate);
         if (Number.isNaN(invoiceDate.getTime())) {
@@ -404,7 +407,9 @@ export class ManufacturerService {
       const details = businessMap.get(userId);
       const userInvoices = invoiceMap.get(userId) ?? [];
 
-      const sentInvoices = userInvoices.filter((i) => i.status === 'SENT');
+      const sentInvoices = userInvoices.filter(
+        (i) => i.status === InvoiceSubmitStatus.SENT,
+      );
 
       const overdueInvoices = sentInvoices.filter(
         (i) => i.invoiceDueDate && new Date(i.invoiceDueDate) < now,

@@ -15,6 +15,7 @@ import { InvoiceItemAllocation } from '../db/schema/invoice-item-allocation.sche
 import { UserBusinessDetails } from '../db/schema/user-business-details.schema';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { Item } from '../db/schema/item.schema';
+import { InvoiceStatus, InvoiceSubmitStatus } from '../common/enums';
 
 @Injectable()
 export class InvoiceService {
@@ -38,23 +39,23 @@ export class InvoiceService {
   ) {}
 
   private resolveInvoiceStatus(
-    status: string,
+    status: InvoiceSubmitStatus,
     invoiceDueDate?: Date | string,
-  ): 'DRAFT' | 'SENT' | 'PAID' | 'OVERDUE' {
-    if (status === 'PAID') {
-      return 'PAID';
+  ): InvoiceStatus {
+    if (status === InvoiceSubmitStatus.PAID) {
+      return InvoiceStatus.PAID;
     }
 
-    if (status !== 'SENT') {
-      return 'DRAFT';
+    if (status !== InvoiceSubmitStatus.SENT) {
+      return InvoiceStatus.DRAFT;
     }
 
     const dueDate = invoiceDueDate ? new Date(invoiceDueDate) : null;
     if (!dueDate || Number.isNaN(dueDate.getTime())) {
-      return 'SENT';
+      return InvoiceStatus.SENT;
     }
 
-    return dueDate < new Date() ? 'OVERDUE' : 'SENT';
+    return dueDate < new Date() ? InvoiceStatus.OVERDUE : InvoiceStatus.SENT;
   }
 
   async createInvoice(createInvoiceDto: CreateInvoiceDto) {

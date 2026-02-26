@@ -53,7 +53,7 @@ const DEFAULT_INVOICE: Invoice = {
   cgst: 0,
   igst: 0,
   total: 0,
-  status: "",
+  status: InvoiceStatus.DRAFT,
 };
 
 type StockErrorField = {
@@ -171,7 +171,7 @@ export default function CreateAiInvoicePage() {
       igstRate,
       roundOff,
       sellerId: user._id,
-      status: "DRAFT" as InvoiceStatus,
+      status: InvoiceStatus.DRAFT,
       totalTaxAmount: totalGstAmount,
       subtotal: taxableSubtotal,
       total: totalAmountDue,

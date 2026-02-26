@@ -6,11 +6,12 @@ export type Role = "manufacturer" | "wholesaler";
 
 export type ItemCategory = "FABRIC" | "MATERIAL" | "THREAD";
 
-export type InvoiceStatus =
-  | "DRAFT"
-  | "SENT"
-  | "PAID"
-  | "OVERDUE";
+export enum InvoiceStatus {
+  DRAFT = "DRAFT",
+  SENT = "SENT",
+  PAID = "PAID",
+  OVERDUE = "OVERDUE",
+}
 
 export type TaxMode = "CGST_SGST" | "IGST";
 
@@ -162,7 +163,7 @@ export type Invoice = {
   cgst: number;
   igst: number;
   total: number;
-  status: InvoiceStatus | string;
+  status: InvoiceStatus;
   buyerInfo?: UserProfile;
   sellerInfo?: UserProfile;
 };
@@ -233,7 +234,7 @@ export interface ManufacturerDashboard {
     buyerName: string;
     invoiceDate: string;
     total: number;
-    status: InvoiceStatus | string;
+    status: InvoiceStatus;
   }>;
   insights: Array<{
     type: ManufacturerDashboardInsightType;
@@ -283,7 +284,7 @@ export type ValidationErrors = {
   >;
 };
 
-export type InvoiceSubmitAction = "DRAFT" | "SENT";
+export type InvoiceSubmitAction = InvoiceStatus.DRAFT | InvoiceStatus.SENT;
 
 export type InvoiceCreateState = {
   wholesalerId: string;

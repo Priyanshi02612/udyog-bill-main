@@ -28,22 +28,22 @@ export const statusStyles: Record<
   InvoiceStatus,
   { bg: string; text: string; label: string }
 > = {
-  DRAFT: {
+  [InvoiceStatus.DRAFT]: {
     bg: "bg-slate-100",
     text: "text-slate-600",
     label: "Draft",
   },
-  SENT: {
+  [InvoiceStatus.SENT]: {
     bg: "bg-amber-50",
     text: "text-amber-600",
     label: "Sent",
   },
-  PAID: {
+  [InvoiceStatus.PAID]: {
     bg: "bg-emerald-50",
     text: "text-emerald-600",
     label: "Paid",
   },
-  OVERDUE: {
+  [InvoiceStatus.OVERDUE]: {
     bg: "bg-red-50",
     text: "text-danger",
     label: "Overdue",

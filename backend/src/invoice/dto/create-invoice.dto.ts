@@ -9,13 +9,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { GstType, TaxMode } from '../../common/enums';
-
-enum InvoiceSubmitStatus {
-  DRAFT = 'DRAFT',
-  SENT = 'SENT',
-  PAID = 'PAID',
-}
+import { GstType, InvoiceSubmitStatus, TaxMode } from '../../common/enums';
 
 class CreateInvoiceLineItemDto {
   @IsString()
@@ -52,7 +46,7 @@ export class CreateInvoiceDto {
   financialYear!: string;
 
   @IsEnum(InvoiceSubmitStatus)
-  status!: 'DRAFT' | 'SENT' | 'PAID';
+  status!: InvoiceSubmitStatus;
 
   @IsEnum(GstType)
   gstType!: GstType;

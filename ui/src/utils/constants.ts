@@ -52,20 +52,20 @@ export const DEFAULT_FORM: Item = {
 
 export const invoiceStatusOptions = [
   { label: "Select Invoice Status", value: "" },
-  { label: "Draft", value: "DRAFT" },
-  { label: "Sent", value: "SENT" },
-  { label: "Paid", value: "PAID" },
-  { label: "Overdue", value: "OVERDUE" },
+  { label: "Draft", value: InvoiceStatus.DRAFT },
+  { label: "Sent", value: InvoiceStatus.SENT },
+  { label: "Paid", value: InvoiceStatus.PAID },
+  { label: "Overdue", value: InvoiceStatus.OVERDUE },
 ];
 
 export const previewStatusVariant: Record<
   InvoiceStatus,
   "success" | "warning" | "danger" | "info" | "primary"
 > = {
-  DRAFT: "info",
-  SENT: "warning",
-  PAID: "success",
-  OVERDUE: "danger",
+  [InvoiceStatus.DRAFT]: "info",
+  [InvoiceStatus.SENT]: "warning",
+  [InvoiceStatus.PAID]: "success",
+  [InvoiceStatus.OVERDUE]: "danger",
 };
 
 export const INDIAN_NUMBER_UNITS = [

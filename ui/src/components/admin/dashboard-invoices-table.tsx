@@ -12,7 +12,7 @@ type DashboardInvoiceRow = {
   buyerName: string;
   invoiceDate: string;
   total: number;
-  status: InvoiceStatus | string;
+  status: InvoiceStatus;
 };
 
 export default function DashboardInvoicesTable({
@@ -38,7 +38,7 @@ export default function DashboardInvoicesTable({
 
         <tbody className="divide-y divide-slate-100 text-sm">
           {invoices.map((invoice) => {
-            const status = statusStyles[invoice.status as InvoiceStatus];
+            const status = statusStyles[invoice.status];
 
             return (
               <tr

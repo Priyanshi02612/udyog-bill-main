@@ -38,6 +38,7 @@ import {
   AuthContextType,
   FinancialYear,
   Invoice,
+  InvoiceStatus,
 } from "../../../../utils/types";
 import toast from "react-hot-toast";
 import { InvoiceService } from "../../../../lib/api/invoice";
@@ -172,28 +173,32 @@ export default function Invoices() {
   const totalOutstanding = useMemo(
     () =>
       filteredInvoices
-        .filter((invoice) => invoice.status !== "PAID")
+        .filter((invoice) => invoice.status !== InvoiceStatus.PAID)
         .reduce((total, invoice) => total + invoice.total, 0),
     [filteredInvoices],
   );
 
   const awaitingPayment = useMemo(
     () =>
-      filteredInvoices.filter((invoice) => invoice.status === "SENT").length,
+      filteredInvoices.filter(
+        (invoice) => invoice.status === InvoiceStatus.SENT,
+      ).length,
     [filteredInvoices],
   );
 
   const paidThisMonth = useMemo(
     () =>
       filteredInvoices
-        .filter((invoice) => invoice.status === "PAID")
+        .filter((invoice) => invoice.status === InvoiceStatus.PAID)
         .reduce((total, invoice) => total + invoice.total, 0),
     [filteredInvoices],
   );
 
   const overdueCount = useMemo(
     () =>
-      filteredInvoices.filter((invoice) => invoice.status === "OVERDUE").length,
+      filteredInvoices.filter(
+        (invoice) => invoice.status === InvoiceStatus.OVERDUE,
+      ).length,
     [filteredInvoices],
   );
 

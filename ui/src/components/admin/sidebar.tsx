@@ -19,6 +19,9 @@ import { Button } from "../ui/button";
 import { auth } from "../../lib/firebase/config";
 import { UserRole } from "../../utils/constants";
 import clsx from "clsx";
+import { useContext, useMemo } from "react";
+import { AuthContext } from "../../context/auth.context";
+import { AuthContextType } from "../../utils/types";
 
 const navbarOptions = {
   [UserRole.MANUFACTURER]: [
@@ -51,7 +54,7 @@ const navbarOptions = {
   [UserRole.WHOLESALER]: [
     {
       title: "Dashboard",
-      to: "/wholesaler",
+      to: "/wholesaler/dashboard",
       icon: <MdDashboard className="w-6 h-6 text-primary" />,
     },
     {
@@ -73,11 +76,21 @@ export const Sidebar = ({
 }) => {
   const router = useRouter();
   const pathname = usePathname();
+  const { user } = useContext(AuthContext) as AuthContextType;
 
   const activeTab =
     navbarOptions[role].find((item) => pathname.startsWith(item.to))?.to ||
     "/manufacturer/dashboard";
-  const isSettingsActive = pathname.startsWith("/manufacturer/profile");
+
+  const settingRoute = useMemo(() => {
+    if (!user) return "/";
+
+    return user.role === UserRole.MANUFACTURER
+      ? "/manufacturer/profile"
+      : "/wholesaler/profile";
+  }, [user]);
+
+  const isSettingsActive = pathname.startsWith(settingRoute);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -132,7 +145,7 @@ export const Sidebar = ({
 
       <div className="p-4 border-t border-slate-200">
         <Link
-          href="/manufacturer/profile"
+          href={settingRoute}
           onClick={onClose}
           className={clsx(
             "flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium hover:bg-primary-soft",

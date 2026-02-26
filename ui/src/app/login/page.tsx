@@ -70,7 +70,7 @@ const LoginContent = () => {
           break;
 
         case "wholesaler":
-          router.replace("/wholesaler");
+          router.replace("/wholesaler/dashboard");
           break;
 
         default:

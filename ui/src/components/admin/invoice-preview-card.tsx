@@ -23,6 +23,7 @@ export function InvoicePreviewCard({
 }: InvoicePreviewCardProps) {
   const applyGst = invoice.gstType !== GstType.NO_GST;
   const taxMode = invoice.taxMode;
+  const dueDate = invoice.invoiceDueDate || invoice.invoiceDate;
 
   const {
     taxableSubtotal,
@@ -81,7 +82,7 @@ export function InvoicePreviewCard({
           <p className="text-sm text-slate-500">
             Due Date:{" "}
             <span className="font-bold text-slate-800">
-              {formatDate(invoice.dueDate)}
+              {formatDate(dueDate)}
             </span>
           </p>
           <p className="text-sm text-slate-500">

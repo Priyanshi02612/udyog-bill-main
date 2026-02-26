@@ -6,13 +6,12 @@ export type Role = "manufacturer" | "wholesaler";
 
 export type ItemCategory = "FABRIC" | "MATERIAL" | "THREAD";
 
-export type InvoiceStatus =
-  | "DRAFT"
-  | "SENT"
-  | "ACCEPTED"
-  | "REJECTED"
-  | "PAID"
-  | "OVERDUE";
+export enum InvoiceStatus {
+  DRAFT = "DRAFT",
+  SENT = "SENT",
+  PAID = "PAID",
+  OVERDUE = "OVERDUE",
+}
 
 export type TaxMode = "CGST_SGST" | "IGST";
 
@@ -106,6 +105,7 @@ export interface Item {
   ownerId?: string;
   createdAt?: string;
   updatedAt?: string;
+  currentStock?: number;
 }
 
 export type AddEditTextileItemModalProps = {
@@ -144,15 +144,18 @@ export type Inventory = {
   dateReceived: string;
   totalValue: number;
   inventoryItems: InventoryItem[];
+  currentStock?: number;
 };
 
 export type Invoice = {
   id: string | number;
   _id?: string;
   invoiceNumber: string;
+  financialYear: string;
   buyerId: string;
   sellerId: string;
   invoiceDate: string;
+  invoiceDueDate?: string;
   items: InvoiceItem[];
   subtotal: number;
   gstType: GstType;
@@ -161,8 +164,7 @@ export type Invoice = {
   cgst: number;
   igst: number;
   total: number;
-  status: InvoiceStatus | string;
-  dueDate: string;
+  status: InvoiceStatus;
   buyerInfo?: UserProfile;
   sellerInfo?: UserProfile;
 };
@@ -190,6 +192,56 @@ export interface Insight {
 export interface DashboardData {
   kpis: KpiCardProps[];
   insights: Insight[];
+}
+
+export type ManufacturerDashboardInsightType = "success" | "warning" | "info";
+
+export interface ManufacturerDashboard {
+  kpis: {
+    totalInvoices: number;
+    pendingPayments: number;
+    monthlyRevenue: number;
+  };
+  invoiceSummary: {
+    totalInvoices: number;
+    pendingPayments: number;
+    monthlyRevenue: number;
+    overdueCount: number;
+  };
+  inventorySummary: {
+    totalReceivedStock: number;
+    currentStock: number;
+    consumedStock: number;
+    inventoryValue: number;
+    outOfStockCount: number;
+    lowStockCount: number;
+  };
+  lowStockItems: Array<{
+    id: string;
+    itemId: string;
+    name: string;
+    unit: string;
+    totalStock: number;
+    currentStock: number;
+  }>;
+  dailyStockData: Array<{
+    label: string;
+    inward: number;
+    outward: number;
+  }>;
+  recentInvoices: Array<{
+    id: string;
+    invoiceNumber: string;
+    buyerName: string;
+    invoiceDate: string;
+    total: number;
+    status: InvoiceStatus;
+  }>;
+  insights: Array<{
+    type: ManufacturerDashboardInsightType;
+    title: string;
+    description: string;
+  }>;
 }
 
 export type CreateInvoiceLineItemPayload = {
@@ -233,7 +285,7 @@ export type ValidationErrors = {
   >;
 };
 
-export type InvoiceSubmitAction = "DRAFT" | "SENT";
+export type InvoiceSubmitAction = InvoiceStatus.DRAFT | InvoiceStatus.SENT;
 
 export type InvoiceCreateState = {
   wholesalerId: string;
@@ -267,6 +319,7 @@ export type UserProfile = {
   outstanding?: number;
   overdueInvoices?: number;
   invoices?: Invoice[];
+  isPending?: boolean;
 };
 
 export type CreateInventoryPayload = {

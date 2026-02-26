@@ -9,6 +9,10 @@ import {
   UserBusinessDetailsSchema,
 } from '../db/schema/user-business-details.schema';
 import { Invoice, InvoiceSchema } from '../db/schema/invoice.schema';
+import {
+  ManufacturerWholesalerInvitation,
+  ManufacturerWholesalerInvitationSchema,
+} from '../db/schema/manufacturer-wholesaler-invitation.schema';
 
 @Module({
   imports: [
@@ -17,6 +21,10 @@ import { Invoice, InvoiceSchema } from '../db/schema/invoice.schema';
       { name: Invoice.name, schema: InvoiceSchema },
       { name: User.name, schema: UserSchema },
       { name: UserBusinessDetails.name, schema: UserBusinessDetailsSchema },
+      {
+        name: ManufacturerWholesalerInvitation.name,
+        schema: ManufacturerWholesalerInvitationSchema,
+      },
     ]),
   ],
   controllers: [AiController],

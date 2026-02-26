@@ -15,7 +15,6 @@ import { previewStatusVariant } from "../../../../../utils/constants";
 import {
   AuthContextType,
   Invoice,
-  InvoiceStatus,
 } from "../../../../../utils/types";
 import toast from "react-hot-toast";
 import { InvoiceService } from "../../../../../lib/api/invoice";
@@ -61,8 +60,7 @@ const InvoicePreviewPage = () => {
 
   if (!invoice) return null;
 
-  const statusLabel =
-    statusStyles[invoice.status as InvoiceStatus].label.toUpperCase();
+  const statusLabel = statusStyles[invoice.status].label.toUpperCase();
 
   return (
     <div className="relative min-h-[calc(100vh-124px)] p-4 pb-6 sm:p-6 lg:p-8 lg:pb-0">
@@ -86,7 +84,7 @@ const InvoicePreviewPage = () => {
               </p>
               <Badge
                 label={statusLabel}
-                variant={previewStatusVariant[invoice.status as InvoiceStatus]}
+                variant={previewStatusVariant[invoice.status]}
               />
             </div>
           </div>

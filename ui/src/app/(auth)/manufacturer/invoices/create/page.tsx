@@ -32,6 +32,7 @@ import {
   Item,
   InvoiceCreateState,
   InvoiceItem,
+  InvoiceStatus,
   InvoiceSubmitAction,
   UserProfile,
 } from "../../../../../utils/types";
@@ -92,6 +93,7 @@ export default function CreateInvoicePage() {
 
   const [submittingAction, setSubmittingAction] =
     useState<InvoiceSubmitAction | null>(null);
+  const isEditMode = Boolean(invoiceId && editableInvoice);
 
   const computedRows = useMemo(
     () =>
@@ -120,10 +122,10 @@ export default function CreateInvoicePage() {
       try {
         const [wholesalersResponse, itemsResponse, invoicesResponse] =
           await Promise.all([
-          ManufacturerService.getWholesalers(user._id),
-          ItemsService.getUsersMasterItems(user._id),
-          InvoiceService.getManufacturerInvoices(user._id),
-        ]);
+            ManufacturerService.getWholesalers(user._id),
+            ItemsService.getUsersMasterItems(user._id),
+            InvoiceService.getManufacturerInvoices(user._id),
+          ]);
 
         setWholesalers(wholesalersResponse.data || []);
         setMasterItems((itemsResponse.data as Item[]) || []);
@@ -409,9 +411,19 @@ export default function CreateInvoicePage() {
     try {
       setSubmittingAction(action);
       setStockErrorsByRowId({});
-      await InvoiceService.createInvoice(payload);
+
+      if (isEditMode) {
+        await InvoiceService.updateInvoice(String(invoiceId), payload);
+      } else {
+        await InvoiceService.createInvoice(payload);
+      }
+
       router.push("/manufacturer/invoices");
-      toast.success("Invoice created successfully!");
+      toast.success(
+        isEditMode
+          ? "Invoice updated successfully!"
+          : "Invoice created successfully!",
+      );
     } catch (error: any) {
       const message = getErrorMessage(error);
       handleStockErrorFields(error);
@@ -422,10 +434,12 @@ export default function CreateInvoicePage() {
   };
 
   const wholesalersList = useMemo(() => {
-    return wholesalers.map((wholesaler: UserProfile) => ({
-      value: wholesaler.userId as string,
-      label: wholesaler.businessName,
-    }));
+    return wholesalers
+      .filter((wholesaler) => !wholesaler.isPending)
+      .map((wholesaler: UserProfile) => ({
+        value: wholesaler.userId as string,
+        label: wholesaler.businessName,
+      }));
   }, [wholesalers]);
 
   const financialYearsOptions = useMemo(() => {
@@ -451,7 +465,7 @@ export default function CreateInvoicePage() {
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
-            Manual Invoice Creation
+            {isEditMode ? "Edit Invoice" : "Manual Invoice Creation"}
           </h1>
         </div>
 
@@ -468,18 +482,18 @@ export default function CreateInvoicePage() {
             variant="outline-secondary"
             size="sm"
             className="flex-1 sm:flex-none"
-            loading={submittingAction === "DRAFT"}
-            onClick={() => handleSubmit("DRAFT")}
+            loading={submittingAction === InvoiceStatus.DRAFT}
+            onClick={() => handleSubmit(InvoiceStatus.DRAFT)}
           >
             Save Draft
           </Button>
           <Button
             size="sm"
             className="w-full sm:w-auto"
-            loading={submittingAction === "SENT"}
-            onClick={() => handleSubmit("SENT")}
+            loading={submittingAction === InvoiceStatus.SENT}
+            onClick={() => handleSubmit(InvoiceStatus.SENT)}
           >
-            Create Invoice
+            {isEditMode ? "Update Invoice" : "Create Invoice"}
           </Button>
         </div>
       </div>

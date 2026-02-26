@@ -1,12 +1,27 @@
 "use client";
 
-import { MdDownload, MdVisibility } from "react-icons/md";
-import { mockInvoices } from "../../utils/data";
+import { MdVisibility } from "react-icons/md";
+import { useRouter } from "next/navigation";
 import { formatCurrency, formatDate, statusStyles } from "../../utils/helpers";
 import { InvoiceStatus } from "../../utils/types";
 import { Button } from "../ui/button";
 
-export default function DashboardInvoicesTable() {
+type DashboardInvoiceRow = {
+  id: string;
+  invoiceNumber: string;
+  buyerName: string;
+  invoiceDate: string;
+  total: number;
+  status: InvoiceStatus;
+};
+
+export default function DashboardInvoicesTable({
+  invoices,
+}: {
+  invoices: DashboardInvoiceRow[];
+}) {
+  const router = useRouter();
+
   return (
     <div className="overflow-x-auto" style={{ scrollbarWidth: "thin" }}>
       <table className="w-full text-left">
@@ -22,8 +37,8 @@ export default function DashboardInvoicesTable() {
         </thead>
 
         <tbody className="divide-y divide-slate-100 text-sm">
-          {mockInvoices.map((invoice) => {
-            const status = statusStyles[invoice.status as InvoiceStatus];
+          {invoices.map((invoice) => {
+            const status = statusStyles[invoice.status];
 
             return (
               <tr
@@ -35,7 +50,7 @@ export default function DashboardInvoicesTable() {
                 </td>
 
                 <td className="px-8 py-4 font-semibold text-slate-700">
-                  {invoice.buyerId}
+                  {invoice.buyerName}
                 </td>
 
                 <td className="px-8 py-4 text-slate-500">
@@ -59,23 +74,28 @@ export default function DashboardInvoicesTable() {
                     <Button
                       variant="link"
                       className="w-8 h-8"
-                      onClick={() => console.log("View", invoice.id)}
+                      onClick={() =>
+                        router.push(`/manufacturer/invoices/${invoice.id}`)
+                      }
                     >
                       <MdVisibility className="w-5 h-5" />
-                    </Button>
-
-                    <Button
-                      variant="link"
-                      className="w-8 h-8"
-                      onClick={() => console.log("Download", invoice.id)}
-                    >
-                      <MdDownload className="w-5 h-5" />
                     </Button>
                   </div>
                 </td>
               </tr>
             );
           })}
+
+          {invoices.length === 0 ? (
+            <tr>
+              <td
+                colSpan={6}
+                className="px-8 py-10 text-center text-sm text-slate-500"
+              >
+                No invoices found.
+              </td>
+            </tr>
+          ) : null}
         </tbody>
       </table>
     </div>

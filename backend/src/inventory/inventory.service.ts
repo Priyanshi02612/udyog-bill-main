@@ -176,17 +176,41 @@ export class InventoryService {
   async getUsersInventoryLots(userId: string, page = 1, limit = 10) {
     const skip = (page - 1) * limit;
 
-    const inventory = await this.inventoryModel
+    const inventories = await this.inventoryModel
       .find({ userId })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
 
+    if (!inventories) {
+      throw new NotFoundException('Inventory lot not found');
+    }
+
+    const inventoryItems = await this.inventoryItemModel
+      .find({
+        inventoryId: {
+          $in: inventories.map((inventory) => String(inventory._id)),
+        },
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
     const totalInventory = await this.inventoryModel.countDocuments({ userId });
 
+    const mappedInventories = inventories.map((inventory) => {
+      const currentStock = inventoryItems
+        .filter((item) => item.inventoryId === String(inventory._id))
+        .reduce((sum, item) => sum + item.currentStock, 0);
+
+      return {
+        ...inventory,
+        currentStock,
+      };
+    });
+
     return {
-      inventory,
+      inventory: mappedInventories,
       totalInventory,
     };
   }

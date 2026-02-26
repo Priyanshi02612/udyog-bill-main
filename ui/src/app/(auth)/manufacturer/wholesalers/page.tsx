@@ -29,6 +29,7 @@ const Wholesalers = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [wholesalers, setWholesalers] = useState<UserProfile[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const { user } = useContext(AuthContext) as AuthContextType;
 
@@ -37,10 +38,13 @@ const Wholesalers = () => {
 
     const fetchWholesalers = async () => {
       try {
+        setLoading(true);
         const response = await ManufacturerService.getWholesalers(user._id);
         setWholesalers(response.data);
       } catch (error) {
         toast.error(getErrorMessage(error) || "Failed to fetch wholesalers");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -98,6 +102,14 @@ const Wholesalers = () => {
       toast.error(getErrorMessage(error) || "Failed to remove party");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-64px)]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 pb-0 min-h-[calc(100vh-124px)] relative">
@@ -164,32 +176,40 @@ const Wholesalers = () => {
                   <td className="px-6 py-4">
                     <span
                       className={`font-medium ${
-                        party.outstanding === 0
+                        party.outstanding === 0 && !party.isPending
                           ? "text-green-600"
                           : "text-slate-900"
                       }`}
                     >
-                      {formatCurrency(party.outstanding || 0)}
+                      {party.isPending
+                        ? "-"
+                        : formatCurrency(party.outstanding || 0)}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-4">
-                      <MdVisibility
-                        className="w-5 h-5 text-slate-400 hover:text-primary cursor-pointer"
-                        onClick={() => {
-                          setSelectedParty(party);
-                          setDrawerOpen(true);
-                        }}
-                      />
+                    {party.isPending ? (
+                      <span className="text-xs font-semibold text-amber-700">
+                        Awaiting acceptance
+                      </span>
+                    ) : (
+                      <div className="flex items-center gap-4">
+                        <MdVisibility
+                          className="w-5 h-5 text-slate-400 hover:text-primary cursor-pointer"
+                          onClick={() => {
+                            setSelectedParty(party);
+                            setDrawerOpen(true);
+                          }}
+                        />
 
-                      <MdDelete
-                        className="w-5 h-5 text-slate-400 hover:text-danger cursor-pointer"
-                        onClick={() => {
-                          setSelectedParty(party);
-                          setDeleteModalOpen(true);
-                        }}
-                      />
-                    </div>
+                        <MdDelete
+                          className="w-5 h-5 text-slate-400 hover:text-danger cursor-pointer"
+                          onClick={() => {
+                            setSelectedParty(party);
+                            setDeleteModalOpen(true);
+                          }}
+                        />
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}

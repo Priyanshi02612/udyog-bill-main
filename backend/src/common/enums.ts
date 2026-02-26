@@ -9,3 +9,16 @@ export enum GstType {
   GST_12 = 'GST_12',
   GST_18 = 'GST_18',
 }
+
+export enum InvoiceStatus {
+  DRAFT = 'DRAFT',
+  SENT = 'SENT',
+  PAID = 'PAID',
+  OVERDUE = 'OVERDUE',
+}
+
+export enum InvoiceSubmitStatus {
+  DRAFT = InvoiceStatus.DRAFT,
+  SENT = InvoiceStatus.SENT,
+  PAID = InvoiceStatus.PAID,
+}

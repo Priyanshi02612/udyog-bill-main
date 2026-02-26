@@ -1,7 +1,29 @@
 import axios from "axios";
 import { API_URL } from "./auth";
+import { ManufacturerDashboard } from "../../utils/types";
 
 export class ManufacturerService {
+  static async getDashboard(
+    manufacturerUserId: string,
+  ): Promise<ManufacturerDashboard> {
+    try {
+      const response = await axios.get(
+        `${API_URL}/manufacturer/dashboard/${manufacturerUserId}`,
+      );
+
+      if (!response.status) {
+        throw new Error(
+          response.data.message || `HTTP error! status: ${response.status}`,
+        );
+      }
+
+      return response.data.data;
+    } catch (error) {
+      console.error("Error while fetching manufacturer dashboard:", error);
+      throw error;
+    }
+  }
+
   static async getWholesalers(manufacturerUserId: string) {
     try {
       const response = await axios.get(

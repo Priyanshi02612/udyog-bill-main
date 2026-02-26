@@ -167,6 +167,7 @@ export default function InventoryPage() {
               <th className="px-6 py-4">Lot ID / Collection</th>
               <th className="px-6 py-4">Item Count</th>
               <th className="px-6 py-4">Total Stock</th>
+              <th className="px-6 py-4">Current Stock</th>
               <th className="px-6 py-4">Valuation</th>
               <th className="px-6 py-4">Date Received</th>
             </tr>
@@ -204,6 +205,9 @@ export default function InventoryPage() {
                   </td>
                   <td className="px-6 py-5 font-semibold text-slate-900">
                     {lot.totalStock}
+                  </td>
+                  <td className="px-6 py-5 font-semibold text-slate-900">
+                    {lot.currentStock}
                   </td>
                   <td className="px-6 py-5 font-semibold text-slate-900">
                     {formatCurrency(lot.totalValue)}

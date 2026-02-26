@@ -8,12 +8,15 @@ import { Model } from 'mongoose';
 import { Item } from '../db/schema/item.schema';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
+import { InventoryItem } from '../db/schema/inventory-item.schema';
 
 @Injectable()
 export class ItemsService {
   constructor(
     @InjectModel(Item.name)
     private readonly itemModel: Model<Item>,
+    @InjectModel(InventoryItem.name)
+    private readonly inventoryItemModel: Model<InventoryItem>,
   ) {}
 
   async create(createItemDto: CreateItemDto) {
@@ -55,7 +58,17 @@ export class ItemsService {
       throw new NotFoundException('Item not found');
     }
 
-    return item;
+    const inventoryItems = await this.inventoryItemModel.find({
+      itemId: String(item._id),
+    });
+
+    return {
+      ...item,
+      currentStock: inventoryItems.reduce(
+        (sum, item) => sum + item.currentStock,
+        0,
+      ),
+    };
   }
 
   async update(id: string, updateItemDto: UpdateItemDto) {

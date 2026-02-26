@@ -233,6 +233,7 @@ const styles = StyleSheet.create({
 const InvoicePdfPage = ({ invoice }: { invoice: Invoice }) => {
   const buyerInfo = invoice.buyerInfo;
   const sellerInfo = invoice.sellerInfo;
+  const dueDate = invoice.invoiceDueDate || invoice.invoiceDate;
   const applyGst = invoice.gstType !== GstType.NO_GST;
   const taxMode = invoice.taxMode;
 
@@ -274,7 +275,7 @@ const InvoicePdfPage = ({ invoice }: { invoice: Invoice }) => {
             <View style={styles.metaRow}>
               <Text style={styles.metaKey}>Due Date: </Text>
               <Text style={styles.metaValue}>
-                {formatDate(invoice.dueDate)}
+                {formatDate(dueDate)}
               </Text>
             </View>
             <View style={styles.metaRow}>

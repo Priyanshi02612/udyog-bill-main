@@ -401,6 +401,19 @@ export class ManufacturerService {
     }
 
     const partyEmail = dto.partyEmail.trim().toLowerCase();
+
+    const existsAcceptedParty = await this.invitationModel.findOne({
+      manufacturerId: manufacturer.id,
+      partyEmail,
+      status: InvitationStatus.ACCEPTED,
+    });
+
+    if (existsAcceptedParty) {
+      throw new BadRequestException(
+        'Party with this email has already accepted your invitation.',
+      );
+    }
+
     const activeInvitation = await this.invitationModel.findOne({
       manufacturerId: manufacturer.id,
       partyEmail,

@@ -42,6 +42,11 @@ import { InvoiceModule } from './invoice/invoice.module';
             host: mailer?.host,
             port: mailer?.port,
             secure: mailer?.secure,
+            pool: true,
+            maxConnections: 5,
+            maxMessages: 100,
+            rateDelta: 1000,
+            rateLimit: 5,
             auth: {
               user: mailer?.auth.user,
               pass: mailer?.auth.pass,

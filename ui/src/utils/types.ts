@@ -144,6 +144,7 @@ export type Inventory = {
   dateReceived: string;
   totalValue: number;
   inventoryItems: InventoryItem[];
+  currentStock?: number;
 };
 
 export type Invoice = {

@@ -29,6 +29,7 @@ const Wholesalers = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [wholesalers, setWholesalers] = useState<UserProfile[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const { user } = useContext(AuthContext) as AuthContextType;
 
@@ -37,10 +38,13 @@ const Wholesalers = () => {
 
     const fetchWholesalers = async () => {
       try {
+        setLoading(true);
         const response = await ManufacturerService.getWholesalers(user._id);
         setWholesalers(response.data);
       } catch (error) {
         toast.error(getErrorMessage(error) || "Failed to fetch wholesalers");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -98,6 +102,14 @@ const Wholesalers = () => {
       toast.error(getErrorMessage(error) || "Failed to remove party");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-64px)]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 pb-0 min-h-[calc(100vh-124px)] relative">

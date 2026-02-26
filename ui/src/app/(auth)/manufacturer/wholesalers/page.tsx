@@ -164,32 +164,40 @@ const Wholesalers = () => {
                   <td className="px-6 py-4">
                     <span
                       className={`font-medium ${
-                        party.outstanding === 0
+                        party.outstanding === 0 && !party.isPending
                           ? "text-green-600"
                           : "text-slate-900"
                       }`}
                     >
-                      {formatCurrency(party.outstanding || 0)}
+                      {party.isPending
+                        ? "-"
+                        : formatCurrency(party.outstanding || 0)}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-4">
-                      <MdVisibility
-                        className="w-5 h-5 text-slate-400 hover:text-primary cursor-pointer"
-                        onClick={() => {
-                          setSelectedParty(party);
-                          setDrawerOpen(true);
-                        }}
-                      />
+                    {party.isPending ? (
+                      <span className="text-xs font-semibold text-amber-700">
+                        Awaiting acceptance
+                      </span>
+                    ) : (
+                      <div className="flex items-center gap-4">
+                        <MdVisibility
+                          className="w-5 h-5 text-slate-400 hover:text-primary cursor-pointer"
+                          onClick={() => {
+                            setSelectedParty(party);
+                            setDrawerOpen(true);
+                          }}
+                        />
 
-                      <MdDelete
-                        className="w-5 h-5 text-slate-400 hover:text-danger cursor-pointer"
-                        onClick={() => {
-                          setSelectedParty(party);
-                          setDeleteModalOpen(true);
-                        }}
-                      />
-                    </div>
+                        <MdDelete
+                          className="w-5 h-5 text-slate-400 hover:text-danger cursor-pointer"
+                          onClick={() => {
+                            setSelectedParty(party);
+                            setDeleteModalOpen(true);
+                          }}
+                        />
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}

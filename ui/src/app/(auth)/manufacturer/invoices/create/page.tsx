@@ -121,10 +121,10 @@ export default function CreateInvoicePage() {
       try {
         const [wholesalersResponse, itemsResponse, invoicesResponse] =
           await Promise.all([
-          ManufacturerService.getWholesalers(user._id),
-          ItemsService.getUsersMasterItems(user._id),
-          InvoiceService.getManufacturerInvoices(user._id),
-        ]);
+            ManufacturerService.getWholesalers(user._id),
+            ItemsService.getUsersMasterItems(user._id),
+            InvoiceService.getManufacturerInvoices(user._id),
+          ]);
 
         setWholesalers(wholesalersResponse.data || []);
         setMasterItems((itemsResponse.data as Item[]) || []);
@@ -433,10 +433,12 @@ export default function CreateInvoicePage() {
   };
 
   const wholesalersList = useMemo(() => {
-    return wholesalers.map((wholesaler: UserProfile) => ({
-      value: wholesaler.userId as string,
-      label: wholesaler.businessName,
-    }));
+    return wholesalers
+      .filter((wholesaler) => !wholesaler.isPending)
+      .map((wholesaler: UserProfile) => ({
+        value: wholesaler.userId as string,
+        label: wholesaler.businessName,
+      }));
   }, [wholesalers]);
 
   const financialYearsOptions = useMemo(() => {

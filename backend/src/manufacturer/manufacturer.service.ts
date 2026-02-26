@@ -346,49 +346,86 @@ export class ManufacturerService {
       throw new BadRequestException('manufacturerUserId is required');
     }
 
-    const manufacturer = await this.userModel.findById(manufacturerUserId);
+    const manufacturer = await this.userModel
+      .findById(manufacturerUserId)
+      .lean();
+
     if (!manufacturer) {
       throw new NotFoundException('Manufacturer not found');
     }
 
-    const partyUserIds = [
-      ...new Set(manufacturer.wholesalerIds?.map((id) => id.toString()) ?? []),
-    ];
+    const confirmedIds = manufacturer.wholesalerIds?.map(String) ?? [];
 
-    if (partyUserIds.length === 0) {
-      return [];
-    }
+    const pendingInvitations = await this.invitationModel
+      .find({
+        manufacturerId: manufacturerUserId,
+        status: InvitationStatus.PENDING,
+      })
+      .lean();
 
-    const [wholesalers, wholesalerBusinessDetails, invoices] =
-      await Promise.all([
-        this.userModel.find({ _id: { $in: partyUserIds } }),
-        this.userBusinessDetailsModel.find({ userId: { $in: partyUserIds } }),
-        this.invoiceModel.find({ sellerId: manufacturerUserId }),
-      ]);
+    const pendingEmails = pendingInvitations.map((i) => i.partyEmail);
 
-    const businessDetailsByUserId = new Map(
-      wholesalerBusinessDetails.map((details) => [
-        details.userId.toString(),
-        details,
-      ]),
+    const pendingUsers = await this.userModel
+      .find({ email: { $in: pendingEmails } })
+      .lean();
+
+    const pendingIds = pendingUsers.map((u) => String(u._id));
+
+    const allUserIds = [...new Set([...confirmedIds, ...pendingIds])];
+
+    if (!allUserIds.length) return [];
+
+    const [users, businessDetails, invoices] = await Promise.all([
+      this.userModel.find({ _id: { $in: allUserIds } }).lean(),
+      this.userBusinessDetailsModel
+        .find({ userId: { $in: allUserIds } })
+        .lean(),
+      this.invoiceModel
+        .find({ sellerId: manufacturerUserId, buyerId: { $in: allUserIds } })
+        .lean(),
+    ]);
+
+    const businessMap = new Map(
+      businessDetails.map((d) => [String(d.userId), d]),
     );
 
-    return wholesalers.map((wholesaler) => {
-      const details = businessDetailsByUserId.get(wholesaler.id);
-      const wholesalerInvoices = invoices.filter(
-        (invoice) => invoice.buyerId === wholesaler.id,
+    const invoiceMap = new Map<string, typeof invoices>();
+
+    for (const invoice of invoices) {
+      const buyerId = String(invoice.buyerId);
+      if (!invoiceMap.has(buyerId)) invoiceMap.set(buyerId, []);
+      invoiceMap.get(buyerId)!.push(invoice);
+    }
+
+    const now = new Date();
+
+    return users.map((user) => {
+      const userId = String(user._id);
+      const details = businessMap.get(userId);
+      const userInvoices = invoiceMap.get(userId) ?? [];
+
+      const sentInvoices = userInvoices.filter((i) => i.status === 'SENT');
+
+      const overdueInvoices = sentInvoices.filter(
+        (i) => i.invoiceDueDate && new Date(i.invoiceDueDate) < now,
+      );
+
+      const outstanding = sentInvoices.reduce(
+        (sum, i) => sum + Number(i.total ?? 0),
+        0,
       );
 
       return {
-        userId: wholesaler.id,
-        email: wholesaler.email,
-        businessName: details?.businessName,
-        contactPerson: details?.contactPerson,
-        gstin: details?.gstin,
-        phone: details?.phone,
-        outstanding: 0,
-        overdueInvoices: 0,
-        invoices: wholesalerInvoices.slice(0, 4),
+        userId,
+        email: user.email,
+        businessName: details?.businessName ?? null,
+        contactPerson: details?.contactPerson ?? null,
+        gstin: details?.gstin ?? null,
+        phone: details?.phone ?? null,
+        outstanding,
+        overdueInvoices: overdueInvoices.length,
+        invoices: userInvoices.slice(0, 4),
+        isPending: pendingIds.includes(userId),
       };
     });
   }

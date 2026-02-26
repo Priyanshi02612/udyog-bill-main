@@ -12,6 +12,7 @@ import { Item } from '../db/schema/item.schema';
 import { User } from '../db/schema/user.schema';
 import { UserBusinessDetails } from '../db/schema/user-business-details.schema';
 import { Invoice } from '../db/schema/invoice.schema';
+import { ManufacturerWholesalerInvitation } from '../db/schema/manufacturer-wholesaler-invitation.schema';
 import { getNextDocumentNumber } from '../common/helper';
 
 type GeminiClient = {
@@ -45,6 +46,9 @@ export class AiService {
 
     @InjectModel(UserBusinessDetails.name)
     private readonly userBusinessDetailsModel: Model<UserBusinessDetails>,
+
+    @InjectModel(ManufacturerWholesalerInvitation.name)
+    private readonly invitationsModel: Model<ManufacturerWholesalerInvitation>,
   ) {
     this.geminiApiKey = process.env.GEMINI_API_KEY ?? '';
     this.geminiModel = process.env.GEMINI_MODEL ?? 'gemini-2.0-flash';
@@ -91,6 +95,16 @@ export class AiService {
 
     if (!existingWholesaler) {
       throw new NotFoundException('Wholesaler not found');
+    }
+
+    const isPendingInvitation = await this.invitationsModel.find({
+      partyUserId: String(existingWholesaler.userId),
+    });
+
+    if (isPendingInvitation) {
+      throw new BadRequestException(
+        'Wholesaler has not accepted your invitation yet.',
+      );
     }
 
     const aiGeneratedItems = parsedData.items.map((item) => ({

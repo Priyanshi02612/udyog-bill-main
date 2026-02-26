@@ -317,6 +317,7 @@ export type UserProfile = {
   outstanding?: number;
   overdueInvoices?: number;
   invoices?: Invoice[];
+  isPending?: boolean;
 };
 
 export type CreateInventoryPayload = {

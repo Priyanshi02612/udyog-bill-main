@@ -42,10 +42,12 @@ function MetricCard({
   label,
   value,
   subtitle,
+  subTitleTextColor,
 }: {
   label: string;
   value: string | number | undefined;
   subtitle?: string;
+  subTitleTextColor?: string;
 }) {
   return (
     <div className="rounded-lg bg-slate-50 p-4 flex-1">
@@ -53,7 +55,9 @@ function MetricCard({
         {label}
       </p>
       <p className="text-2xl font-bold">{value}</p>
-      <p className="text-xs font-medium tracking-wider text-slate-500">
+      <p
+        className={`text-xs font-medium tracking-wider ${subTitleTextColor ?? "text-slate-500"}`}
+      >
         {subtitle}
       </p>
     </div>
@@ -236,8 +240,13 @@ export default function ItemSpecificationDetail() {
             <div className="flex flex-row lg:flex-col 2xl:flex-row gap-5">
               <MetricCard
                 label="Stock level"
-                value="1240"
-                subtitle="In Stock"
+                value={item?.currentStock || 0}
+                subtitle={
+                  item?.currentStock === 0 ? "Out of Stock" : "In Stock"
+                }
+                subTitleTextColor={
+                  item?.currentStock === 0 ? "text-rose-400" : ""
+                }
               />
               <MetricCard label="UOM" value={item?.unit} subtitle="Unit Type" />
             </div>

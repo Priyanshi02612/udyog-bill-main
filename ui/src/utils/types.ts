@@ -106,6 +106,7 @@ export interface Item {
   ownerId?: string;
   createdAt?: string;
   updatedAt?: string;
+  currentStock?: number;
 }
 
 export type AddEditTextileItemModalProps = {

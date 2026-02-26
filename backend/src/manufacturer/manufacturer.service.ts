@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-  ServiceUnavailableException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { randomBytes } from 'crypto';
@@ -23,8 +22,6 @@ import { AddPartyDto } from './dto/add-party.dto';
 import { AcceptPartyInvitationDto } from './dto/accept-party-invitation.dto';
 import { RemovePartyDto } from './dto/remove-party.dto';
 import { InvoiceStatus, InvoiceSubmitStatus } from '../common/enums';
-import { ConfigService } from '@nestjs/config';
-import { AppConfig } from '../config';
 
 @Injectable()
 export class ManufacturerService {
@@ -45,39 +42,9 @@ export class ManufacturerService {
     @InjectModel(ManufacturerWholesalerInvitation.name)
     private readonly invitationModel: Model<ManufacturerWholesalerInvitation>,
     private readonly mailerService: MailerService,
-    private readonly configService: ConfigService<AppConfig>,
   ) {}
 
   private readonly dashboardDaysToShow = 7;
-
-  private async sendMailWithTimeout(
-    payload: Parameters<MailerService['sendMail']>[0],
-  ) {
-    const mailer = this.configService.get('mailer', { infer: true });
-    const timeoutMs = mailer?.timeoutMs.send ?? 12000;
-
-    let timeoutRef: NodeJS.Timeout | undefined;
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      timeoutRef = setTimeout(() => {
-        reject(new Error('Mail send timed out'));
-      }, timeoutMs);
-    });
-
-    try {
-      await Promise.race([
-        this.mailerService.sendMail(payload),
-        timeoutPromise,
-      ]);
-    } catch {
-      throw new ServiceUnavailableException(
-        'Unable to send invitation email right now. Please try again.',
-      );
-    } finally {
-      if (timeoutRef) {
-        clearTimeout(timeoutRef);
-      }
-    }
-  }
 
   private getDayStart(date: Date) {
     const start = new Date(date);
@@ -519,7 +486,7 @@ export class ManufacturerService {
 
     const acceptUrl = `${process.env.FRONTEND_URL ?? ''}/accept-party-invitation?token=${token}`;
 
-    await this.sendMailWithTimeout({
+    await this.mailerService.sendMail({
       to: partyEmail,
       subject: 'Invitation to connect as wholesaler',
       html: `

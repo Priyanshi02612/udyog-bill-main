@@ -35,7 +35,7 @@ export class AuthService {
     user.otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 min
     await user.save();
 
-    void this.mailerService.sendMail({
+    await this.mailerService.sendMail({
       to: data.email,
       subject: 'Your verification code',
       html: `

@@ -4,8 +4,9 @@ import { Fragment } from "react";
 import { MdCall, MdClose, MdEmail, MdVerified } from "react-icons/md";
 import { Button } from "../ui/button";
 import Avatar from "react-avatar";
-import { UserProfile } from "@/src/utils/types";
-import { formatCurrency } from "@/src/utils/helpers";
+import { InvoiceStatus, UserProfile } from "@/src/utils/types";
+import { formatCurrency, formatDate, statusStyles } from "@/src/utils/helpers";
+import Link from "next/link";
 
 interface PartyDrawerProps {
   open: boolean;
@@ -15,6 +16,28 @@ interface PartyDrawerProps {
 
 const PartyDrawer = ({ open, onClose, party }: PartyDrawerProps) => {
   if (!open || !party) return null;
+
+  const formatPhone = (phone?: string) => {
+    if (!phone) return "Not available";
+    return phone.startsWith("+") ? phone : `+${phone}`;
+  };
+
+  const getResolvedStatus = (invoice: {
+    status?: string;
+    invoiceDueDate?: string;
+  }) => {
+    const now = new Date();
+    const dueDate = invoice.invoiceDueDate
+      ? new Date(invoice.invoiceDueDate)
+      : null;
+    const isOverdue =
+      invoice.status === "SENT" &&
+      dueDate &&
+      !Number.isNaN(dueDate.getTime()) &&
+      dueDate < now;
+
+    return (isOverdue ? "OVERDUE" : invoice.status || "DRAFT") as InvoiceStatus;
+  };
 
   return (
     <Fragment>
@@ -47,7 +70,7 @@ const PartyDrawer = ({ open, onClose, party }: PartyDrawerProps) => {
 
           <div className="flex flex-col items-center text-center gap-2">
             <Avatar
-              name={party.businessName}
+              name={party.businessName || "Unknown Business"}
               size="100"
               color="#8b5a2b1a"
               fgColor="#8b5a2b"
@@ -55,12 +78,12 @@ const PartyDrawer = ({ open, onClose, party }: PartyDrawerProps) => {
             />
 
             <h3 className="text-2xl font-black text-slate-900 tracking-tight">
-              {party.businessName}
+              {party.businessName || "Unknown Business"}
             </h3>
 
             <p className="mt-2 px-3 py-1 bg-blue-100 rounded-full text-[10px] font-bold text-blue-500 uppercase tracking-widest flex items-center gap-1.5">
               <MdVerified className="w-5 h-5" />
-              GST: {party.gstin}
+              GST: {party.gstin || "Not available"}
             </p>
           </div>
         </div>
@@ -72,15 +95,15 @@ const PartyDrawer = ({ open, onClose, party }: PartyDrawerProps) => {
             </h4>
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
               <p className="text-sm font-bold text-slate-900">
-                {party.contactPerson}
+                {party.contactPerson || "Not available"}
               </p>
               <p className="text-sm text-slate-500 mt-1 flex items-center gap-2">
                 <MdCall className="w-5 h-5" />
-                {`+91 ${party.phone}`}
+                {formatPhone(party.phone)}
               </p>
               <p className="text-sm text-slate-500 mt-1 flex items-center gap-2">
                 <MdEmail className="w-5 h-5" />
-                {party.email}
+                {party.email || "Not available"}
               </p>
             </div>
           </div>
@@ -90,40 +113,72 @@ const PartyDrawer = ({ open, onClose, party }: PartyDrawerProps) => {
               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
                 Recent Invoices
               </h4>
-              <a
-                className="text-xs font-bold text-primary hover:underline"
-                href="#"
-              >
-                View All
-              </a>
+
+              <div className="flex gap-2">
+                <p className="text-xs font-bold text-slate-700">
+                  {(party.invoices?.length || 0).toString()} total
+                </p>
+
+                {(party.invoices?.length || 0) > 0 && (
+                  <Link
+                    className="text-xs font-bold text-primary hover:underline"
+                    href={`/manufacturer/invoices?wholesaler=${party.userId}`}
+                  >
+                    View All
+                  </Link>
+                )}
+              </div>
             </div>
             <div className="space-y-3">
               {party.invoices && party.invoices.length > 0 ? (
-                party.invoices.map((invoice, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 cursor-pointer rounded-xl border border-slate-100 bg-white hover:shadow-sm transition-all"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="size-2 rounded-full bg-danger" />
-                      <div>
-                        <p className="text-sm font-bold text-slate-900">
-                          {invoice.invoiceNumber}
-                        </p>
-                        <p className="text-[11px] text-slate-400">
-                          {invoice.invoiceDate} •{" "}
-                          <span className="text-danger font-bold uppercase">
-                            Overdue
-                          </span>
-                        </p>
-                      </div>
-                    </div>
+                party.invoices.map((invoice) => {
+                  const resolvedStatus = getResolvedStatus(invoice);
+                  const statusConfig =
+                    statusStyles[resolvedStatus] || statusStyles.DRAFT;
+                  const statusDotColor =
+                    resolvedStatus === "PAID"
+                      ? "bg-emerald-500"
+                      : resolvedStatus === "OVERDUE" ||
+                          resolvedStatus === "REJECTED"
+                        ? "bg-danger"
+                        : resolvedStatus === "ACCEPTED"
+                          ? "bg-blue-500"
+                          : resolvedStatus === "SENT"
+                            ? "bg-amber-500"
+                            : "bg-slate-400";
 
-                    <span className="text-sm font-black text-slate-900">
-                      {formatCurrency(invoice.total)}
-                    </span>
-                  </div>
-                ))
+                  return (
+                    <div
+                      key={String(
+                        invoice._id || invoice.id || invoice.invoiceNumber,
+                      )}
+                      className="flex items-center justify-between p-4 cursor-pointer rounded-xl border border-slate-100 bg-white hover:shadow-sm transition-all"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`size-2 rounded-full ${statusDotColor}`}
+                        />
+                        <div>
+                          <p className="text-sm font-bold text-slate-900">
+                            {invoice.invoiceNumber}
+                          </p>
+                          <p className="text-[11px] text-slate-400">
+                            {formatDate(invoice.invoiceDate)} •{" "}
+                            <span
+                              className={`${statusConfig.text} font-bold uppercase`}
+                            >
+                              {statusConfig.label}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+
+                      <span className="text-sm font-black text-slate-900">
+                        {formatCurrency(invoice.total)}
+                      </span>
+                    </div>
+                  );
+                })
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 px-4 border border-dashed border-slate-200 rounded-xl bg-slate-50">
                   <p className="text-sm font-semibold text-slate-600">

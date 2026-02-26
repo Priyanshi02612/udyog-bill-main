@@ -359,10 +359,12 @@ export class ManufacturerService {
       return [];
     }
 
-    const [wholesalers, wholesalerBusinessDetails] = await Promise.all([
-      this.userModel.find({ _id: { $in: partyUserIds } }),
-      this.userBusinessDetailsModel.find({ userId: { $in: partyUserIds } }),
-    ]);
+    const [wholesalers, wholesalerBusinessDetails, invoices] =
+      await Promise.all([
+        this.userModel.find({ _id: { $in: partyUserIds } }),
+        this.userBusinessDetailsModel.find({ userId: { $in: partyUserIds } }),
+        this.invoiceModel.find({ sellerId: manufacturerUserId }),
+      ]);
 
     const businessDetailsByUserId = new Map(
       wholesalerBusinessDetails.map((details) => [
@@ -373,6 +375,9 @@ export class ManufacturerService {
 
     return wholesalers.map((wholesaler) => {
       const details = businessDetailsByUserId.get(wholesaler.id);
+      const wholesalerInvoices = invoices.filter(
+        (invoice) => invoice.buyerId === wholesaler.id,
+      );
 
       return {
         userId: wholesaler.id,
@@ -383,7 +388,7 @@ export class ManufacturerService {
         phone: details?.phone,
         outstanding: 0,
         overdueInvoices: 0,
-        invoices: [],
+        invoices: wholesalerInvoices.slice(0, 4),
       };
     });
   }

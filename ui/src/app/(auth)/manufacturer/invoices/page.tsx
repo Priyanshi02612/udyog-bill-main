@@ -15,7 +15,7 @@ import {
   MdSearch,
   MdVisibility,
 } from "react-icons/md";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AuthContext } from "../../../../context/auth.context";
 import { KpiCard } from "../../../../components/admin/kpi-card";
 import { Button } from "../../../../components/ui/button";
@@ -63,6 +63,9 @@ export default function Invoices() {
 
   const router = useRouter();
 
+  const searchParams = useSearchParams();
+  const wholesalerId = searchParams.get("wholesaler") || "";
+
   useEffect(() => {
     const fetchInvoices = async () => {
       if (!user?._id) {
@@ -107,6 +110,12 @@ export default function Invoices() {
 
     fetchInvoices();
   }, [user]);
+
+  useEffect(() => {
+    if (!wholesalerId) return;
+
+    setSearchQuery(wholesalerNameById[wholesalerId] || "");
+  }, [wholesalerId, wholesalerNameById]);
 
   const handleDeleteSelected = async () => {
     const idsToDelete = [...selectedIds];
@@ -237,12 +246,16 @@ export default function Invoices() {
     );
   };
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
+    if (wholesalerId) {
+      router.replace("/manufacturer/invoices");
+    }
+
     setSearchQuery("");
     setSelectedStatus("");
     setSelectedFinancialYear("");
     setSelectedIds([]);
-  };
+  }, [router, wholesalerId]);
 
   const handleEditInvoice = (invoiceId: string) => {
     router.push(`/manufacturer/invoices/create?invoiceId=${invoiceId}`);
@@ -434,7 +447,7 @@ export default function Invoices() {
               <th className="px-4 py-4 sm:px-8">Issue Date</th>
               <th className="px-4 py-4 sm:px-8">Amount</th>
               <th className="px-4 py-4 sm:px-8">Status</th>
-              <th className="px-4 py-4 text-center sm:px-8">Actions</th>
+              <th className="px-4 py-4 text-end sm:px-8">Actions</th>
             </tr>
           </thead>
 
@@ -478,17 +491,7 @@ export default function Invoices() {
                   </td>
 
                   <td className="px-4 py-4 sm:px-8">
-                    <div className="flex items-center justify-center gap-2">
-                      <Button
-                        variant="link"
-                        className="w-8 h-8"
-                        onClick={() =>
-                          router.push(`/manufacturer/invoices/${invoice._id}`)
-                        }
-                      >
-                        <MdVisibility className="w-5 h-5" />
-                      </Button>
-
+                    <div className="flex items-center justify-end gap-2">
                       {status.label === "Draft" && (
                         <Button
                           variant="link"
@@ -498,6 +501,16 @@ export default function Invoices() {
                           <MdEdit className="w-5 h-5" />
                         </Button>
                       )}
+
+                      <Button
+                        variant="link"
+                        className="w-8 h-8"
+                        onClick={() =>
+                          router.push(`/manufacturer/invoices/${invoice._id}`)
+                        }
+                      >
+                        <MdVisibility className="w-5 h-5" />
+                      </Button>
                     </div>
                   </td>
                 </tr>

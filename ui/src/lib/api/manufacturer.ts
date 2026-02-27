@@ -110,4 +110,29 @@ export class ManufacturerService {
       throw error;
     }
   }
+
+  static async cancelInvitation(payload: {
+    manufacturerUserId: string;
+    partyEmail: string;
+  }) {
+    try {
+      const response = await axios.delete(
+        `${API_URL}/manufacturer/cancel-invitation`,
+        {
+          data: payload,
+        },
+      );
+
+      if (!response.status) {
+        throw new Error(
+          response.data.message || `HTTP error! status: ${response.status}`,
+        );
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error while cancelling invitation:", error);
+      throw error;
+    }
+  }
 }

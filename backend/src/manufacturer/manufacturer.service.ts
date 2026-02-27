@@ -21,6 +21,7 @@ import { Item } from '../db/schema/item.schema';
 import { AddPartyDto } from './dto/add-party.dto';
 import { AcceptPartyInvitationDto } from './dto/accept-party-invitation.dto';
 import { RemovePartyDto } from './dto/remove-party.dto';
+import { CancelPartyInvitationDto } from './dto/cancel-party-invitation.dto';
 import { InvoiceStatus, InvoiceSubmitStatus } from '../common/enums';
 
 @Injectable()
@@ -444,7 +445,7 @@ export class ManufacturerService {
 
     const partyEmail = dto.partyEmail.trim().toLowerCase();
 
-    const isPartyOnboarded = await this.userModel.find({
+    const isPartyOnboarded = await this.userModel.findOne({
       email: partyEmail,
       isOnboarded: true,
     });
@@ -634,6 +635,43 @@ export class ManufacturerService {
       message: 'Wholesaler removed successfully',
       manufacturerId: manufacturer.id,
       wholesalerId: dto.wholesalerUserId,
+    };
+  }
+
+  async cancelInvitation(dto: CancelPartyInvitationDto) {
+    const manufacturerUserId = dto.manufacturerUserId?.trim();
+    const partyEmail = dto.partyEmail?.trim().toLowerCase();
+
+    if (!manufacturerUserId || !partyEmail) {
+      throw new BadRequestException(
+        'manufacturerUserId and partyEmail are required',
+      );
+    }
+
+    const manufacturer = await this.userModel.findById(manufacturerUserId);
+    if (!manufacturer) {
+      throw new NotFoundException('Manufacturer not found');
+    }
+
+    const invitation = await this.invitationModel.findOne({
+      manufacturerId: manufacturerUserId,
+      partyEmail,
+      status: InvitationStatus.PENDING,
+      expiresAt: { $gt: new Date() },
+    });
+
+    if (!invitation) {
+      throw new NotFoundException('Pending invitation not found');
+    }
+
+    invitation.status = InvitationStatus.DISCONNECTED;
+    invitation.disconnectedAt = new Date();
+    await invitation.save();
+
+    return {
+      message: 'Invitation cancelled successfully',
+      manufacturerId: manufacturer.id,
+      partyEmail,
     };
   }
 }

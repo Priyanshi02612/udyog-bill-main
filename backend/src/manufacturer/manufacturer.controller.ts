@@ -6,6 +6,7 @@ import { ManufacturerService } from './manufacturer.service';
 import { AddPartyDto } from './dto/add-party.dto';
 import { AcceptPartyInvitationDto } from './dto/accept-party-invitation.dto';
 import { RemovePartyDto } from './dto/remove-party.dto';
+import { CancelPartyInvitationDto } from './dto/cancel-party-invitation.dto';
 
 @Controller('manufacturer')
 export class ManufacturerController {
@@ -49,6 +50,16 @@ export class ManufacturerController {
   async acceptInvitation(@Body() dto: AcceptPartyInvitationDto) {
     try {
       const response = await this.manufacturerService.acceptInvitation(dto);
+      return ResponseHandler.handle(response);
+    } catch (error: any) {
+      return ResponseHandler.handle(null, true, error.message, 400);
+    }
+  }
+
+  @Delete('cancel-invitation')
+  async cancelInvitation(@Body() dto: CancelPartyInvitationDto) {
+    try {
+      const response = await this.manufacturerService.cancelInvitation(dto);
       return ResponseHandler.handle(response);
     } catch (error: any) {
       return ResponseHandler.handle(null, true, error.message, 400);

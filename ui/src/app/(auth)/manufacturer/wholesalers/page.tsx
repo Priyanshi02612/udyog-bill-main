@@ -19,6 +19,7 @@ import toast from "react-hot-toast";
 import { KpiCard } from "../../../../components/admin/kpi-card";
 import { ManufacturerService } from "../../../../lib/api/manufacturer";
 import { AuthContext } from "../../../../context/auth.context";
+import { Badge } from "@/src/components/ui/badge";
 
 const PAGE_SIZE = 6;
 
@@ -28,6 +29,7 @@ const Wholesalers = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [wholesalers, setWholesalers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -103,6 +105,28 @@ const Wholesalers = () => {
     }
   };
 
+  const handleCancelInvitation = async () => {
+    if (!user?._id || !selectedParty?.email) return;
+    const partyEmail = selectedParty.email;
+
+    try {
+      await ManufacturerService.cancelInvitation({
+        manufacturerUserId: user._id,
+        partyEmail,
+      });
+
+      setWholesalers((prev) =>
+        prev.filter((party) => party.email !== partyEmail),
+      );
+
+      toast.success("Invitation cancelled successfully");
+      setCancelModalOpen(false);
+      setSelectedParty(null);
+    } catch (error) {
+      toast.error(getErrorMessage(error) || "Failed to cancel invitation");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-64px)]">
@@ -165,7 +189,17 @@ const Wholesalers = () => {
               {paginatedItems.map((party, index) => (
                 <tr key={index} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 text-slate-900 max-w-50 truncate">
-                    {party.businessName}
+                    <div className="flex gap-1">
+                      <span>{party.businessName}</span>
+
+                      {party.isPending && (
+                        <Badge
+                          label="Pending"
+                          variant="warning"
+                          showDot={false}
+                        />
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-slate-500 max-w-28.75 truncate">
                     {party.gstin}
@@ -188,9 +222,16 @@ const Wholesalers = () => {
                   </td>
                   <td className="px-6 py-4">
                     {party.isPending ? (
-                      <span className="text-xs font-semibold text-amber-700">
-                        Awaiting acceptance
-                      </span>
+                      <button
+                        type="button"
+                        className="text-xs font-semibold text-danger hover:underline"
+                        onClick={() => {
+                          setSelectedParty(party);
+                          setCancelModalOpen(true);
+                        }}
+                      >
+                        Cancel invitation
+                      </button>
                     ) : (
                       <div className="flex items-center gap-4">
                         <MdVisibility
@@ -245,8 +286,24 @@ const Wholesalers = () => {
         description="Are you sure you want to remove this party? This action cannot be undone."
         confirmText="Yes, Remove"
         icon={<MdDelete className="h-8 w-8 text-danger" />}
-        onCancel={() => setDeleteModalOpen(false)}
+        onCancel={() => {
+          setDeleteModalOpen(false);
+          setSelectedParty(null);
+        }}
         onConfirm={handleRemoveParty}
+      />
+
+      <ConfirmModal
+        open={cancelModalOpen}
+        title="Cancel Invitation"
+        description="Do you want to cancel this pending invitation?"
+        confirmText="Yes, Cancel"
+        icon={<MdDelete className="h-8 w-8 text-danger" />}
+        onCancel={() => {
+          setCancelModalOpen(false);
+          setSelectedParty(null);
+        }}
+        onConfirm={handleCancelInvitation}
       />
     </div>
   );

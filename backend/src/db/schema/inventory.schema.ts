@@ -15,7 +15,7 @@ export class Inventory {
   @Prop({ required: true, trim: true, index: true })
   collection!: string;
 
-  @Prop({ required: true, trim: true, unique: true, index: true })
+  @Prop({ required: true, trim: true, index: true })
   lotNumber!: string;
 
   @Prop({ required: true, min: 0 })

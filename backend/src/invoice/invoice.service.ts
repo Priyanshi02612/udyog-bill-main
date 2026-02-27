@@ -135,6 +135,48 @@ export class InvoiceService {
     }));
   }
 
+  async getWholesalerInvoices(userId: string) {
+    const invoices = await this.invoiceModel
+      .find({ buyerId: userId })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    if (!invoices.length) {
+      return [];
+    }
+
+    const invoiceIds = invoices.map((invoice) => String(invoice._id));
+    const invoiceItems = await this.invoiceItemModel
+      .find({ invoiceId: { $in: invoiceIds } })
+      .lean();
+
+    const sellerIds = [...new Set(invoices.map((invoice) => invoice.sellerId))];
+    const itemIds = [...new Set(invoiceItems.map((item) => item.itemId))];
+
+    const [sellerInfoByUserId, masterItemById] = await Promise.all([
+      this.getBusinessDetailsMapByUserIds(sellerIds),
+      this.getMasterItemMapByIds(itemIds),
+    ]);
+
+    const itemsByInvoiceId = new Map<string, typeof invoiceItems>();
+    for (const item of invoiceItems) {
+      if (!itemsByInvoiceId.has(item.invoiceId)) {
+        itemsByInvoiceId.set(item.invoiceId, []);
+      }
+      itemsByInvoiceId.get(item.invoiceId)!.push(item);
+    }
+
+    return invoices.map((invoice) => ({
+      ...invoice,
+      status: this.resolveInvoiceStatus(invoice.status, invoice.invoiceDueDate),
+      sellerInfo: sellerInfoByUserId.get(String(invoice.sellerId)) ?? null,
+      items: (itemsByInvoiceId.get(String(invoice._id)) ?? []).map((item) => ({
+        ...item,
+        ...(masterItemById.get(String(item.itemId)) ?? {}),
+      })),
+    }));
+  }
+
   async getInvoiceDetails(invoiceId: string) {
     const [invoice, invoiceItems] = await Promise.all([
       this.invoiceModel.findById(invoiceId).lean(),
@@ -238,7 +280,7 @@ export class InvoiceService {
     }
   }
 
-  private async getBuyerInfoMapByUserIds(userIds: string[]) {
+  private async getBusinessDetailsMapByUserIds(userIds: string[]) {
     if (!userIds.length) {
       return new Map<string, any>();
     }
@@ -258,6 +300,10 @@ export class InvoiceService {
       .lean();
 
     return new Map(buyers.map((buyer) => [String(buyer.userId), buyer]));
+  }
+
+  private async getBuyerInfoMapByUserIds(userIds: string[]) {
+    return this.getBusinessDetailsMapByUserIds(userIds);
   }
 
   private async getMasterItemMapByIds(itemIds: string[]) {

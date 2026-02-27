@@ -46,6 +46,16 @@ export class InvoiceController {
     }
   }
 
+  @Get('wholesaler/:userId')
+  async getWholesalerInvoices(@Param('userId') userId: string) {
+    try {
+      const response = await this.invoiceService.getWholesalerInvoices(userId);
+      return ResponseHandler.handle(response);
+    } catch (error: any) {
+      return ResponseHandler.handle(null, true, error.message, 400);
+    }
+  }
+
   @Get(':invoiceId')
   async getInvoiceDetails(@Param('invoiceId') invoiceId: string) {
     try {

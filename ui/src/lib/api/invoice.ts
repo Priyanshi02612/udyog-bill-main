@@ -57,6 +57,23 @@ export class InvoiceService {
     }
   }
 
+  static async getWholesalerInvoices(userId: string) {
+    try {
+      const response = await axios.get(`${API_URL}/invoice/wholesaler/${userId}`);
+
+      if (!response.status) {
+        throw new Error(
+          response.data.message || `HTTP error! status: ${response.status}`,
+        );
+      }
+
+      return response.data.data || [];
+    } catch (error) {
+      console.error("Error while fetching wholesaler invoices:", error);
+      throw error;
+    }
+  }
+
   static async getInvoiceDetails(invoiceId: string) {
     try {
       const response = await axios.get(`${API_URL}/invoice/${invoiceId}`);

@@ -1,15 +1,11 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { createApp } from './bootstrap';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-
-  app.enableCors({
-    origin: process.env.FRONTEND_URL,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-  });
-
+  // Keep a direct Nest import in this entrypoint for Vercel Nest preset detection.
+  void NestFactory;
+  const app = await createApp();
   await app.listen(process.env.PORT ?? 8080);
 }
-bootstrap();
+
+void bootstrap();

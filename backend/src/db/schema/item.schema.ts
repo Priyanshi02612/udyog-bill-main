@@ -4,7 +4,11 @@ import * as types from '../../common/types';
 
 export type ItemDocument = Item & Document;
 
-@Schema({ timestamps: true, collection: 'items' })
+@Schema({
+  timestamps: true,
+  collection: 'items',
+  suppressReservedKeysWarning: true,
+})
 export class Item {
   @Prop({ required: true, trim: true })
   name!: string;

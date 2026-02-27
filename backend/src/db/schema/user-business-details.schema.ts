@@ -21,7 +21,11 @@ class FinancialYearSnapshot {
   endYear!: number;
 }
 
-@Schema({ timestamps: true, collection: 'user_business_details' })
+@Schema({
+  timestamps: true,
+  collection: 'user_business_details',
+  suppressReservedKeysWarning: true,
+})
 export class UserBusinessDetails {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, unique: true })
   userId!: Types.ObjectId;

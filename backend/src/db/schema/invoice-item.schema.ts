@@ -3,7 +3,11 @@ import { Document } from 'mongoose';
 
 export type InvoiceItemDocument = InvoiceItem & Document;
 
-@Schema({ timestamps: true, collection: 'invoice_items' })
+@Schema({
+  timestamps: true,
+  collection: 'invoice_items',
+  suppressReservedKeysWarning: true,
+})
 export class InvoiceItem {
   @Prop({ required: true, trim: true, index: true })
   invoiceId!: string;

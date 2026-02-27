@@ -20,7 +20,7 @@ import {
 } from '../db/schema/user-business-details.schema';
 import { InvoiceController } from './invoice.controller';
 import { InvoiceService } from './invoice.service';
-import { Item, ItemSchema } from 'src/db/schema/item.schema';
+import { Item, ItemSchema } from '../db/schema/item.schema';
 
 @Module({
   imports: [

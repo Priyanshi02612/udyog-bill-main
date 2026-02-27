@@ -6,17 +6,14 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   updatePassword,
-  User,
 } from "firebase/auth";
 import toast from "react-hot-toast";
 
-import { AuthContext } from "../../context/auth.context";
 import { OnboardingContext } from "../../context/onboarding.context";
 import { auth } from "../../lib/firebase/config";
 import { AuthService } from "../../lib/api/auth";
 import { Button } from "../ui/button";
 import {
-  AuthContextType,
   OnboardingContextType,
   OnboardingData,
   SignupPayload,
@@ -87,7 +84,6 @@ export default function Stepper() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { user } = useContext(AuthContext) as AuthContextType;
   const {
     onBoardingStep,
     setOnBoardingStep,
@@ -109,8 +105,13 @@ export default function Stepper() {
 
       let firebaseUid = onBoardingData.firebaseUid;
 
-      if (firebaseUid && user) {
-        await updatePassword(user as User, onBoardingData.password);
+      if (firebaseUid) {
+        const currentFirebaseUser = auth.currentUser;
+        if (!currentFirebaseUser || currentFirebaseUser.uid !== firebaseUid) {
+          toast.error("Session expired. Please login again.");
+          return false;
+        }
+        await updatePassword(currentFirebaseUser, onBoardingData.password);
       } else {
         const userCred = await createUserWithEmailAndPassword(
           auth,

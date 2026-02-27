@@ -516,6 +516,7 @@ export default function CreateInvoicePage() {
               ...wholesalersList,
             ]}
             label="Wholesaler"
+            required
             value={wholesalerId}
             onChange={(event) =>
               setInvoiceDetails((prev) => ({
@@ -530,6 +531,7 @@ export default function CreateInvoicePage() {
               ...financialYearsOptions,
             ]}
             label="Financial Year"
+            required
             value={financialYear}
             onChange={(event) =>
               setInvoiceDetails((prev) => ({
@@ -542,6 +544,7 @@ export default function CreateInvoicePage() {
           <div>
             <Input
               label="Invoice Date"
+              required
               type="date"
               value={invoiceDate}
               onChange={(event) =>

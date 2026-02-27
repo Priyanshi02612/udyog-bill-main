@@ -131,6 +131,7 @@ const ResetPasswordContent = () => {
 
           <Input
             label="New Password"
+            required
             type={showPassword ? "text" : "password"}
             placeholder="Enter new password"
             value={password}
@@ -140,6 +141,7 @@ const ResetPasswordContent = () => {
           />
           <Input
             label="Confirm New Password"
+            required
             type={showConfirmPassword ? "text" : "password"}
             placeholder="Confirm new password"
             value={confirmPassword}

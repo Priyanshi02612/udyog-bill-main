@@ -57,6 +57,7 @@ const BasicInfo = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               label="Contact Person"
+              required
               placeholder="Primary contact person"
               value={onBoardingData.contactPerson}
               onChange={(e) =>
@@ -65,6 +66,7 @@ const BasicInfo = () => {
             />
             <Input
               label="Email"
+              required
               placeholder="you@company.com"
               value={onBoardingData.email}
               disabled={!!user?.email}
@@ -75,6 +77,7 @@ const BasicInfo = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               label="Password"
+              required
               type="password"
               placeholder="Create a strong password"
               value={onBoardingData.password}
@@ -83,6 +86,7 @@ const BasicInfo = () => {
 
             <Input
               label="Phone"
+              required
               type="text"
               maxLength={10}
               placeholder="9087654567"
@@ -96,6 +100,7 @@ const BasicInfo = () => {
           <div className="space-y-4">
             <Input
               label="Legal Business Name"
+              required
               placeholder="e.g. Paramount Textiles Pvt Ltd"
               value={onBoardingData.businessName}
               onChange={(e) => handleChangeForm("businessName", e.target.value)}
@@ -103,6 +108,7 @@ const BasicInfo = () => {
 
             <Input
               label="GSTIN"
+              required
               placeholder="22AAAAA0000A1Z5"
               value={onBoardingData.gstin}
               onChange={(e) => handleChangeForm("gstin", e.target.value)}
@@ -110,6 +116,7 @@ const BasicInfo = () => {
 
             <Input
               label="Registered Address"
+              required
               placeholder="Full registered office address"
               value={onBoardingData.registeredAddress}
               onChange={(e) =>
@@ -119,6 +126,7 @@ const BasicInfo = () => {
 
             <Dropdown
               label="State / Region"
+              required
               options={states}
               value={onBoardingData.state}
               onChange={(e) => handleChangeForm("state", e.target.value)}

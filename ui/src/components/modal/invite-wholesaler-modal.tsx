@@ -105,6 +105,7 @@ export const InviteWholesalerModal = ({
         <form onSubmit={handleSubmit} className="p-8 space-y-5">
           <Input
             label="Email Address"
+            required
             placeholder="contact@wholesaler.com"
             leadingIcon={<MdEmail />}
             value={email}

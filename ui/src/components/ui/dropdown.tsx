@@ -16,16 +16,21 @@ export const Dropdown: React.FC<DropdownProps> = ({
   label,
   options,
   className,
+  required,
   ...props
 }) => {
   return (
     <div className="flex flex-col gap-2">
       {label && (
-        <label className="text-sm font-semibold text-[#0d161b]">{label}</label>
+        <label className="text-sm font-semibold text-[#0d161b]">
+          {label}
+          {required ? <span className="ml-1 text-rose-500">*</span> : null}
+        </label>
       )}
 
       <div className="relative">
         <select
+          required={required}
           className={clsx(
             "form-input flex w-full h-9 rounded-lg px-4 pr-10 text-sm transition-all",
             "bg-slate-50 border border-[#cfdde7] text-[#0d161b]",

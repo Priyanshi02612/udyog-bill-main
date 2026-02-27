@@ -4,12 +4,14 @@ import { MdClose, MdCloudUpload } from "react-icons/md";
 
 type ImageUploaderProps = {
   label?: string;
+  required?: boolean;
   preview?: string;
   onChange: (file: File | null, preview: string) => void;
 };
 
 export const ImageUploader = ({
   label = "Item Image",
+  required,
   preview,
   onChange,
 }: ImageUploaderProps) => {
@@ -23,7 +25,10 @@ export const ImageUploader = ({
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-sm font-semibold text-[#0d161b]">{label}</label>
+      <label className="text-sm font-semibold text-[#0d161b]">
+        {label}
+        {required ? <span className="ml-1 text-rose-500">*</span> : null}
+      </label>
 
       {!preview ? (
         <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-center hover:border-primary hover:bg-primary/5 transition">

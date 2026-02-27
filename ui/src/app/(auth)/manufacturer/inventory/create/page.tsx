@@ -368,6 +368,7 @@ export default function InventoryLotFormPage() {
 
               <Dropdown
                 label="Select Collection"
+                required
                 options={collectionOptions}
                 value={selectedCollection}
                 onChange={(event) => setSelectedCollection(event.target.value)}
@@ -375,6 +376,7 @@ export default function InventoryLotFormPage() {
 
               <Input
                 label="Date of Arrival"
+                required
                 type="date"
                 value={dateReceived}
                 onChange={(event) => setDateReceived(event.target.value)}
@@ -396,10 +398,14 @@ export default function InventoryLotFormPage() {
               <table className="min-w-225 w-full border-collapse">
                 <thead className="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
                   <tr>
-                    <th className="px-6 py-4">Item Name</th>
+                    <th className="px-6 py-4">
+                      Item Name <span className="text-rose-500">*</span>
+                    </th>
                     <th className="px-6 py-4">SKU</th>
                     <th className="px-6 py-4">Fabric Type</th>
-                    <th className="px-6 py-4">Qty</th>
+                    <th className="px-6 py-4">
+                      Qty <span className="text-rose-500">*</span>
+                    </th>
                     <th className="px-6 py-4">Base Price</th>
                     <th className="w-16 px-4 py-4" />
                   </tr>

@@ -16,6 +16,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       trailingIcon,
       onTrailingIconClick,
       className,
+      required,
       ...props
     },
     ref,
@@ -28,6 +29,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label className="text-[#0d161b] text-sm font-semibold">
             {label}
+            {required ? <span className="ml-1 text-rose-500">*</span> : null}
           </label>
         )}
 
@@ -46,6 +48,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
           <input
             ref={ref}
+            required={required}
             {...props}
             className={clsx(
               "w-full h-9 rounded-lg border p-4 text-sm transition-all",

@@ -189,6 +189,7 @@ export default function AddEditTextileItemModal({
                 <Input
                   name="name"
                   label="Item Name"
+                  required
                   placeholder="Item Name"
                   value={itemDetails.name}
                   onChange={handleChange}
@@ -198,6 +199,7 @@ export default function AddEditTextileItemModal({
               <Dropdown
                 options={itemCategoryOptions}
                 label="Item Category"
+                required
                 value={itemDetails.category}
                 onChange={(e) =>
                   setItemDetails((prev) => ({
@@ -269,6 +271,7 @@ export default function AddEditTextileItemModal({
               <Input
                 name="unit"
                 label="Unit"
+                required
                 placeholder="Unit"
                 value={itemDetails.unit}
                 onChange={handleChange}
@@ -276,6 +279,7 @@ export default function AddEditTextileItemModal({
               <Input
                 name="gstPercentage"
                 label="GST %"
+                required
                 placeholder="GST %"
                 type="number"
                 value={itemDetails.gstPercentage}
@@ -285,6 +289,7 @@ export default function AddEditTextileItemModal({
               <Input
                 name="hsnCode"
                 label="HSN Code"
+                required
                 placeholder="HSN Code"
                 type="number"
                 value={itemDetails.hsnCode}
@@ -303,6 +308,7 @@ export default function AddEditTextileItemModal({
                 <Input
                   name="basePrice"
                   label="Base Price"
+                  required
                   placeholder="Base Price"
                   type="number"
                   value={itemDetails.basePrice}

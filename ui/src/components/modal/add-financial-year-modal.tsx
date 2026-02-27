@@ -70,6 +70,7 @@ export const AddFinancialYearModal = ({
           <div className="grid gap-3 sm:grid-cols-2">
             <Dropdown
               label="Start Date"
+              required
               options={startPeriodOptions}
               value={selectedStartYear}
               onChange={(event) => onChangeStartYear(event.target.value)}

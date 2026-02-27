@@ -117,6 +117,7 @@ export default function ManufacturerProfileSettingsPage() {
           <div className="grid gap-4 md:grid-cols-2">
             <Input
               label="Legal Business Name"
+              required
               value={userProfile.businessName}
               onChange={(event) =>
                 setUserProfile((prev) => ({
@@ -129,6 +130,7 @@ export default function ManufacturerProfileSettingsPage() {
 
             <Input
               label="GST Number"
+              required
               value={userProfile.gstin}
               onChange={(event) =>
                 setUserProfile((prev) => ({
@@ -153,6 +155,7 @@ export default function ManufacturerProfileSettingsPage() {
 
             <Input
               label="Phone Number"
+              required
               value={userProfile.phone}
               onChange={(event) =>
                 setUserProfile((prev) => ({

@@ -5,12 +5,14 @@ import { Sketch } from "@uiw/react-color";
 
 type ColorPickerFieldProps = {
   label?: string;
+  required?: boolean;
   value?: string;
   onChange: (color: string) => void;
 };
 
 export function ColorPickerField({
   label = "Color",
+  required,
   value = "#6366f1",
   onChange,
 }: ColorPickerFieldProps) {
@@ -29,7 +31,10 @@ export function ColorPickerField({
 
   return (
     <div className="relative flex flex-col gap-2" ref={ref}>
-      <label className="text-sm font-semibold text-slate-900">{label}</label>
+      <label className="text-sm font-semibold text-slate-900">
+        {label}
+        {required ? <span className="ml-1 text-rose-500">*</span> : null}
+      </label>
 
       <button
         type="button"

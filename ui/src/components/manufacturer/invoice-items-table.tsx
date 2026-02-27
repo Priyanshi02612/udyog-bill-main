@@ -56,9 +56,13 @@ export function InvoiceItemsTable({
           <thead className="bg-slate-50 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
             <tr>
               <th className="px-4 py-3">#</th>
-              <th className="px-4 py-3">Item Name</th>
+              <th className="px-4 py-3">
+                Item Name <span className="text-rose-500">*</span>
+              </th>
               <th className="px-4 py-3">HSN Code</th>
-              <th className="px-4 py-3">Quantity</th>
+              <th className="px-4 py-3">
+                Quantity <span className="text-rose-500">*</span>
+              </th>
               <th className="px-4 py-3">Unit</th>
               <th className="px-4 py-3">Price (₹)</th>
               <th className="px-4 py-3">GST (%)</th>

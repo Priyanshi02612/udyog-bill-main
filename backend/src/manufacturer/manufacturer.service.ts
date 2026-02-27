@@ -444,21 +444,20 @@ export class ManufacturerService {
 
     const partyEmail = dto.partyEmail.trim().toLowerCase();
 
-    if (manufacturer.email === partyEmail) {
+    const isPartyOnboarded = await this.userModel.find({
+      email: partyEmail,
+      isOnboarded: true,
+    });
+
+    if (!isPartyOnboarded) {
       throw new BadRequestException(
-        'Manufacturer cannot send invitation to their own email address',
+        'This email is not registered on UdyogBill yet.',
       );
     }
 
-    const existsAcceptedParty = await this.invitationModel.findOne({
-      manufacturerId: manufacturer.id,
-      partyEmail,
-      status: InvitationStatus.ACCEPTED,
-    });
-
-    if (existsAcceptedParty) {
+    if (manufacturer.email === partyEmail) {
       throw new BadRequestException(
-        'Party with this email has already accepted your invitation.',
+        'Manufacturer cannot send invitation to their own email address',
       );
     }
 
@@ -471,6 +470,18 @@ export class ManufacturerService {
 
     if (activeInvitation) {
       throw new BadRequestException('Invitation already sent to this party');
+    }
+
+    const existsAcceptedParty = await this.invitationModel.findOne({
+      manufacturerId: manufacturer.id,
+      partyEmail,
+      status: InvitationStatus.ACCEPTED,
+    });
+
+    if (existsAcceptedParty) {
+      throw new BadRequestException(
+        'Party with this email has already accepted your invitation.',
+      );
     }
 
     const token = randomBytes(24).toString('hex');

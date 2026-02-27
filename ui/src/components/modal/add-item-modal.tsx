@@ -15,7 +15,12 @@ import {
   AuthContextType,
 } from "../../utils/types";
 import { getErrorMessage } from "../../utils/helpers";
-import { DEFAULT_FORM, itemCategoryOptions } from "../../utils/constants";
+import {
+  ALLOWED_GST_PERCENTAGES,
+  DEFAULT_FORM,
+  gstPercentageOptions,
+  itemCategoryOptions,
+} from "../../utils/constants";
 import { AuthContext } from "../../context/auth.context";
 import { ItemsService } from "../../lib/api/items";
 
@@ -72,11 +77,13 @@ export default function AddEditTextileItemModal({
       errors.basePrice = "Base price must be 0 or more";
 
     if (
-      !itemDetails.gstPercentage ||
-      Number(itemDetails.gstPercentage) < 0 ||
-      Number(itemDetails.gstPercentage) > 100
+      !ALLOWED_GST_PERCENTAGES.includes(
+        Number(
+          itemDetails.gstPercentage,
+        ) as (typeof ALLOWED_GST_PERCENTAGES)[number],
+      )
     )
-      errors.gstPercentage = "GST must be between 0-100";
+      errors.gstPercentage = "GST must be one of 0, 5, 12, or 18";
 
     if (!itemDetails.hsnCode) errors.hsnCode = "HSN code is required";
 
@@ -276,14 +283,17 @@ export default function AddEditTextileItemModal({
                 value={itemDetails.unit}
                 onChange={handleChange}
               />
-              <Input
-                name="gstPercentage"
+              <Dropdown
                 label="GST %"
                 required
-                placeholder="GST %"
-                type="number"
+                options={gstPercentageOptions}
                 value={itemDetails.gstPercentage}
-                onChange={handleChange}
+                onChange={(e) =>
+                  setItemDetails((prev) => ({
+                    ...prev,
+                    gstPercentage: Number(e.target.value),
+                  }))
+                }
               />
 
               <Input

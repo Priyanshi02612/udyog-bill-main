@@ -452,12 +452,15 @@ export default function CreateInvoicePage() {
   const masterItemOptions = useMemo(
     () =>
       masterItems
-        .filter((item) => item._id && item.isActive)
+        .filter(
+          (item) =>
+            item._id && item.isActive && item.gstPercentage === selectedGstRate,
+        )
         .map((item) => ({
           value: item._id as string,
           label: item.name,
         })),
-    [masterItems],
+    [masterItems, selectedGstRate],
   );
 
   return (

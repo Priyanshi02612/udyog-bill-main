@@ -126,3 +126,11 @@ export const taxModeOptions = [
 export const GENERAL_PREFIX = "GEN";
 export const LOT_PREFIX = "LOT";
 export const INVOICE_PREFIX = "INV";
+
+export const ALLOWED_GST_PERCENTAGES = [0, 5, 12, 18] as const;
+export const gstPercentageOptions = [
+  { label: "No GST", value: "0" },
+  { label: "GST 5%", value: "5" },
+  { label: "GST 12%", value: "12" },
+  { label: "GST 18%", value: "18" },
+];

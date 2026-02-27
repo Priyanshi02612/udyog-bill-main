@@ -20,9 +20,9 @@ import {
   MdWarning,
 } from "react-icons/md";
 import { Button } from "../../../../components/ui/button";
-import DashboardInvoicesTable from "../../../../components/admin/dashboard-invoices-table";
-import { KpiCard } from "../../../../components/admin/kpi-card";
-import { WeeklyStockSection } from "../../../../components/admin/dashboard-stock-charts";
+import DashboardInvoicesTable from "../../../../components/manufacturer/dashboard-invoices-table";
+import { KpiCard } from "../../../../components/manufacturer/kpi-card";
+import { WeeklyStockSection } from "../../../../components/manufacturer/dashboard-stock-charts";
 import { useRouter } from "next/navigation";
 import { ManufacturerService } from "../../../../lib/api/manufacturer";
 import toast from "react-hot-toast";

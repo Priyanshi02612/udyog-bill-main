@@ -3,8 +3,8 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { AuthContextType } from "../../utils/types";
-import { Sidebar } from "../../components/admin/sidebar";
-import { Header } from "../../components/admin/header";
+import { Sidebar } from "../../components/manufacturer/sidebar";
+import { Header } from "../../components/manufacturer/header";
 import { UserRole } from "../../utils/constants";
 import { AuthContext } from "../../context/auth.context";
 

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { KpiCardProps } from "../components/admin/kpi-card";
+import { KpiCardProps } from "../components/manufacturer/kpi-card";
 
 export type Role = "manufacturer" | "wholesaler";
 

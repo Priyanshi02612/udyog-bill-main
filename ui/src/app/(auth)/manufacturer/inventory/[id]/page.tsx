@@ -13,7 +13,7 @@ import {
 import { BsBoxSeamFill } from "react-icons/bs";
 
 import { AuthContext } from "../../../../../context/auth.context";
-import { KpiCard } from "../../../../../components/admin/kpi-card";
+import { KpiCard } from "../../../../../components/manufacturer/kpi-card";
 import { Button } from "../../../../../components/ui/button";
 import ConfirmModal from "../../../../../components/ui/modal";
 import {

@@ -1,7 +1,7 @@
 "use client";
 
 import { InviteWholesalerModal } from "../../../../components/modal/invite-wholesaler-modal";
-import PartyDrawer from "../../../../components/admin/wholesaler-profile";
+import PartyDrawer from "../../../../components/manufacturer/wholesaler-profile";
 import Pagination from "../../../../components/pagination";
 import { Button } from "../../../../components/ui/button";
 import ConfirmModal from "../../../../components/ui/modal";
@@ -16,7 +16,7 @@ import {
   MdVisibility,
 } from "react-icons/md";
 import toast from "react-hot-toast";
-import { KpiCard } from "../../../../components/admin/kpi-card";
+import { KpiCard } from "../../../../components/manufacturer/kpi-card";
 import { ManufacturerService } from "../../../../lib/api/manufacturer";
 import { AuthContext } from "../../../../context/auth.context";
 import { Badge } from "@/src/components/ui/badge";

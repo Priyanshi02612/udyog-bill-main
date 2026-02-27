@@ -8,9 +8,9 @@ import toast from "react-hot-toast";
 import { Button } from "../../../../../components/ui/button";
 import { Input } from "../../../../../components/ui/input";
 import { Dropdown } from "../../../../../components/ui/dropdown";
-import { InvoiceGstConfig } from "../../../../../components/admin/invoice-gst-config";
-import { InvoiceFinancialSummary } from "../../../../../components/admin/invoice-financial-summary";
-import { InvoiceItemsTable } from "../../../../../components/admin/invoice-items-table";
+import { InvoiceGstConfig } from "../../../../../components/manufacturer/invoice-gst-config";
+import { InvoiceFinancialSummary } from "../../../../../components/manufacturer/invoice-financial-summary";
+import { InvoiceItemsTable } from "../../../../../components/manufacturer/invoice-items-table";
 import { AuthContext } from "../../../../../context/auth.context";
 import {
   GstType,

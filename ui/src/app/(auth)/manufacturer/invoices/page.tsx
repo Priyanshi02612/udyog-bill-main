@@ -17,7 +17,7 @@ import {
 } from "react-icons/md";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AuthContext } from "../../../../context/auth.context";
-import { KpiCard } from "../../../../components/admin/kpi-card";
+import { KpiCard } from "../../../../components/manufacturer/kpi-card";
 import { Button } from "../../../../components/ui/button";
 import { Dropdown } from "../../../../components/ui/dropdown";
 import { Input } from "../../../../components/ui/input";
@@ -26,7 +26,7 @@ import Pagination from "../../../../components/pagination";
 import {
   InvoicePdf,
   InvoicesPdf,
-} from "../../../../components/admin/invoice-pdf-template";
+} from "../../../../components/manufacturer/invoice-pdf-template";
 import { invoiceStatusOptions } from "../../../../utils/constants";
 import {
   formatCurrency,

@@ -6,7 +6,7 @@ import { MdAdd, MdInventory2, MdOutlineSearch } from "react-icons/md";
 import { AuthContext } from "../../../../context/auth.context";
 import { Button } from "../../../../components/ui/button";
 import { Input } from "../../../../components/ui/input";
-import { KpiCard } from "../../../../components/admin/kpi-card";
+import { KpiCard } from "../../../../components/manufacturer/kpi-card";
 import Pagination from "../../../../components/pagination";
 import {
   formatCurrency,

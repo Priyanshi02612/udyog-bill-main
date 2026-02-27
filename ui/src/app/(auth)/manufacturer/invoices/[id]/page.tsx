@@ -5,8 +5,8 @@ import { PDFDownloadLink } from "@react-pdf/renderer";
 import { MdArrowBack, MdDownload } from "react-icons/md";
 import { useParams, useRouter } from "next/navigation";
 
-import { InvoicePdf } from "../../../../../components/admin/invoice-pdf-template";
-import { InvoicePreviewCard } from "../../../../../components/admin/invoice-preview-card";
+import { InvoicePdf } from "../../../../../components/manufacturer/invoice-pdf-template";
+import { InvoicePreviewCard } from "../../../../../components/manufacturer/invoice-preview-card";
 import { Badge } from "../../../../../components/ui/badge";
 import { Button } from "../../../../../components/ui/button";
 import { AuthContext } from "../../../../../context/auth.context";

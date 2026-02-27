@@ -3,13 +3,13 @@
 import React, { useContext, useState } from "react";
 import { MdClose, MdEmail, MdPersonAdd, MdSend } from "react-icons/md";
 import { toast } from "react-hot-toast";
-import { Button } from "../../ui/button";
-import { Input } from "../../ui/input";
-import { EMAIL_REGEX } from "../../../utils/constants";
-import { AuthContextType } from "../../../utils/types";
-import { getErrorMessage } from "../../../utils/helpers";
-import { AuthContext } from "../../../context/auth.context";
-import { ManufacturerService } from "../../../lib/api/manufacturer";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { EMAIL_REGEX } from "../../utils/constants";
+import { AuthContextType } from "../../utils/types";
+import { getErrorMessage } from "../../utils/helpers";
+import { AuthContext } from "../../context/auth.context";
+import { ManufacturerService } from "../../lib/api/manufacturer";
 
 type InviteWholesalerModalProps = {
   open: boolean;

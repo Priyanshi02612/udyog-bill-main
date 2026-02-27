@@ -1,6 +1,6 @@
 "use client";
 
-import { InviteWholesalerModal } from "../../../../components/admin/modal/invite-wholesaler-modal";
+import { InviteWholesalerModal } from "../../../../components/modal/invite-wholesaler-modal";
 import PartyDrawer from "../../../../components/admin/wholesaler-profile";
 import Pagination from "../../../../components/pagination";
 import { Button } from "../../../../components/ui/button";

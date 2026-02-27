@@ -3,21 +3,21 @@
 import React, { useContext, useEffect, useState } from "react";
 import { MdClose } from "react-icons/md";
 import toast from "react-hot-toast";
-import { Input } from "../../ui/input";
-import { Button } from "../../ui/button";
-import { Dropdown } from "../../ui/dropdown";
-import { ColorPickerField } from "../../ui/color-picker";
-import { ImageUploader } from "../../ui/image-uploader";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { Dropdown } from "../ui/dropdown";
+import { ColorPickerField } from "../ui/color-picker";
+import { ImageUploader } from "../ui/image-uploader";
 import {
   Errors,
   AddEditTextileItemModalProps,
   Item,
   AuthContextType,
-} from "../../../utils/types";
-import { getErrorMessage } from "../../../utils/helpers";
-import { DEFAULT_FORM, itemCategoryOptions } from "../../../utils/constants";
-import { AuthContext } from "../../../context/auth.context";
-import { ItemsService } from "../../../lib/api/items";
+} from "../../utils/types";
+import { getErrorMessage } from "../../utils/helpers";
+import { DEFAULT_FORM, itemCategoryOptions } from "../../utils/constants";
+import { AuthContext } from "../../context/auth.context";
+import { ItemsService } from "../../lib/api/items";
 
 export default function AddEditTextileItemModal({
   open,

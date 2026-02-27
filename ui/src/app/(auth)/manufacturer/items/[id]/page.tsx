@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import AddEditTextileItemModal from "../../../../../components/admin/modal/add-item-modal";
+import AddEditTextileItemModal from "../../../../../components/modal/add-item-modal";
 import { Badge } from "../../../../../components/ui/badge";
 import { Button } from "../../../../../components/ui/button";
 import { useParams, useRouter } from "next/navigation";

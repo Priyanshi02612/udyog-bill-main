@@ -2,8 +2,8 @@
 
 import { useMemo } from "react";
 import { MdClose, MdOutlineArrowForward } from "react-icons/md";
-import { Button } from "../../ui/button";
-import { Dropdown } from "../../ui/dropdown";
+import { Button } from "../ui/button";
+import { Dropdown } from "../ui/dropdown";
 
 type AddFinancialYearModalProps = {
   open: boolean;

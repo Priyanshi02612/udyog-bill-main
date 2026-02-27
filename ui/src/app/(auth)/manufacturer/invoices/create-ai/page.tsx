@@ -14,7 +14,7 @@ import { AuthContext } from "../../../../../context/auth.context";
 import { InvoicePreviewCard } from "../../../../../components/admin/invoice-preview-card";
 import { Button } from "../../../../../components/ui/button";
 import InvoicePreviewSkeleton from "../../../../../components/admin/invoice-preview-skeleton";
-import PromptHelperModal from "../../../../../components/admin/modal/prompt-helper-modal";
+import PromptHelperModal from "../../../../../components/modal/prompt-helper-modal";
 import { AiService } from "../../../../../lib/api/ai";
 import { InvoiceService } from "../../../../../lib/api/invoice";
 import { GstType, TaxMode } from "../../../../../utils/constants";

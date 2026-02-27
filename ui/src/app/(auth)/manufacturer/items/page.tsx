@@ -8,7 +8,7 @@ import Link from "next/link";
 import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
 import Pagination from "../../../../components/pagination";
-import AddEditTextileItemModal from "../../../../components/admin/modal/add-item-modal";
+import AddEditTextileItemModal from "../../../../components/modal/add-item-modal";
 import { AuthContextType, Item, ItemCategory } from "../../../../utils/types";
 import { getErrorMessage } from "../../../../utils/helpers";
 import { ItemsService } from "../../../../lib/api/items";

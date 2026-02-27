@@ -4,7 +4,6 @@ import { useContext, useMemo, useState } from "react";
 import { MdAdd, MdCalendarToday } from "react-icons/md";
 import { AuthContext } from "../../../../context/auth.context";
 import { UserContext } from "../../../../context/user.context";
-import { AddFinancialYearModal } from "../../../../components/admin/modal/add-financial-year-modal";
 
 import { Button } from "../../../../components/ui/button";
 import { Dropdown } from "../../../../components/ui/dropdown";
@@ -18,6 +17,7 @@ import {
 } from "../../../../utils/constants";
 import { AuthContextType, UserContextType } from "../../../../utils/types";
 import toast from "react-hot-toast";
+import { AddFinancialYearModal } from "../../../../components/modal/add-financial-year-modal";
 
 const states = [
   { label: "Select your state", value: "" },

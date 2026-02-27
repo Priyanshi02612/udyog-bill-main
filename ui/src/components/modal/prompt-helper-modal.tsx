@@ -1,6 +1,6 @@
 import { MdClose } from "react-icons/md";
 
-import { Button } from "../../ui/button";
+import { Button } from "../ui/button";
 
 type PromptHelperModalProps = {
   open: boolean;

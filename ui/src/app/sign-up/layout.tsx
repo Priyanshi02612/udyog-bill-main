@@ -12,11 +12,13 @@ export default function AuthLayout({
 }) {
   const { shouldShowLoading } = usePublicRouteRedirect({
     allowNotOnboarded: true,
+    onboardingPath: "/sign-up",
+    suppressLoadingOnOnboardingRoute: true,
   });
 
   if (shouldShowLoading) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-64px)]">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
       </div>
     );

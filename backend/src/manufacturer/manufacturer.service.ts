@@ -444,6 +444,12 @@ export class ManufacturerService {
 
     const partyEmail = dto.partyEmail.trim().toLowerCase();
 
+    if (manufacturer.email === partyEmail) {
+      throw new BadRequestException(
+        'Manufacturer cannot send invitation to their own email address',
+      );
+    }
+
     const existsAcceptedParty = await this.invitationModel.findOne({
       manufacturerId: manufacturer.id,
       partyEmail,

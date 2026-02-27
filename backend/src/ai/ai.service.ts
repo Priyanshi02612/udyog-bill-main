@@ -12,7 +12,10 @@ import { Item } from '../db/schema/item.schema';
 import { User } from '../db/schema/user.schema';
 import { UserBusinessDetails } from '../db/schema/user-business-details.schema';
 import { Invoice } from '../db/schema/invoice.schema';
-import { ManufacturerWholesalerInvitation } from '../db/schema/manufacturer-wholesaler-invitation.schema';
+import {
+  InvitationStatus,
+  ManufacturerWholesalerInvitation,
+} from '../db/schema/manufacturer-wholesaler-invitation.schema';
 import { getNextDocumentNumber } from '../common/helper';
 
 type GeminiClient = {
@@ -99,6 +102,7 @@ export class AiService {
 
     const isPendingInvitation = await this.invitationsModel.find({
       partyUserId: String(existingWholesaler.userId),
+      status: InvitationStatus.PENDING,
     });
 
     if (isPendingInvitation) {

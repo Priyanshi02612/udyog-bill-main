@@ -44,7 +44,7 @@ const AcceptPartyInvitationContent = () => {
       });
 
       toast.success("Invitation accepted successfully");
-      router.replace("/wholesaler");
+      router.replace("/wholesaler/dashboard");
     } catch (error) {
       toast.error(getErrorMessage(error) || "Failed to accept invitation");
     } finally {

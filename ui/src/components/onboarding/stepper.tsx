@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   createUserWithEmailAndPassword,
@@ -85,6 +85,7 @@ const buildSignupPayload = (
 
 export default function Stepper() {
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { user } = useContext(AuthContext) as AuthContextType;
   const {
@@ -155,6 +156,8 @@ export default function Stepper() {
   };
 
   const handleNext = async () => {
+    if (isSubmitting) return;
+
     switch (onBoardingStep) {
       case 1:
         if (!onBoardingData.role) {
@@ -165,7 +168,9 @@ export default function Stepper() {
 
       case 2:
         if (!validateForm()) return;
+        setIsSubmitting(true);
         const success = await registerUser();
+        setIsSubmitting(false);
         if (!success) return;
         break;
 
@@ -178,6 +183,7 @@ export default function Stepper() {
   };
 
   const handleBack = () => {
+    if (isSubmitting) return;
     if (onBoardingStep > 1) {
       setOnBoardingStep((prev) => prev - 1);
     }
@@ -189,13 +195,23 @@ export default function Stepper() {
         className={`w-full flex items-center ${onBoardingStep === 1 ? "justify-end" : "justify-between"}`}
       >
         {onBoardingStep !== 1 && (
-          <Button size="sm" className="w-max md:w-50" onClick={handleBack}>
+          <Button
+            size="sm"
+            className="w-max md:w-50"
+            onClick={handleBack}
+            disabled={isSubmitting}
+          >
             Back
           </Button>
         )}
 
-        <Button size="sm" className="w-max md:w-50" onClick={handleNext}>
-          {STEPS[currentStepIndex].cta}
+        <Button
+          size="sm"
+          className="w-max md:w-50"
+          onClick={handleNext}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Processing..." : STEPS[currentStepIndex].cta}
         </Button>
       </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState } from "react";
+import { createContext, useCallback, useState } from "react";
 import toast from "react-hot-toast";
 import { OnboardingContextType, OnboardingData } from "../utils/types";
 import { EMAIL_REGEX, GSTIN_REGEX, PHONE_REGEX } from "../utils/constants";
@@ -58,9 +58,9 @@ export function OnboardingProvider({
     setOtp(["", "", "", "", "", ""]);
   };
 
-  const handleOnBoardingData = (data: Partial<OnboardingData>) => {
+  const handleOnBoardingData = useCallback((data: Partial<OnboardingData>) => {
     setOnBoardingData((prev) => ({ ...prev, ...data }));
-  };
+  }, []);
 
   const validateForm = () => {
     const fields = Object.keys(labels) as RequiredOnboardingField[];

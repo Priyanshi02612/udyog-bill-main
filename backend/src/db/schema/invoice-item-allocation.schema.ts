@@ -3,7 +3,11 @@ import { Document } from 'mongoose';
 
 export type InvoiceItemAllocationDocument = InvoiceItemAllocation & Document;
 
-@Schema({ timestamps: true, collection: 'invoice_item_allocations' })
+@Schema({
+  timestamps: true,
+  collection: 'invoice_item_allocations',
+  suppressReservedKeysWarning: true,
+})
 export class InvoiceItemAllocation {
   @Prop({ required: true, trim: true, index: true })
   invoiceId!: string;

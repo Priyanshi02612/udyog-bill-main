@@ -3,7 +3,11 @@ import { Document, Types } from 'mongoose';
 
 export type InventoryDocument = Inventory & Document;
 
-@Schema({ timestamps: true, collection: 'inventories' })
+@Schema({
+  timestamps: true,
+  collection: 'inventories',
+  suppressReservedKeysWarning: true,
+})
 export class Inventory {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId!: Types.ObjectId;

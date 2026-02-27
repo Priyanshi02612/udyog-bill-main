@@ -4,7 +4,11 @@ import { GstType, InvoiceSubmitStatus, TaxMode } from '../../common/enums';
 
 export type InvoiceDocument = Invoice & Document;
 
-@Schema({ timestamps: true, collection: 'invoices' })
+@Schema({
+  timestamps: true,
+  collection: 'invoices',
+  suppressReservedKeysWarning: true,
+})
 export class Invoice {
   @Prop({ required: true, trim: true, index: true })
   invoiceNumber!: string;

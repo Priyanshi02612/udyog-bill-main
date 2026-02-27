@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { applyActionCode, checkActionCode } from "firebase/auth";
 import { MdArrowBack } from "react-icons/md";
 
@@ -11,17 +11,22 @@ import logo from "../../../assets/logo.png";
 import { Button } from "../../../components/ui/button";
 import { auth } from "../../../lib/firebase/config";
 
-const AuthActionPage = () => {
+const AuthActionContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const [title, setTitle] = useState("Verifying Link");
-  const [message, setMessage] = useState("Please wait while we process this link.");
+  const [message, setMessage] = useState(
+    "Please wait while we process this link.",
+  );
   const [primaryLabel, setPrimaryLabel] = useState("Go to Login");
   const [primaryPath, setPrimaryPath] = useState("/login");
 
   const mode = useMemo(() => searchParams.get("mode") ?? "", [searchParams]);
-  const oobCode = useMemo(() => searchParams.get("oobCode") ?? "", [searchParams]);
+  const oobCode = useMemo(
+    () => searchParams.get("oobCode") ?? "",
+    [searchParams],
+  );
 
   useEffect(() => {
     const processAction = async () => {
@@ -56,7 +61,9 @@ const AuthActionPage = () => {
           await applyActionCode(auth, oobCode);
           const restoredEmail = info.data.email ?? "your previous email";
           setTitle("Email Recovered");
-          setMessage(`Email recovery complete. You can now sign in with ${restoredEmail}.`);
+          setMessage(
+            `Email recovery complete. You can now sign in with ${restoredEmail}.`,
+          );
           setPrimaryLabel("Go to Login");
           setPrimaryPath("/login");
         } catch {
@@ -142,6 +149,20 @@ const AuthActionPage = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const LoadingState = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
+  </div>
+);
+
+const AuthActionPage = () => {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <AuthActionContent />
+    </Suspense>
   );
 };
 

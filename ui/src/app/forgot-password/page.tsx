@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import toast from "react-hot-toast";
@@ -12,7 +12,7 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { auth } from "../../lib/firebase/config";
 
-const ForgotPasswordPage = () => {
+const ForgotPasswordContent = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -95,6 +95,19 @@ const ForgotPasswordPage = () => {
         </Button>
       </div>
     </AuthShell>
+  );
+};
+
+const LoadingState = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-primary" />
+  </div>
+);
+const ForgotPasswordPage = () => {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <ForgotPasswordContent />
+    </Suspense>
   );
 };
 

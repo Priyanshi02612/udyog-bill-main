@@ -42,6 +42,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#e2e8f0",
     padding: 20,
+    height: "100%",
+    position: "relative",
   },
   topBlock: {
     flexDirection: "row",
@@ -108,6 +110,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     overflow: "hidden",
     marginBottom: 16,
+    height: 280,
   },
   tableHeader: {
     flexDirection: "row",
@@ -153,6 +156,12 @@ const styles = StyleSheet.create({
   lowerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  footerFixed: {
+    position: "absolute",
+    left: 20,
+    right: 20,
+    bottom: 20,
   },
   termsBlock: {
     width: "48%",
@@ -274,9 +283,7 @@ const InvoicePdfPage = ({ invoice }: { invoice: Invoice }) => {
             </View>
             <View style={styles.metaRow}>
               <Text style={styles.metaKey}>Due Date: </Text>
-              <Text style={styles.metaValue}>
-                {formatDate(dueDate)}
-              </Text>
+              <Text style={styles.metaValue}>{formatDate(dueDate)}</Text>
             </View>
             <View style={styles.metaRow}>
               <Text style={styles.metaKey}>PO Ref: </Text>
@@ -363,90 +370,92 @@ const InvoicePdfPage = ({ invoice }: { invoice: Invoice }) => {
           })}
         </View>
 
-        <View style={styles.lowerRow}>
-          <View style={styles.termsBlock}>
-            <Text style={styles.termsTitle}>Terms & Conditions:</Text>
-            <Text style={styles.termsText}>
-              1. Goods once sold will not be taken back.
-            </Text>
-            <Text style={styles.termsText}>
-              2. Interest @ 18% p.a. will be charged if payment is not made
-              within 30 days.
-            </Text>
-            <Text style={styles.termsText}>
-              3. Subject to Surat jurisdiction only.
-            </Text>
-          </View>
-
-          <View style={styles.totalsBlock}>
-            <View style={styles.totalLine}>
-              <Text style={styles.totalKey}>Sub Total</Text>
-              <Text style={styles.totalValue}>
-                {formatCurrency(taxableSubtotal)}
+        <View style={styles.footerFixed}>
+          <View style={styles.lowerRow}>
+            <View style={styles.termsBlock}>
+              <Text style={styles.termsTitle}>Terms & Conditions:</Text>
+              <Text style={styles.termsText}>
+                1. Goods once sold will not be taken back.
+              </Text>
+              <Text style={styles.termsText}>
+                2. Interest @ 18% p.a. will be charged if payment is not made
+                within 30 days.
+              </Text>
+              <Text style={styles.termsText}>
+                3. Subject to Surat jurisdiction only.
               </Text>
             </View>
-            {applyGst ? (
-              taxMode === TaxMode.IGST ? (
-                <View style={styles.totalLine}>
-                  <Text style={styles.totalKey}>
-                    IGST ({igstRate.toFixed(2)}%)
-                  </Text>
-                  <Text style={styles.totalValue}>
-                    {formatCurrency(igstAmount)}
-                  </Text>
-                </View>
-              ) : (
-                <>
+
+            <View style={styles.totalsBlock}>
+              <View style={styles.totalLine}>
+                <Text style={styles.totalKey}>Sub Total</Text>
+                <Text style={styles.totalValue}>
+                  {formatCurrency(taxableSubtotal)}
+                </Text>
+              </View>
+              {applyGst ? (
+                taxMode === TaxMode.IGST ? (
                   <View style={styles.totalLine}>
                     <Text style={styles.totalKey}>
-                      CGST ({cgstRate.toFixed(2)}%)
+                      IGST ({igstRate.toFixed(2)}%)
                     </Text>
                     <Text style={styles.totalValue}>
-                      {formatCurrency(cgstAmount)}
+                      {formatCurrency(igstAmount)}
                     </Text>
                   </View>
-                  <View style={styles.totalLine}>
-                    <Text style={styles.totalKey}>
-                      SGST ({sgstRate.toFixed(2)}%)
-                    </Text>
-                    <Text style={styles.totalValue}>
-                      {formatCurrency(sgstAmount)}
-                    </Text>
-                  </View>
-                </>
-              )
-            ) : null}
-            <View style={styles.totalLine}>
-              <Text style={styles.totalKey}>Tax Breakdown</Text>
-              <Text style={styles.totalValue}>
-                {formatCurrency(totalGstAmount)}
-              </Text>
-            </View>
-            <View style={styles.totalLine}>
-              <Text style={styles.totalKey}>Round Off</Text>
-              <Text style={styles.totalValue}>{formatCurrency(roundOff)}</Text>
-            </View>
+                ) : (
+                  <>
+                    <View style={styles.totalLine}>
+                      <Text style={styles.totalKey}>
+                        CGST ({cgstRate.toFixed(2)}%)
+                      </Text>
+                      <Text style={styles.totalValue}>
+                        {formatCurrency(cgstAmount)}
+                      </Text>
+                    </View>
+                    <View style={styles.totalLine}>
+                      <Text style={styles.totalKey}>
+                        SGST ({sgstRate.toFixed(2)}%)
+                      </Text>
+                      <Text style={styles.totalValue}>
+                        {formatCurrency(sgstAmount)}
+                      </Text>
+                    </View>
+                  </>
+                )
+              ) : null}
+              <View style={styles.totalLine}>
+                <Text style={styles.totalKey}>Tax Breakdown</Text>
+                <Text style={styles.totalValue}>
+                  {formatCurrency(totalGstAmount)}
+                </Text>
+              </View>
+              <View style={styles.totalLine}>
+                <Text style={styles.totalKey}>Round Off</Text>
+                <Text style={styles.totalValue}>{formatCurrency(roundOff)}</Text>
+              </View>
 
-            <View style={styles.divider} />
+              <View style={styles.divider} />
 
-            <View style={styles.totalLine}>
-              <Text style={styles.grandTotalLabel}>GRAND TOTAL</Text>
-              <Text style={styles.grandTotalValue}>
-                {formatCurrency(invoice.total)}
-              </Text>
+              <View style={styles.totalLine}>
+                <Text style={styles.grandTotalLabel}>GRAND TOTAL</Text>
+                <Text style={styles.grandTotalValue}>
+                  {formatCurrency(invoice.total)}
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
 
-        <View style={styles.signatureSection}>
-          <Text style={styles.signatureLabel}>Authorized Signatory</Text>
-          <View style={styles.signatureLine} />
-          <Text style={styles.signatureRole}>Finance Director</Text>
-        </View>
+          <View style={styles.signatureSection}>
+            <Text style={styles.signatureLabel}>Authorized Signatory</Text>
+            <View style={styles.signatureLine} />
+            <Text style={styles.signatureRole}>Finance Director</Text>
+          </View>
 
-        <Text style={styles.footerNote}>
-          This is a computer-generated document with digital authorization.
-        </Text>
+          <Text style={styles.footerNote}>
+            This is a computer-generated document with digital authorization.
+          </Text>
+        </View>
       </View>
     </Page>
   );

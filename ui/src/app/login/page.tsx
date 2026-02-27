@@ -27,6 +27,7 @@ const LoginContent = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -41,6 +42,8 @@ const LoginContent = () => {
 
   const handleLogin = async () => {
     try {
+      setLoading(true);
+
       const firebaseUser = await signInWithEmailAndPassword(
         auth,
         email,
@@ -84,6 +87,8 @@ const LoginContent = () => {
       } else {
         toast.error("Something went wrong while logging in");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -146,7 +151,12 @@ const LoginContent = () => {
           Forgot Password?
         </Link>
 
-        <Button size="md" className="w-full" onClick={handleLogin}>
+        <Button
+          size="md"
+          className="w-full"
+          onClick={handleLogin}
+          loading={loading}
+        >
           Sign In to Dashboard
         </Button>
 

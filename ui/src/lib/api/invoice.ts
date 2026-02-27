@@ -74,6 +74,25 @@ export class InvoiceService {
     }
   }
 
+  static async markInvoiceAsPaid(invoiceId: string, wholesalerUserId: string) {
+    try {
+      const response = await axios.put(`${API_URL}/invoice/${invoiceId}/pay`, {
+        wholesalerUserId,
+      });
+
+      if (!response.status) {
+        throw new Error(
+          response.data.message || `HTTP error! status: ${response.status}`,
+        );
+      }
+
+      return response.data.data || null;
+    } catch (error) {
+      console.error("Error while paying invoice:", error);
+      throw error;
+    }
+  }
+
   static async getInvoiceDetails(invoiceId: string) {
     try {
       const response = await axios.get(`${API_URL}/invoice/${invoiceId}`);

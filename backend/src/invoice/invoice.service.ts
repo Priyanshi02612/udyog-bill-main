@@ -137,7 +137,10 @@ export class InvoiceService {
 
   async getWholesalerInvoices(userId: string) {
     const invoices = await this.invoiceModel
-      .find({ buyerId: userId })
+      .find({
+        buyerId: userId,
+        status: { $ne: InvoiceSubmitStatus.DRAFT },
+      })
       .sort({ createdAt: -1 })
       .lean();
 
@@ -175,6 +178,43 @@ export class InvoiceService {
         ...(masterItemById.get(String(item.itemId)) ?? {}),
       })),
     }));
+  }
+
+  async markInvoiceAsPaid(invoiceId: string, wholesalerUserId: string) {
+    const invoice = await this.invoiceModel.findById(invoiceId).lean();
+
+    if (!invoice) {
+      throw new NotFoundException('Invoice not found');
+    }
+
+    if (invoice.buyerId !== wholesalerUserId) {
+      throw new BadRequestException(
+        'Only the assigned wholesaler can mark this invoice as paid',
+      );
+    }
+
+    if (invoice.status === InvoiceSubmitStatus.DRAFT) {
+      throw new BadRequestException('Draft invoices cannot be marked as paid');
+    }
+
+    if (invoice.status === InvoiceSubmitStatus.PAID) {
+      return {
+        ...invoice,
+        status: InvoiceStatus.PAID,
+      };
+    }
+
+    await this.invoiceModel.updateOne(
+      { _id: invoiceId },
+      { status: InvoiceSubmitStatus.PAID },
+    );
+
+    const updatedInvoice = await this.invoiceModel.findById(invoiceId).lean();
+
+    return {
+      ...updatedInvoice,
+      status: InvoiceStatus.PAID,
+    };
   }
 
   async getInvoiceDetails(invoiceId: string) {

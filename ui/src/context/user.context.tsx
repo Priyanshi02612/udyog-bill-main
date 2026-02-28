@@ -83,6 +83,10 @@ export const UserContext = createContext<UserContextType | null>(null);
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const { user, setUser } = useContext(AuthContext) as AuthContextType;
   const router = useRouter();
+  const dashboardPath =
+    user?.role === UserRole.WHOLESALER
+      ? "/wholesaler/dashboard"
+      : "/manufacturer/dashboard";
 
   const safeUser: UserProfile = user ?? {
     businessName: "",
@@ -128,7 +132,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const handleDiscardProfileChanges = () => {
     setUserProfile(initialProfile);
-    router.push("/manufacturer/dashboard");
+    router.push(dashboardPath);
   };
 
   const handleSaveProfile = async () => {
@@ -145,7 +149,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       const { data } = await AuthService.createUser(payload);
       setUser(data);
       toast.success("Profile updated successfully");
-      router.replace("/manufacturer/dashboard");
+      router.replace(dashboardPath);
     } catch (err) {
       console.error(err);
       toast.error("Failed to update profile");

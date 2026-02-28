@@ -1,7 +1,7 @@
-import React from "react";
+"use client";
 
-const WholesalerProfilePage = () => {
-  return <div>WholesalerProfilePage</div>;
-};
+import { ProfileSettingsPage } from "../../../../components/profile/profile-settings-page";
 
-export default WholesalerProfilePage;
+export default function WholesalerProfilePage() {
+  return <ProfileSettingsPage />;
+}

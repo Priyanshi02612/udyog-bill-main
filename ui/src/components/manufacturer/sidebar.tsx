@@ -12,6 +12,7 @@ import {
   MdSettings,
   MdClose,
   MdWysiwyg,
+  MdPersonOff,
 } from "react-icons/md";
 import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
@@ -68,11 +69,13 @@ export const Sidebar = ({
   isOpen,
   onClose,
   handleLogoutModal,
+  handleDeactivateModal,
 }: {
   role: UserRole;
   isOpen: boolean;
   onClose: () => void;
   handleLogoutModal: () => void;
+  handleDeactivateModal: () => void;
 }) => {
   const pathname = usePathname();
   const { user } = useContext(AuthContext) as AuthContextType;
@@ -157,6 +160,16 @@ export const Sidebar = ({
           onClick={handleLogoutModal}
         >
           Log out
+        </Button>
+
+        <Button
+          className="mt-2 w-full"
+          size="sm"
+          variant="outline-danger"
+          trailingIcon={<MdPersonOff className="w-5 h-5" />}
+          onClick={handleDeactivateModal}
+        >
+          Deactivate Account
         </Button>
       </div>
     </div>

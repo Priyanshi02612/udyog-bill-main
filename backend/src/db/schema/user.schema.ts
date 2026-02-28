@@ -22,6 +22,9 @@ export class User {
   @Prop({ default: false })
   isOnboarded!: boolean;
 
+  @Prop({ default: true })
+  isActive!: boolean;
+
   @Prop({ default: 'free' })
   subscriptionPlan!: 'free' | 'monthly' | 'yearly';
 

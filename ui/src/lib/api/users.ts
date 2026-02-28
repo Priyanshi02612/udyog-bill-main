@@ -22,4 +22,50 @@ export class UsersService {
       throw error;
     }
   }
+
+  static async deactivateUserByFirebaseId(firebaseUid: string | undefined) {
+    if (!firebaseUid) {
+      throw new Error("Missing firebase uid");
+    }
+
+    try {
+      const response = await axios.patch(
+        `${API_URL}/users/${firebaseUid}/deactivate`,
+      );
+
+      if (!response.status) {
+        throw new Error(
+          response.data.message || `HTTP error! status: ${response.status}`,
+        );
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error while deactivating user:", error);
+      throw error;
+    }
+  }
+
+  static async reactivateUserByFirebaseId(firebaseUid: string | undefined) {
+    if (!firebaseUid) {
+      throw new Error("Missing firebase uid");
+    }
+
+    try {
+      const response = await axios.patch(
+        `${API_URL}/users/${firebaseUid}/reactivate`,
+      );
+
+      if (!response.status) {
+        throw new Error(
+          response.data.message || `HTTP error! status: ${response.status}`,
+        );
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error while reactivating user:", error);
+      throw error;
+    }
+  }
 }

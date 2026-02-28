@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import axios from "axios";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { AuthShell } from "../../components/auth/auth-shell";
@@ -28,6 +29,8 @@ const LoginContent = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [reactivating, setReactivating] = useState(false);
+  const [deactivatedUid, setDeactivatedUid] = useState<string | null>(null);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -40,7 +43,18 @@ const LoginContent = () => {
     );
   }
 
+  const isDeactivatedAccountError = (error: unknown) => {
+    if (!axios.isAxiosError(error)) return false;
+    const message = error.response?.data?.message;
+    return (
+      typeof message === "string" &&
+      message.toLowerCase().includes("deactivated")
+    );
+  };
+
   const handleLogin = async () => {
+    setDeactivatedUid(null);
+
     try {
       setLoading(true);
 
@@ -52,8 +66,21 @@ const LoginContent = () => {
 
       const firebaseUid = firebaseUser.user.uid;
 
-      const response = await UsersService.getUserByFirebaseId(firebaseUid);
-      const userData = response.data;
+      let userData: { isOnboarded?: boolean; role?: string };
+      
+      try {
+        const response = await UsersService.getUserByFirebaseId(firebaseUid);
+        userData = response.data as { isOnboarded?: boolean; role?: string };
+      } catch (error: unknown) {
+        if (isDeactivatedAccountError(error)) {
+          setDeactivatedUid(firebaseUid);
+          await signOut(auth);
+          toast.error("Account is deactivated. Reactivate to continue.");
+          return;
+        }
+
+        throw error;
+      }
 
       if (!userData.isOnboarded) {
         router.replace("/sign-up");
@@ -89,6 +116,28 @@ const LoginContent = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleReactivateAccount = async () => {
+    if (!deactivatedUid) {
+      toast.error("Please sign in again to reactivate your account.");
+      return;
+    }
+
+    try {
+      setReactivating(true);
+      await UsersService.reactivateUserByFirebaseId(deactivatedUid);
+      setDeactivatedUid(null);
+      toast.success("Account reactivated. Please sign in.");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to reactivate account");
+      }
+    } finally {
+      setReactivating(false);
     }
   };
 
@@ -159,6 +208,18 @@ const LoginContent = () => {
         >
           Sign In to Dashboard
         </Button>
+
+        {deactivatedUid && (
+          <Button
+            size="md"
+            className="w-full"
+            variant="outline-danger"
+            onClick={handleReactivateAccount}
+            loading={reactivating}
+          >
+            Reactivate Account
+          </Button>
+        )}
 
         <div className="flex items-center justify-center gap-2 text-sm">
           <span className="text-slate-500">{`Don't have an account?`}</span>

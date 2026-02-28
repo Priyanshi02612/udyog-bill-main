@@ -8,9 +8,11 @@ import { Header } from "../../components/manufacturer/header";
 import { UserRole } from "../../utils/constants";
 import { AuthContext } from "../../context/auth.context";
 import ConfirmModal from "@/src/components/ui/modal";
-import { MdLogout } from "react-icons/md";
+import { MdLogout, MdPersonOff } from "react-icons/md";
 import { auth } from "../../lib/firebase/config";
 import { signOut } from "firebase/auth";
+import { UsersService } from "../../lib/api/users";
+import toast from "react-hot-toast";
 
 export default function AuthLayout({
   children,
@@ -23,6 +25,7 @@ export default function AuthLayout({
   const userRole = user?.role as UserRole | undefined;
 
   const [showLogOutModal, setShowLogOutModal] = useState(false);
+  const [showDeactivateModal, setShowDeactivateModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -62,6 +65,25 @@ export default function AuthLayout({
     setShowLogOutModal(false);
   };
 
+  const handleDeactivate = async () => {
+    if (!user?.firebaseUid) {
+      toast.error("Unable to deactivate account. Please login again.");
+      return;
+    }
+
+    try {
+      await UsersService.deactivateUserByFirebaseId(user.firebaseUid as string);
+      toast.success("Account deactivated successfully");
+      await signOut(auth);
+      router.push("/");
+      setShowDeactivateModal(false);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to deactivate account.");
+      setShowDeactivateModal(false);
+    }
+  };
+
   return (
     <div className="bg-primary-soft text-slate-900 antialiased">
       <div className="flex h-screen overflow-hidden">
@@ -71,6 +93,7 @@ export default function AuthLayout({
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
             handleLogoutModal={() => setShowLogOutModal(true)}
+            handleDeactivateModal={() => setShowDeactivateModal(true)}
           />
         )}
 
@@ -103,6 +126,16 @@ export default function AuthLayout({
         cancelText="Cancel"
         onConfirm={handleLogout}
         icon={<MdLogout className="w-8 h-8 text-danger" />}
+      />
+      <ConfirmModal
+        open={showDeactivateModal}
+        onCancel={() => setShowDeactivateModal(false)}
+        title="Deactivate Account"
+        description="Your account will be deactivated and you will be logged out immediately."
+        confirmText="Deactivate"
+        cancelText="Cancel"
+        onConfirm={handleDeactivate}
+        icon={<MdPersonOff className="w-8 h-8 text-danger" />}
       />
     </div>
   );

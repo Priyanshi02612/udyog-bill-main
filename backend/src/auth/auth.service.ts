@@ -122,6 +122,7 @@ export class AuthService {
           email: dto.email,
           firebaseUid: dto.firebaseUid,
           role: dto.role,
+          isActive: true,
         },
       },
       { new: true, upsert: true, setDefaultsOnInsert: true },

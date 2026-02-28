@@ -100,7 +100,7 @@ export class AiService {
       throw new NotFoundException('Wholesaler not found');
     }
 
-    const isPendingInvitation = await this.invitationsModel.find({
+    const isPendingInvitation = await this.invitationsModel.findOne({
       partyUserId: String(existingWholesaler.userId),
       status: InvitationStatus.PENDING,
     });

@@ -122,9 +122,9 @@ export default function CreateInvoicePage() {
       try {
         const [wholesalersResponse, itemsResponse, invoicesResponse] =
           await Promise.all([
-            ManufacturerService.getWholesalers(user._id),
-            ItemsService.getUsersMasterItems(user._id),
-            InvoiceService.getManufacturerInvoices(user._id),
+            ManufacturerService.getWholesalers(user.userId),
+            ItemsService.getUsersMasterItems(user.userId),
+            InvoiceService.getManufacturerInvoices(user.userId),
           ]);
 
         setWholesalers(wholesalersResponse.data || []);
@@ -392,7 +392,7 @@ export default function CreateInvoicePage() {
       sgstRate,
       igstRate,
       roundOff,
-      sellerId: user._id,
+      sellerId: user.userId,
       buyerId: wholesalerId,
       status: action,
       taxMode: effectiveTaxMode,

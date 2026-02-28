@@ -40,7 +40,7 @@ const AcceptPartyInvitationContent = () => {
 
       await ManufacturerService.acceptInvitation({
         token,
-        wholesalerUserId: user._id as string,
+        wholesalerUserId: user.userId as string,
       });
 
       toast.success("Invitation accepted successfully");

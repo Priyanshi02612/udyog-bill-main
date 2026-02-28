@@ -57,7 +57,7 @@ export default function ManufacturerInventoryPage() {
 
     try {
       setIsLoading(true);
-      const response = await ItemsService.getUsersMasterItems(user._id);
+      const response = await ItemsService.getUsersMasterItems(user.userId);
       setItems((response.data as Item[]) || []);
     } catch (error) {
       toast.error(getErrorMessage(error) || "Failed to load inventory items");

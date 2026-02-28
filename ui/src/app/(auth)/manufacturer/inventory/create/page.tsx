@@ -77,8 +77,8 @@ export default function InventoryLotFormPage() {
     try {
       setIsLoading(true);
       const [itemsResponse, inventoryResponse] = await Promise.all([
-        ItemsService.getUsersMasterItems(user._id),
-        InventoryService.getUsersInventory(user._id, 1, 50),
+        ItemsService.getUsersMasterItems(user.userId),
+        InventoryService.getUsersInventory(user.userId, 1, 50),
       ]);
 
       setItems((itemsResponse.data as Item[]) || []);
@@ -265,7 +265,7 @@ export default function InventoryLotFormPage() {
     }
 
     const payload = {
-      userId: user._id,
+      userId: user.userId,
       lotNumber,
       collection: selectedCollection,
       dateReceived,

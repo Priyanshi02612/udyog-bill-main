@@ -56,7 +56,7 @@ export const InviteWholesalerModal = ({
       setLoading(true);
 
       await ManufacturerService.addParty({
-        manufacturerUserId: user._id as string,
+        manufacturerUserId: user.userId as string,
         partyEmail: email.trim().toLowerCase(),
       });
 

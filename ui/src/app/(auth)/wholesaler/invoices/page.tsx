@@ -52,7 +52,7 @@ const WholesalerInvoicesPage = () => {
 
   useEffect(() => {
     const fetchInvoices = async () => {
-      if (!user?._id) {
+      if (!user?.userId) {
         setInvoices([]);
         setSelectedIds([]);
         setLoading(false);
@@ -61,7 +61,7 @@ const WholesalerInvoicesPage = () => {
 
       try {
         setLoading(true);
-        const data = await InvoiceService.getWholesalerInvoices(user._id);
+        const data = await InvoiceService.getWholesalerInvoices(user.userId);
         const normalized = (data || []).map((invoice: Invoice) => ({
           ...invoice,
           buyerInfo: invoice.buyerInfo || user,
@@ -214,7 +214,7 @@ const WholesalerInvoicesPage = () => {
     if (!user?._id) return;
 
     try {
-      await InvoiceService.markInvoiceAsPaid(invoiceId, user._id);
+      await InvoiceService.markInvoiceAsPaid(invoiceId, user.userId);
 
       setInvoices((prev) =>
         prev.map((invoice) =>

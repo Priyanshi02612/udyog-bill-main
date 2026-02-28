@@ -42,7 +42,7 @@ export default function InventoryPage() {
       try {
         setIsLoading(true);
         const response = await InventoryService.getUsersInventory(
-          user._id,
+          user.userId,
           page,
           PAGE_SIZE,
         );

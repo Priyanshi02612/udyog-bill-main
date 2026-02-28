@@ -32,7 +32,7 @@ const WholesalerDashboardPage = () => {
 
   useEffect(() => {
     const fetchInvoices = async () => {
-      if (!user?._id) {
+      if (!user?.userId) {
         setInvoices([]);
         setLoading(false);
         return;
@@ -40,7 +40,7 @@ const WholesalerDashboardPage = () => {
 
       try {
         setLoading(true);
-        const data = await InvoiceService.getWholesalerInvoices(user._id);
+        const data = await InvoiceService.getWholesalerInvoices(user.userId);
         setInvoices(data || []);
       } catch (error) {
         toast.error(getErrorMessage(error) || "Failed to fetch dashboard data");

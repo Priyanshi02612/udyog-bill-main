@@ -79,8 +79,8 @@ export default function Invoices() {
       try {
         setLoading(true);
         const [data, wholesalersResponse] = await Promise.all([
-          InvoiceService.getManufacturerInvoices(user._id),
-          ManufacturerService.getWholesalers(user._id),
+          InvoiceService.getManufacturerInvoices(user.userId),
+          ManufacturerService.getWholesalers(user.userId),
         ]);
 
         const wholesalerMap = (wholesalersResponse.data || []).reduce(

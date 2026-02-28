@@ -41,7 +41,7 @@ const Wholesalers = () => {
     const fetchWholesalers = async () => {
       try {
         setLoading(true);
-        const response = await ManufacturerService.getWholesalers(user._id);
+        const response = await ManufacturerService.getWholesalers(user.userId);
         setWholesalers(response.data);
       } catch (error) {
         toast.error(getErrorMessage(error) || "Failed to fetch wholesalers");
@@ -86,7 +86,7 @@ const Wholesalers = () => {
 
     try {
       await ManufacturerService.removeParty({
-        manufacturerUserId: user._id,
+        manufacturerUserId: user.userId,
         wholesalerUserId,
       });
 
@@ -106,12 +106,12 @@ const Wholesalers = () => {
   };
 
   const handleCancelInvitation = async () => {
-    if (!user?._id || !selectedParty?.email) return;
+    if (!user?.userId || !selectedParty?.email) return;
     const partyEmail = selectedParty.email;
 
     try {
       await ManufacturerService.cancelInvitation({
-        manufacturerUserId: user._id,
+        manufacturerUserId: user.userId,
         partyEmail,
       });
 

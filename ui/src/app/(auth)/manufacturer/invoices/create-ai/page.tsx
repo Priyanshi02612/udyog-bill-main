@@ -134,7 +134,7 @@ export default function CreateAiInvoicePage() {
     try {
       const aiDraft = await AiService.generateInvoiceDraft(
         rawOrderText,
-        user._id,
+        user.userId,
       );
       applyDraft(aiDraft);
     } catch (error) {

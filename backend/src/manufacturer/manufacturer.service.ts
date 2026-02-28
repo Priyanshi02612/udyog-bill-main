@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -445,15 +446,19 @@ export class ManufacturerService {
 
     const partyEmail = dto.partyEmail.trim().toLowerCase();
 
-    const isPartyOnboarded = await this.userModel.findOne({
+    const existingOnboardedParty = await this.userModel.findOne({
       email: partyEmail,
       isOnboarded: true,
     });
 
-    if (!isPartyOnboarded) {
+    if (!existingOnboardedParty) {
       throw new BadRequestException(
         'This email is not registered on UdyogBill yet.',
       );
+    }
+
+    if (!existingOnboardedParty.isActive) {
+      throw new ForbiddenException('This party account is currently inactive.');
     }
 
     if (manufacturer.email === partyEmail) {

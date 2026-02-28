@@ -52,7 +52,7 @@ export function InvoiceItemsTable({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-245">
+        <table className="w-full min-w-245 text-xs xl:text-base">
           <thead className="bg-slate-50 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
             <tr>
               <th className="px-4 py-3">#</th>
@@ -96,7 +96,7 @@ export function InvoiceItemsTable({
                     rowError ? "border-rose-200 bg-rose-50/40" : "border-slate-100"
                   }`}
                 >
-                  <td className="px-4 py-3 text-sm text-slate-500">
+                  <td className="px-4 py-3 text-xs text-slate-500 xl:text-sm">
                     {`0${index + 1}`.slice(-2)}
                   </td>
                   <td className="px-4 py-3">
@@ -146,7 +146,7 @@ export function InvoiceItemsTable({
                   <td className="px-4 py-3">{item.unit || "-"}</td>
                   <td className="px-4 py-3">{item.basePrice || "₹0.00"}</td>
                   <td className="px-4 py-3">{item.gstPercentage}</td>
-                  <td className="px-4 py-3 text-right text-sm font-bold text-slate-900">
+                  <td className="px-4 py-3 text-right text-xs font-bold text-slate-900 xl:text-sm">
                     {formatCurrency(item.taxableAmount)}
                   </td>
                   <td className="px-4 py-3 text-center">

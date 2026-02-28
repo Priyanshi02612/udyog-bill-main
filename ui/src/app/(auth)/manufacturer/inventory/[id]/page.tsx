@@ -228,7 +228,7 @@ export default function InventoryLotDetailsPage() {
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-        <table className="min-w-245 w-full text-left">
+        <table className="min-w-245 w-full text-left text-xs xl:text-base">
           <thead className="border-b border-slate-200 bg-slate-50">
             <tr className="text-xs uppercase tracking-wide text-slate-500">
               <th className="px-6 py-4">Item</th>

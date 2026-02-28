@@ -436,9 +436,9 @@ export default function Invoices() {
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto min-h-103 xl:min-h-78">
-        <table className="w-full min-w-190 text-left">
+        <table className="w-full min-w-190 text-left text-xs xl:text-base">
           <thead>
-            <tr className="bg-slate-50/50 text-sm font-bold text-slate-400 uppercase tracking-widest">
+            <tr className="bg-slate-50/50 text-xs font-bold text-slate-400 uppercase tracking-widest xl:text-sm">
               <th className="p-4 w-12 text-center">
                 <input
                   type="checkbox"
@@ -489,7 +489,7 @@ export default function Invoices() {
 
                   <td className="px-4 py-4 sm:px-8">
                     <span
-                      className={`px-3 py-1 ${status.bg} ${status.text} text-sm font-bold rounded-lg`}
+                      className={`px-3 py-1 ${status.bg} ${status.text} text-xs font-bold rounded-lg xl:text-sm`}
                     >
                       {status.label}
                     </span>

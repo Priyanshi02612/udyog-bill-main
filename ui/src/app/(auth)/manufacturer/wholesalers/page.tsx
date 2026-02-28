@@ -174,7 +174,7 @@ const Wholesalers = () => {
 
       <div className="min-h-105 md:min-h-125 xl:min-h-109.5">
         <div className="overflow-x-auto rounded-xl border border-gray-300 bg-white ">
-          <table className="w-full text-left text-xs md:text-base">
+          <table className="w-full text-left text-xs xl:text-base">
             <thead className="bg-gray-100 text-primary">
               <tr className="font-bold uppercase">
                 <th className="px-6 py-4">Business Name</th>

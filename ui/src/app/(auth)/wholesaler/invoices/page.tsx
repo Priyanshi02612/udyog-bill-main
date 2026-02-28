@@ -357,9 +357,9 @@ const WholesalerInvoicesPage = () => {
       </div>
 
       <div className="min-h-110 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm xl:min-h-84">
-        <table className="w-full min-w-190 text-left">
+        <table className="w-full min-w-190 text-left text-xs xl:text-base">
           <thead>
-            <tr className="bg-slate-50/50 text-sm font-bold uppercase tracking-widest text-slate-400">
+            <tr className="bg-slate-50/50 text-xs font-bold uppercase tracking-widest text-slate-400 xl:text-sm">
               <th className="w-12 p-4 text-center">
                 <input
                   type="checkbox"
@@ -419,7 +419,7 @@ const WholesalerInvoicesPage = () => {
 
                   <td className="px-4 py-4 sm:px-8">
                     <span
-                      className={`rounded-lg px-3 py-1 text-sm font-bold ${status.bg} ${status.text}`}
+                      className={`rounded-lg px-3 py-1 text-xs font-bold ${status.bg} ${status.text} xl:text-sm`}
                     >
                       {invoice.status === InvoiceStatus.SENT
                         ? "Received"

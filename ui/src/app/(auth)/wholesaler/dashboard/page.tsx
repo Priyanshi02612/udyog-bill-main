@@ -193,7 +193,7 @@ const WholesalerDashboardPage = () => {
               Recent Purchase Invoices
             </h2>
           </div>
-          <table className="min-w-210 w-full text-left">
+          <table className="min-w-210 w-full text-left text-xs xl:text-base">
             <thead className="border-b border-slate-200 bg-white">
               <tr className="text-xs uppercase tracking-wide text-slate-500">
                 <th className="px-6 py-4">Invoice</th>

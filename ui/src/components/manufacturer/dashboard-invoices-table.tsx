@@ -24,9 +24,9 @@ export default function DashboardInvoicesTable({
 
   return (
     <div className="overflow-x-auto" style={{ scrollbarWidth: "thin" }}>
-      <table className="w-full text-left">
+      <table className="w-full text-left text-xs xl:text-base">
         <thead>
-          <tr className="bg-slate-50/50 text-sm font-bold text-slate-400 uppercase tracking-widest">
+          <tr className="bg-slate-50/50 text-xs font-bold text-slate-400 uppercase tracking-widest xl:text-sm">
             <th className="px-8 py-4">Invoice ID</th>
             <th className="px-8 py-4">Buyer</th>
             <th className="px-8 py-4">Date</th>
@@ -36,7 +36,7 @@ export default function DashboardInvoicesTable({
           </tr>
         </thead>
 
-        <tbody className="divide-y divide-slate-100 text-sm">
+        <tbody className="divide-y divide-slate-100 text-xs xl:text-sm">
           {invoices.map((invoice) => {
             const status = statusStyles[invoice.status];
 
@@ -90,7 +90,7 @@ export default function DashboardInvoicesTable({
             <tr>
               <td
                 colSpan={6}
-                className="px-8 py-10 text-center text-sm text-slate-500"
+                className="px-8 py-10 text-center text-xs text-slate-500 xl:text-sm"
               >
                 No invoices found.
               </td>

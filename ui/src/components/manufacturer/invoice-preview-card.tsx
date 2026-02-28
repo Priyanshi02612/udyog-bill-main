@@ -129,7 +129,7 @@ export function InvoicePreviewCard({
         className="mt-6 overflow-x-auto rounded-xl border border-slate-200"
         style={{ scrollbarWidth: "thin" }}
       >
-        <table className="w-full min-w-190 text-left">
+        <table className="w-full min-w-190 text-left text-xs xl:text-base">
           <thead className="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
             <tr>
               <th className="px-3 py-3">#</th>
@@ -153,31 +153,31 @@ export function InvoicePreviewCard({
 
               return (
                 <tr key={index}>
-                  <td className="px-3 py-4 text-sm text-slate-500">
+                  <td className="px-3 py-4 text-xs text-slate-500 xl:text-sm">
                     {`0${index + 1}`.slice(-2)}
                   </td>
-                  <td className="px-3 py-4 text-sm font-bold text-slate-900">
+                  <td className="px-3 py-4 text-xs font-bold text-slate-900 xl:text-sm">
                     {item.name}
                   </td>
-                  <td className="px-3 py-4 text-sm text-slate-600">
+                  <td className="px-3 py-4 text-xs text-slate-600 xl:text-sm">
                     {item.hsnCode}
                   </td>
-                  <td className="px-3 py-4 text-sm text-slate-600">
+                  <td className="px-3 py-4 text-xs text-slate-600 xl:text-sm">
                     {item.quantity}
                   </td>
-                  <td className="px-3 py-4 text-sm text-slate-600">
+                  <td className="px-3 py-4 text-xs text-slate-600 xl:text-sm">
                     {item.unit}
                   </td>
-                  <td className="px-3 py-4 text-sm text-slate-600">
+                  <td className="px-3 py-4 text-xs text-slate-600 xl:text-sm">
                     {effectiveGstRate.toFixed(2)}%
                   </td>
-                  <td className="px-3 py-4 text-sm text-slate-600">
+                  <td className="px-3 py-4 text-xs text-slate-600 xl:text-sm">
                     {formatCurrency(itemGstAmount)}
                   </td>
-                  <td className="px-3 py-4 text-sm text-slate-600">
+                  <td className="px-3 py-4 text-xs text-slate-600 xl:text-sm">
                     {formatCurrency(Number(item.basePrice))}
                   </td>
-                  <td className="px-3 py-4 text-right text-sm font-bold text-slate-900">
+                  <td className="px-3 py-4 text-right text-xs font-bold text-slate-900 xl:text-sm">
                     {formatCurrency(itemTotalWithGst)}
                   </td>
                 </tr>

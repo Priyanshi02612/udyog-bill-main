@@ -395,7 +395,7 @@ export default function InventoryLotFormPage() {
             </div>
 
             <div className="overflow-x-auto" style={{ scrollbarWidth: "thin" }}>
-              <table className="min-w-225 w-full border-collapse">
+              <table className="min-w-225 w-full border-collapse text-xs xl:text-base">
                 <thead className="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
                   <tr>
                     <th className="px-6 py-4">
@@ -428,10 +428,10 @@ export default function InventoryLotFormPage() {
                             className="min-w-72.5"
                           />
                         </td>
-                        <td className="px-6 py-2 text-sm font-medium text-slate-500">
+                        <td className="px-6 py-2 text-xs font-medium text-slate-500 xl:text-sm">
                           {selectedItem?.sku || "SKU"}
                         </td>
-                        <td className="px-6 py-2 text-sm text-slate-500">
+                        <td className="px-6 py-2 text-xs text-slate-500 xl:text-sm">
                           {selectedItem?.fabricType || "Fabric"}
                         </td>
                         <td className="px-6 py-2">
@@ -448,7 +448,7 @@ export default function InventoryLotFormPage() {
                             className={rowInputClass}
                           />
                         </td>
-                        <td className="px-6 py-2 text-sm text-slate-500">
+                        <td className="px-6 py-2 text-xs text-slate-500 xl:text-sm">
                           ₹ {selectedItem?.defaultCost || 0}
                         </td>
                         <td className="px-4 py-2 text-center">

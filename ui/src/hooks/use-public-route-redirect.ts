@@ -14,7 +14,7 @@ type UsePublicRouteRedirectOptions = {
 
 export const usePublicRouteRedirect = ({
   allowNotOnboarded = false,
-  onboardingPath = "/sign-up",
+  onboardingPath = "/sign-up/role",
   suppressLoadingOnOnboardingRoute = false,
 }: UsePublicRouteRedirectOptions = {}) => {
   const { user, authLoading } = useContext(AuthContext) as AuthContextType;
@@ -55,7 +55,8 @@ export const usePublicRouteRedirect = ({
   const shouldShowLoading =
     (authLoading && !skipLoadingOnAllowedOnboardingRoute) ||
     (!!user &&
-      (Boolean(user.isOnboarded) || (!allowNotOnboarded && !isOnboardingRoute)));
+      (Boolean(user.isOnboarded) ||
+        (!allowNotOnboarded && !isOnboardingRoute)));
 
   return {
     user,

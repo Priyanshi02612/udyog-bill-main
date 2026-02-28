@@ -7,6 +7,10 @@ import { Sidebar } from "../../components/manufacturer/sidebar";
 import { Header } from "../../components/manufacturer/header";
 import { UserRole } from "../../utils/constants";
 import { AuthContext } from "../../context/auth.context";
+import ConfirmModal from "@/src/components/ui/modal";
+import { MdLogout } from "react-icons/md";
+import { auth } from "../../lib/firebase/config";
+import { signOut } from "firebase/auth";
 
 export default function AuthLayout({
   children,
@@ -18,6 +22,7 @@ export default function AuthLayout({
   const { user, authLoading } = useContext(AuthContext) as AuthContextType;
   const userRole = user?.role as UserRole | undefined;
 
+  const [showLogOutModal, setShowLogOutModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -30,7 +35,7 @@ export default function AuthLayout({
     if (authLoading) return;
 
     if (!user) {
-      router.replace("/login");
+      router.replace("/");
       return;
     }
 
@@ -51,6 +56,12 @@ export default function AuthLayout({
     }
   }, [authLoading, userRole, pathname, router, user]);
 
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push("/");
+    setShowLogOutModal(false);
+  };
+
   return (
     <div className="bg-primary-soft text-slate-900 antialiased">
       <div className="flex h-screen overflow-hidden">
@@ -59,6 +70,7 @@ export default function AuthLayout({
             role={userRole}
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
+            handleLogoutModal={() => setShowLogOutModal(true)}
           />
         )}
 
@@ -82,6 +94,16 @@ export default function AuthLayout({
           </div>
         </main>
       </div>
+      <ConfirmModal
+        open={showLogOutModal}
+        onCancel={() => setShowLogOutModal(false)}
+        title="Confirm Logout"
+        description="Are you sure you want to log out of your account?"
+        confirmText="Logout"
+        cancelText="Cancel"
+        onConfirm={handleLogout}
+        icon={<MdLogout className="w-8 h-8 text-danger" />}
+      />
     </div>
   );
 }

@@ -13,10 +13,8 @@ import {
   MdClose,
   MdWysiwyg,
 } from "react-icons/md";
-import { usePathname, useRouter } from "next/navigation";
-import { signOut } from "firebase/auth";
+import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
-import { auth } from "../../lib/firebase/config";
 import { UserRole } from "../../utils/constants";
 import clsx from "clsx";
 import { useContext, useMemo } from "react";
@@ -69,12 +67,13 @@ export const Sidebar = ({
   role,
   isOpen,
   onClose,
+  handleLogoutModal,
 }: {
   role: UserRole;
   isOpen: boolean;
   onClose: () => void;
+  handleLogoutModal: () => void;
 }) => {
-  const router = useRouter();
   const pathname = usePathname();
   const { user } = useContext(AuthContext) as AuthContextType;
 
@@ -91,11 +90,6 @@ export const Sidebar = ({
   }, [user]);
 
   const isSettingsActive = pathname.startsWith(settingRoute);
-
-  const handleLogout = async () => {
-    await signOut(auth);
-    router.push("/");
-  };
 
   return (
     <div
@@ -160,7 +154,7 @@ export const Sidebar = ({
           className="mt-2 w-full"
           size="sm"
           trailingIcon={<MdLogout className="w-5 h-5" />}
-          onClick={handleLogout}
+          onClick={handleLogoutModal}
         >
           Log out
         </Button>

@@ -2,6 +2,7 @@
 
 import { useContext, useEffect, useMemo, useState } from "react";
 import { MdAdd, MdInventory2, MdOutlineSearch } from "react-icons/md";
+import Link from "next/link";
 
 import { AuthContext } from "../../../../context/auth.context";
 import { Button } from "../../../../components/ui/button";
@@ -170,13 +171,14 @@ export default function InventoryPage() {
               <th className="px-6 py-4">Current Stock</th>
               <th className="px-6 py-4">Valuation</th>
               <th className="px-6 py-4">Date Received</th>
+              <th className="px-6 py-4">Actions</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={7}
                   className="px-6 py-16 text-center text-slate-500"
                 >
                   <div className="flex items-center justify-center">
@@ -188,10 +190,7 @@ export default function InventoryPage() {
               filteredLots.map((lot: Inventory, index) => (
                 <tr
                   key={index}
-                  className="border-b border-slate-200 transition-colors hover:bg-slate-50 cursor-pointer"
-                  onClick={() =>
-                    router.push(`/manufacturer/inventory/${lot._id}`)
-                  }
+                  className="border-b border-slate-200 transition-colors hover:bg-slate-50"
                 >
                   <td className="px-6 py-5">
                     <p className="font-semibold text-slate-900">
@@ -215,12 +214,20 @@ export default function InventoryPage() {
                   <td className="px-6 py-5 text-slate-600">
                     {formatDate(lot.dateReceived)}
                   </td>
+                  <td className="px-6 py-5">
+                    <Link
+                      href={`/manufacturer/inventory/${lot._id}`}
+                      className="font-semibold text-primary hover:underline"
+                    >
+                      View details
+                    </Link>
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={7}
                   className="px-6 py-16 text-center text-slate-500"
                 >
                   No lots matched this view.

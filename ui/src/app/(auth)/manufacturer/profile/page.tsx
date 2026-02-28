@@ -46,6 +46,15 @@ export default function ManufacturerProfileSettingsPage() {
     handleSaveProfile,
   } = useContext(UserContext) as UserContextType;
 
+  const profileDisplayName = useMemo(() => {
+    return userProfile.businessName?.trim() || "Profile";
+  }, [userProfile.businessName]);
+
+  const profileInitial = useMemo(() => {
+    const seed = profileDisplayName || user?.email || "U";
+    return seed.charAt(0).toUpperCase();
+  }, [profileDisplayName, user?.email]);
+
   const currentFinancialStartYear = useMemo(() => {
     const today = new Date();
     return today.getMonth() >= 3
@@ -99,11 +108,23 @@ export default function ManufacturerProfileSettingsPage() {
 
   return (
     <div className="min-h-[calc(100vh-124px)] p-4 pb-6 sm:p-6 lg:p-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
-          Profile Settings
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
+      <div className="relative mb-6 overflow-hidden rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
+        <div className="pointer-events-none absolute -left-16 bottom-0 h-24 w-24 rounded-full bg-amber-200/30 blur-2xl" />
+
+        <div className="flex items-center gap-4">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-primary to-primary/80 text-2xl font-black text-white shadow-lg shadow-primary/20 ring-4 ring-primary/10">
+            {profileInitial}
+          </div>
+          <div>
+            <p className="mt-1 text-xl font-semibold text-slate-700">
+              {profileDisplayName}
+            </p>
+            <p className="text-xs text-slate-500">{user?.email}</p>
+          </div>
+        </div>
+
+        <p className="relative mt-4 max-w-2xl text-sm text-slate-500">
           Update business profile, tax defaults, and manage financial years.
         </p>
       </div>

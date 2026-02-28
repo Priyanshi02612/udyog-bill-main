@@ -300,7 +300,7 @@ export default function Invoices() {
 
   return (
     <div className="relative min-h-[calc(100vh-124px)] p-4 pb-6 sm:p-6 lg:p-8 lg:pb-0">
-      <div className="mb-6 flex flex-col gap-3 md:mb-8 md:flex-row md:items-end md:justify-between">
+      <div className="mb-6 flex flex-col gap-3 xl:mb-8 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
             Manufacturer Invoices
@@ -310,7 +310,7 @@ export default function Invoices() {
           </p>
         </div>
 
-        <div className="flex items-center gap-4 self-start md:self-end">
+        <div className="flex flex-col md:flex-row items-center gap-4 justify-end">
           <Button
             size="sm"
             leadingIcon={<MdAdd className="w-5 h-5" />}

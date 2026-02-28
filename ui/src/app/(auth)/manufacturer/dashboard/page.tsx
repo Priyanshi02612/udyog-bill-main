@@ -19,7 +19,6 @@ import {
   MdPsychology,
   MdWarning,
 } from "react-icons/md";
-import { Button } from "../../../../components/ui/button";
 import DashboardInvoicesTable from "../../../../components/manufacturer/dashboard-invoices-table";
 import { KpiCard } from "../../../../components/manufacturer/kpi-card";
 import { WeeklyStockSection } from "../../../../components/manufacturer/dashboard-stock-charts";
@@ -86,7 +85,7 @@ const ManufacturerDashboardPage = () => {
     };
 
     const fetchDashboard = async () => {
-      if (!user?._id) {
+      if (!user?.userId) {
         resetDashboard();
         setLoading(false);
         return;
@@ -94,7 +93,7 @@ const ManufacturerDashboardPage = () => {
 
       try {
         const dashboardResponse = await ManufacturerService.getDashboard(
-          user._id,
+          user.userId,
         );
 
         setDashboardKpis(dashboardResponse.kpis || defaultDashboardKpis);

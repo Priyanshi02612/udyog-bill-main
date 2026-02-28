@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { MdAdd, MdTexture } from "react-icons/md";
+import { MdAdd, MdTexture, MdVisibility } from "react-icons/md";
 import { GiRolledCloth } from "react-icons/gi";
 import { RiShapesFill } from "react-icons/ri";
 import Link from "next/link";
@@ -159,6 +159,7 @@ export default function ManufacturerInventoryPage() {
                   "Price",
                   "GST",
                   "Status",
+                  "Actions",
                 ].map((h) => (
                   <th key={h} className="px-6 py-4 text-sm font-bold uppercase">
                     {h}
@@ -171,7 +172,7 @@ export default function ManufacturerInventoryPage() {
               {filteredItems.length === 0 && (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={7}
                     className="px-6 py-10 text-center text-gray-400"
                   >
                     No items found
@@ -185,9 +186,7 @@ export default function ManufacturerInventoryPage() {
                   className="hover:bg-gray-50 border-t border-gray-200"
                 >
                   <td className="px-6 py-4 xl:min-w-79 max-w-30 truncate">
-                    <Link href={`/manufacturer/items/${item._id}`}>
-                      {item.name}
-                    </Link>
+                    {item.name}
                   </td>
                   <td className="px-6 py-4">{item.category}</td>
                   <td className="px-6 py-4">{item.hsnCode}</td>
@@ -200,6 +199,14 @@ export default function ManufacturerInventoryPage() {
                       label={item.isActive ? "Active" : "inactive"}
                       variant={item.isActive ? "success" : "danger"}
                     />
+                  </td>
+                  <td className="px-6 py-4">
+                    <Link
+                      href={`/manufacturer/items/${item._id}`}
+                      className="font-semibold text-primary hover:underline"
+                    >
+                      <MdVisibility className="w-5 h-5" />
+                    </Link>
                   </td>
                 </tr>
               ))}
